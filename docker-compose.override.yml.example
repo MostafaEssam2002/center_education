@@ -1,0 +1,25 @@
+# هذا ملف مثال لإعدادات DNS في Docker
+# إذا واجهت مشاكل في الاتصال، انسخ هذا الملف إلى docker-compose.override.yml
+# أو أضف هذه الإعدادات في Docker Desktop > Settings > Docker Engine
+
+# version: '3.8'  # لا حاجة للإصدار في الإصدارات الحديثة
+
+services:
+  app:
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+      - 1.1.1.1
+    extra_hosts:
+      - "docker.io:104.18.114.97"
+  
+  mysql:
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+  
+  phpmyadmin:
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+

@@ -1,0 +1,979 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مركز التعليم - نظام إدارة المستخدمين</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 20px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .nav-buttons {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .nav-btn.active {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 10px 15px;
+            background: #f0f0f0;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .user-info span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .logout-btn {
+            padding: 8px 15px;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .logout-btn:hover {
+            background: #c82333;
+        }
+
+        .page {
+            display: none;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-card {
+            background: white;
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .form-card h2 {
+            color: #667eea;
+            margin-bottom: 30px;
+            font-size: 2em;
+            border-bottom: 3px solid #667eea;
+            padding-bottom: 15px;
+            text-align: center;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .required {
+            color: red;
+        }
+
+        button[type="submit"] {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            margin-top: 10px;
+        }
+
+        button[type="submit"]:hover {
+            transform: scale(1.02);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button[type="submit"]:active {
+            transform: scale(0.98);
+        }
+
+        button[type="submit"]:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .message {
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .message.success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+
+        .message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+
+        .file-preview {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .file-preview img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+            margin-top: 10px;
+        }
+
+        .file-info {
+            margin-top: 10px;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Users Table Styles */
+        .users-container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .users-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .users-header h2 {
+            color: #667eea;
+            font-size: 2em;
+            margin: 0;
+        }
+
+        .refresh-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: transform 0.2s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .users-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto;
+            display: block;
+        }
+
+        .users-table thead {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .users-table th,
+        .users-table td {
+            padding: 15px;
+            text-align: right;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .users-table th {
+            font-weight: 600;
+            position: sticky;
+            top: 0;
+        }
+
+        .users-table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .users-table tbody {
+            display: block;
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .users-table thead,
+        .users-table tbody tr {
+            display: table;
+            width: 100%;
+            table-layout: fixed;
+        }
+
+        .user-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #667eea;
+        }
+
+        .no-image {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            font-size: 12px;
+        }
+
+        .role-badge {
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .role-USER {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .role-TEACHER {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .role-EMPLOYEE {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+
+        .role-ASSISTANT {
+            background: #e8f5e9;
+            color: #388e3c;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 100px;
+            height: 100px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .form-card {
+                padding: 25px;
+            }
+
+            .users-table {
+                font-size: 14px;
+            }
+
+            .users-table th,
+            .users-table td {
+                padding: 10px 8px;
+            }
+
+            .header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .nav-buttons {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .nav-btn {
+                flex: 1;
+                min-width: 100px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Navigation -->
+        <div class="header">
+            <h1>مركز التعليم</h1>
+            <div class="nav-buttons">
+                <button class="nav-btn" onclick="showPage('login')" id="nav-login">تسجيل الدخول</button>
+                <button class="nav-btn" onclick="showPage('register')" id="nav-register">تسجيل جديد</button>
+                <button class="nav-btn" onclick="showPage('users')" id="nav-users">عرض المستخدمين</button>
+            </div>
+            <div class="user-info" id="userInfo" style="display: none;">
+                <span id="userEmail"></span>
+                <button class="logout-btn" onclick="logout()">تسجيل الخروج</button>
+            </div>
+        </div>
+
+        <!-- Login Page -->
+        <div id="loginPage" class="page">
+            <div class="form-card">
+                <h2>تسجيل الدخول</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">البريد الإلكتروني <span class="required">*</span></label>
+                        <input type="email" id="loginEmail" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="loginPassword">كلمة المرور <span class="required">*</span></label>
+                        <input type="password" id="loginPassword" name="password" required>
+                    </div>
+                    
+                    <button type="submit" id="loginBtn">
+                        تسجيل الدخول
+                    </button>
+                    
+                    <div id="loginMessage" class="message"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Register Page -->
+        <div id="registerPage" class="page">
+            <div class="form-card">
+                <h2>تسجيل مستخدم جديد</h2>
+                <form id="registerForm">
+                    <div class="form-group">
+                        <label for="email">البريد الإلكتروني <span class="required">*</span></label>
+                        <input type="email" id="email" name="email" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="first_name">الاسم الأول <span class="required">*</span></label>
+                        <input type="text" id="first_name" name="first_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="last_name">الاسم الأخير <span class="required">*</span></label>
+                        <input type="text" id="last_name" name="last_name" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="age">العمر <span class="required">*</span></label>
+                        <input type="number" id="age" name="age" min="1" max="120" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">كلمة المرور <span class="required">*</span></label>
+                        <input type="password" id="password" name="password" minlength="6" maxlength="15" required>
+                        <small style="color: #666; font-size: 12px;">يجب أن تكون بين 6 و 15 حرف</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phone">رقم الهاتف</label>
+                        <input type="tel" id="phone" name="phone">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="address">العنوان</label>
+                        <input type="text" id="address" name="address">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="role">الدور <span class="required">*</span></label>
+                        <select id="role" name="role" required>
+                            <option value="">اختر الدور</option>
+                            <option value="USER">مستخدم</option>
+                            <option value="TEACHER">معلم</option>
+                            <option value="EMPLOYEE">موظف</option>
+                            <option value="ASSISTANT">مساعد</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="image">صورة المستخدم (اختياري)</label>
+                        <input type="file" id="image" name="image" accept="image/*">
+                    </div>
+                    
+                    <div class="file-preview" id="imagePreview">
+                        <strong>معاينة الصورة:</strong>
+                        <div id="previewContent"></div>
+                        <div class="file-info" id="fileInfo"></div>
+                    </div>
+                    
+                    <button type="submit" id="registerBtn">
+                        تسجيل
+                    </button>
+                    
+                    <div id="registerMessage" class="message"></div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Users Page -->
+        <div id="usersPage" class="page">
+            <div class="users-container">
+                <div class="users-header">
+                    <h2>قائمة المستخدمين</h2>
+                    <button class="refresh-btn" onclick="loadUsers()">
+                        <span id="refreshIcon">🔄</span> تحديث
+                    </button>
+                </div>
+                <div id="usersTableContainer">
+                    <table class="users-table">
+                        <thead>
+                            <tr>
+                                <th style="width: 80px;">الصورة</th>
+                                <th style="width: 150px;">الاسم</th>
+                                <th style="width: 200px;">البريد الإلكتروني</th>
+                                <th style="width: 100px;">العمر</th>
+                                <th style="width: 120px;">الهاتف</th>
+                                <th style="width: 150px;">العنوان</th>
+                                <th style="width: 120px;">الدور</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTableBody">
+                            <tr>
+                                <td colspan="7" class="empty-state">
+                                    <div>جاري التحميل...</div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Local Development - Change this to 'http://localhost:3001' for Docker
+        const API_BASE_URL = 'http://localhost:3000';
+        
+        // Cookie helper functions
+        function setCookie(name, value, days = 7) {
+            const expires = new Date();
+            expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+            document.cookie = `${name}=${value};expires=${expires.toUTCString()};path=/;SameSite=Lax`;
+        }
+
+        function getCookie(name) {
+            const nameEQ = name + "=";
+            const ca = document.cookie.split(';');
+            for (let i = 0; i < ca.length; i++) {
+                let c = ca[i];
+                while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+                if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+            }
+            return null;
+        }
+
+        function deleteCookie(name) {
+            document.cookie = `${name}=;expires=Thu, 01 Jan 1970 00:00:00 UTC;path=/;`;
+        }
+
+        // Get token and email from cookies
+        function getAuthToken() {
+            return getCookie('authToken');
+        }
+        
+        function getCurrentUserEmail() {
+            return getCookie('userEmail');
+        }
+        
+        let authToken = getAuthToken();
+        let currentUserEmail = getCurrentUserEmail();
+        
+        // Function to refresh token from cookie
+        function refreshAuthToken() {
+            authToken = getAuthToken();
+            currentUserEmail = getCurrentUserEmail();
+        }
+
+        // Helper function to safely parse JSON response
+        async function parseResponse(response) {
+            const contentType = response.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                try {
+                    return await response.json();
+                } catch (e) {
+                    return { message: await response.text() || 'حدث خطأ غير متوقع' };
+                }
+            } else {
+                const text = await response.text();
+                try {
+                    return JSON.parse(text);
+                } catch (e) {
+                    return { message: text || 'حدث خطأ غير متوقع' };
+                }
+            }
+        }
+
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', () => {
+            if (authToken && currentUserEmail) {
+                showUserInfo(currentUserEmail);
+            }
+            showPage('login');
+        });
+
+        // Navigation
+        function showPage(pageName) {
+            // Hide all pages
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+
+            // Remove active class from all nav buttons
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            // Show selected page
+            document.getElementById(pageName + 'Page').classList.add('active');
+            document.getElementById('nav-' + pageName).classList.add('active');
+        }
+
+        function showUserInfo(email) {
+            document.getElementById('userEmail').textContent = email;
+            document.getElementById('userInfo').style.display = 'flex';
+        }
+
+        function hideUserInfo() {
+            document.getElementById('userInfo').style.display = 'none';
+        }
+
+        function logout() {
+            authToken = null;
+            currentUserEmail = null;
+            deleteCookie('authToken');
+            deleteCookie('userEmail');
+            hideUserInfo();
+            showPage('login');
+        }
+
+        // Login Form Handler
+        const loginForm = document.getElementById('loginForm');
+        const loginBtn = document.getElementById('loginBtn');
+        const loginMessage = document.getElementById('loginMessage');
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            loginBtn.disabled = true;
+            loginBtn.innerHTML = '<span class="loading"></span>جاري تسجيل الدخول...';
+            loginMessage.className = 'message';
+            loginMessage.textContent = '';
+
+            try {
+                const formData = {
+                    email: document.getElementById('loginEmail').value,
+                    password: document.getElementById('loginPassword').value,
+                };
+
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await parseResponse(response);
+
+                if (response.ok && data.access_token) {
+                    authToken = data.access_token;
+                    currentUserEmail = formData.email;
+                    setCookie('authToken', authToken, 7);
+                    setCookie('userEmail', currentUserEmail, 7);
+                    
+                    loginMessage.className = 'message success';
+                    loginMessage.textContent = 'تم تسجيل الدخول بنجاح!';
+                    
+                    showUserInfo(currentUserEmail);
+                    
+                    setTimeout(() => {
+                        showPage('users');
+                        loadUsers();
+                    }, 1000);
+                } else {
+                    loginMessage.className = 'message error';
+                    loginMessage.textContent = data.message || data.error || 'البريد الإلكتروني أو كلمة المرور غير صحيحة';
+                }
+            } catch (error) {
+                loginMessage.className = 'message error';
+                loginMessage.textContent = `خطأ في الاتصال: ${error.message}`;
+            } finally {
+                loginBtn.disabled = false;
+                loginBtn.textContent = 'تسجيل الدخول';
+            }
+        });
+
+        // Register Form Handler
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const registerMessage = document.getElementById('registerMessage');
+        const imageInput = document.getElementById('image');
+        const imagePreview = document.getElementById('imagePreview');
+        const previewContent = document.getElementById('previewContent');
+        const fileInfo = document.getElementById('fileInfo');
+
+        // Image preview handler
+        imageInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                imagePreview.style.display = 'block';
+                fileInfo.textContent = `الاسم: ${file.name} | الحجم: ${(file.size / 1024 / 1024).toFixed(2)} MB | النوع: ${file.type}`;
+                
+                previewContent.innerHTML = '';
+                
+                if (file.type.startsWith('image/')) {
+                    const img = document.createElement('img');
+                    img.src = URL.createObjectURL(file);
+                    previewContent.appendChild(img);
+                } else {
+                    previewContent.textContent = 'يرجى اختيار ملف صورة';
+                }
+            } else {
+                imagePreview.style.display = 'none';
+            }
+        });
+
+        function cleanPhoneNumber(phone) {
+            return phone.replace(/[\s\(\)\-]/g, '');
+        }
+
+        function validateForm() {
+            const email = document.getElementById('email').value;
+            const first_name = document.getElementById('first_name').value;
+            const last_name = document.getElementById('last_name').value;
+            const age = document.getElementById('age').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            if (!email || !first_name || !last_name || !age || !password || !role) {
+                return 'يرجى ملء جميع الحقول المطلوبة';
+            }
+
+            if (password.length < 6 || password.length > 15) {
+                return 'كلمة المرور يجب أن تكون بين 6 و 15 حرف';
+            }
+
+            const phone = document.getElementById('phone').value;
+            if (phone) {
+                const cleanedPhone = cleanPhoneNumber(phone);
+                if (!/^\+?[1-9]\d{6,14}$/.test(cleanedPhone)) {
+                    return 'رقم الهاتف غير صحيح';
+                }
+            }
+
+            return null;
+        }
+
+        async function uploadImage(file) {
+            refreshAuthToken(); // Refresh token from cookie before request
+            
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const headers = {};
+            
+            // Add Authorization header if token exists
+            if (authToken) {
+                headers['Authorization'] = `Bearer ${authToken}`;
+            }
+
+            const response = await fetch(`${API_BASE_URL}/upload-file`, {
+                method: 'POST',
+                headers: headers,
+                body: formData,
+            });
+
+            const data = await parseResponse(response);
+
+            if (!response.ok) {
+                throw new Error(data.message || data.error || 'فشل رفع الصورة');
+            }
+
+            return data.url;
+        }
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const validationError = validateForm();
+            if (validationError) {
+                registerMessage.className = 'message error';
+                registerMessage.textContent = validationError;
+                return;
+            }
+
+            registerBtn.disabled = true;
+            registerBtn.innerHTML = '<span class="loading"></span>جاري المعالجة...';
+            registerMessage.className = 'message';
+            registerMessage.textContent = '';
+
+            let imageUrl = null;
+            const imageFile = imageInput.files[0];
+
+            try {
+                if (imageFile) {
+                    registerBtn.innerHTML = '<span class="loading"></span>جاري رفع الصورة...';
+                    try {
+                        imageUrl = await uploadImage(imageFile);
+                    } catch (error) {
+                        registerMessage.className = 'message error';
+                        registerMessage.textContent = `خطأ في رفع الصورة: ${error.message}`;
+                        registerBtn.disabled = false;
+                        registerBtn.textContent = 'تسجيل';
+                        return;
+                    }
+                }
+
+                registerBtn.innerHTML = '<span class="loading"></span>جاري التسجيل...';
+
+                const formData = {
+                    email: document.getElementById('email').value,
+                    first_name: document.getElementById('first_name').value,
+                    last_name: document.getElementById('last_name').value,
+                    age: parseInt(document.getElementById('age').value),
+                    password: document.getElementById('password').value,
+                    role: document.getElementById('role').value,
+                };
+
+                const phone = document.getElementById('phone').value;
+                const address = document.getElementById('address').value;
+                
+                if (phone) formData.phone = cleanPhoneNumber(phone);
+                if (address) formData.address = address;
+                if (imageUrl) formData.image_path = imageUrl;
+
+                const response = await fetch(`${API_BASE_URL}/user/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData),
+                });
+
+                const data = await parseResponse(response);
+
+                if (response.ok && data.user) {
+                    registerMessage.className = 'message success';
+                    registerMessage.innerHTML = `
+                        <strong>نجح التسجيل!</strong><br>
+                        ${data.message || 'تم التسجيل بنجاح'}<br>
+                        <strong>معلومات المستخدم:</strong><br>
+                        الاسم: ${data.user.first_name} ${data.user.last_name}<br>
+                        البريد: ${data.user.email}<br>
+                        الدور: ${data.user.role}<br>
+                        ${data.user.image_path ? `الصورة: <a href="${API_BASE_URL}${data.user.image_path}" target="_blank">عرض الصورة</a>` : ''}
+                    `;
+                    registerForm.reset();
+                    imagePreview.style.display = 'none';
+                } else {
+                    registerMessage.className = 'message error';
+                    const errorMsg = Array.isArray(data.message) ? data.message.join(', ') : (data.message || data.error || 'حدث خطأ أثناء التسجيل');
+                    registerMessage.textContent = errorMsg;
+                }
+            } catch (error) {
+                registerMessage.className = 'message error';
+                registerMessage.textContent = `خطأ في الاتصال: ${error.message}`;
+            } finally {
+                registerBtn.disabled = false;
+                registerBtn.textContent = 'تسجيل';
+            }
+        });
+
+        // Load Users Function
+        async function loadUsers() {
+            const usersTableBody = document.getElementById('usersTableBody');
+            const refreshIcon = document.getElementById('refreshIcon');
+            
+            usersTableBody.innerHTML = '<tr><td colspan="7" class="empty-state"><div>جاري التحميل...</div></td></tr>';
+            refreshIcon.style.animation = 'spin 1s linear infinite';
+
+            try {
+                refreshAuthToken(); // Refresh token from cookie before request
+                
+                const headers = {
+                    'Content-Type': 'application/json',
+                };
+                
+                // Add Authorization header if token exists
+                if (authToken) {
+                    headers['Authorization'] = `Bearer ${authToken}`;
+                }
+                
+                const response = await fetch(`${API_BASE_URL}/user`, {
+                    method: 'GET',
+                    headers: headers,
+                });
+
+                const data = await parseResponse(response);
+
+                if (response.ok && Array.isArray(data)) {
+                    if (data.length === 0) {
+                        usersTableBody.innerHTML = '<tr><td colspan="7" class="empty-state"><div>لا يوجد مستخدمين</div></td></tr>';
+                    } else {
+                        usersTableBody.innerHTML = data.map(user => {
+                            const imageCell = user.image_path 
+                                ? `<img src="${API_BASE_URL}${user.image_path}" alt="User Image" class="user-image" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                   <div class="no-image" style="display: none;">لا توجد صورة</div>`
+                                : '<div class="no-image">لا توجد صورة</div>';
+                            
+                            return `
+                                <tr>
+                                    <td>${imageCell}</td>
+                                    <td>${user.first_name} ${user.last_name}</td>
+                                    <td>${user.email}</td>
+                                    <td>${user.age || '-'}</td>
+                                    <td>${user.phone || '-'}</td>
+                                    <td>${user.address || '-'}</td>
+                                    <td><span class="role-badge role-${user.role}">${getRoleName(user.role)}</span></td>
+                                </tr>
+                            `;
+                        }).join('');
+                    }
+                } else {
+                    const errorMsg = data.message || data.error || 'حدث خطأ في تحميل المستخدمين';
+                    usersTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><div>${errorMsg}</div></td></tr>`;
+                }
+            } catch (error) {
+                usersTableBody.innerHTML = `<tr><td colspan="7" class="empty-state"><div>خطأ في الاتصال: ${error.message}</div></td></tr>`;
+            } finally {
+                refreshIcon.style.animation = '';
+            }
+        }
+
+        function getRoleName(role) {
+            const roles = {
+                'USER': 'مستخدم',
+                'TEACHER': 'معلم',
+                'EMPLOYEE': 'موظف',
+                'ASSISTANT': 'مساعد'
+            };
+            return roles[role] || role;
+        }
+
+        // Auto-load users when users page is shown
+        document.getElementById('nav-users').addEventListener('click', () => {
+            setTimeout(() => loadUsers(), 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: center_education_mysql
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: center_education
+      MYSQL_USER: center_user
+      MYSQL_PASSWORD: center_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - center_education_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: center_education_phpmyadmin
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - center_education_network
+
+  # NestJS Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: center_education_app
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      DATABASE_URL: mysql://center_user:center_password@mysql:3306/center_education
+      PORT: 3000
+      NODE_ENV: production
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+    ports:
+      - "3001:3000"
+    volumes:
+      - ./public:/app/public
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - center_education_network
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL to be ready...' &&
+        sleep 20 &&
+        echo 'Setting up database schema...' &&
+        npx prisma db push --accept-data-loss --skip-generate &&
+        echo 'Starting application...' &&
+        npm run start:prod
+      "
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  center_education_network:
+    driver: bridge
+
