@@ -47,7 +47,7 @@ RUN npx prisma generate
 COPY --from=builder /app/dist ./dist
 
 # Copy public directory for static files
-COPY public ./public
+COPY --from=builder /app/public ./public
 
 # Expose port
 EXPOSE 3000
