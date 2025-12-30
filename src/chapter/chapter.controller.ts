@@ -7,6 +7,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { Role } from '@prisma/client';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
+import { ChapterAccessGuard } from './guards/chapter-access-guard/chapter-access-guard.guard';
 
 @Controller('chapter')
 export class ChapterController {
@@ -27,7 +28,7 @@ export class ChapterController {
   }
 
   @Roles(Role.ADMIN,Role.TEACHER,Role.STUDENT)
-  @UseGuards(JwtAuthGuard,RolesGuard)
+  @UseGuards(JwtAuthGuard,RolesGuard,ChapterAccessGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.chapterService.findOne(+id);
