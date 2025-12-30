@@ -16,10 +16,11 @@ services:
       - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d
     networks:
       - center_education_network
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -46,7 +47,7 @@ services:
     networks:
       - center_education_network
 
-  # NestJS Application
+  # NestJS Application (Backend)
   app:
     build:
       context: .
@@ -65,7 +66,7 @@ services:
       - "3001:3000"
     volumes:
       - ./public:/app/public
-      - ./src:/app/src
+      # - ./src:/app/src # Removed for production-like build, uncomment for dev if using Dockerfile.dev
     depends_on:
       mysql:
         condition: service_healthy
@@ -74,12 +75,22 @@ services:
     command: >
       sh -c "
         echo 'Waiting for MySQL to be ready...' &&
-        sleep 20 &&
-        echo 'Setting up database schema...' &&
-        npx prisma db push --accept-data-loss --skip-generate &&
-        echo 'Starting application...' &&
         npm run start:prod
       "
+
+  # Frontend (Vite + Nginx)
+  frontend:
+    build:
+      context: "./front end"
+      dockerfile: Dockerfile
+    container_name: center_education_frontend
+    restart: unless-stopped
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
+    networks:
+      - center_education_network
 
 volumes:
   mysql_data:
@@ -88,4 +99,3 @@ volumes:
 networks:
   center_education_network:
     driver: bridge
-

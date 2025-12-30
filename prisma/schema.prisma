@@ -6,6 +6,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
 datasource db {
@@ -35,6 +36,7 @@ model Chapter {
   updatedAt DateTime @updatedAt
 
   @@unique([courseId, order]) // مهم جدًا
+  @@map("chapter")
 }
 
 model Course {
@@ -49,6 +51,7 @@ model Course {
   chapters    Chapter[]
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  @@map("course")
 }
 
 model User {
@@ -68,6 +71,7 @@ model User {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   EnrollmentRequest EnrollmentRequest[]
+  @@map("user")
 }
 
 model Enrollment {
@@ -81,6 +85,7 @@ model Enrollment {
 
   // @@unique([studentId, courseId])
   @@unique([studentId, courseId], name: "studentId_courseId_unique")
+  @@map("enrollment")
 }
 
 model EnrollmentRequest {
@@ -94,4 +99,5 @@ model EnrollmentRequest {
   course  Course @relation(fields: [courseId], references: [id])
 
   @@unique([studentId, courseId])
+  @@map("enrollmentrequest")
 }

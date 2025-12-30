@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Delete, Param, Req, UseGuards, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Delete, Param, Req, UseGuards, ParseIntPipe, ForbiddenException } from '@nestjs/common';
 import { EnrollmentService } from './enrollment.service';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { CreateEnrollmentRequestDto } from './dto/CreateEnrollmentRequest.dto';
@@ -6,7 +6,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { Role } from '@prisma/client';
-import { OwnershipGuard as OwnershipGuardForCourse}  from '../course/guards/ownership/ownership.guard';
+import { OwnershipGuard as OwnershipGuardForCourse } from '../course/guards/ownership/ownership.guard';
 import { EnrollmentOwnershipGuard } from './guards/ownership/ownership.guard';
 import { EnrollmentRequestOwnershipGuard } from './guards/enrollment-request-ownership-guard/enrollment-request-ownership-guard.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
@@ -15,7 +15,7 @@ import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } 
 @ApiBearerAuth()
 @Controller('enrollment')
 export class EnrollmentController {
-  constructor(private readonly enrollmentService: EnrollmentService) {}
+  constructor(private readonly enrollmentService: EnrollmentService) { }
 
   // =======================
   // الطالب يرسل طلب الاشتراك
@@ -26,7 +26,7 @@ export class EnrollmentController {
   @ApiOperation({ summary: 'Student sends an enrollment request to a course-->يرسل الطالب طلب تسجيل في دورة تدريبية' })
   @ApiBody({ type: CreateEnrollmentRequestDto })
   @ApiResponse({ status: 201, description: 'Enrollment request created successfully.' })
-  requestEnrollment(@Body() dto: CreateEnrollmentRequestDto,@Req() request: any) {
+  requestEnrollment(@Body() dto: CreateEnrollmentRequestDto, @Req() request: any) {
     const user = request.user;
     return this.enrollmentService.requestEnrollment(dto.courseId, user.userId);
   }
@@ -57,7 +57,7 @@ export class EnrollmentController {
   @ApiOperation({ summary: 'Student withdraws their enrollment request-->سحب الطالب طلب التسجيل الخاص به' })
   @ApiParam({ name: 'courseId', type: Number })
   @ApiResponse({ status: 200, description: 'Enrollment request withdrawn successfully.' })
-  withdrawRequest(@Param('courseId', ParseIntPipe) courseId: number,@Req() request: any) {
+  withdrawRequest(@Param('courseId', ParseIntPipe) courseId: number, @Req() request: any) {
     const studentId = request.user.userId;
     return this.enrollmentService.withdrawRequest(courseId, studentId);
   }
@@ -94,12 +94,16 @@ export class EnrollmentController {
   // =======================
   @Get('student/:studentId')
   @Roles(Role.ADMIN, Role.STUDENT)
-  @UseGuards(JwtAuthGuard, RolesGuard, EnrollmentOwnershipGuard)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @ApiOperation({ summary: 'Admin/Student views all courses of a student-->يعرض المسؤول/الطالب جميع مقررات الطالب' })
   @ApiParam({ name: 'studentId', type: Number })
   @ApiResponse({ status: 200, description: 'List of courses', type: [CreateEnrollmentDto] })
   courses(@Param('studentId') studentId: string, @Req() request: any) {
     const user = request.user;
+    // Check if student is accessing their own data
+    if (user.role === Role.STUDENT && user.userId !== +studentId) {
+      throw new ForbiddenException('You can only view your own enrollments');
+    }
     return this.enrollmentService.coursesForStudent(+studentId, user);
   }
 }

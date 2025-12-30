@@ -8,6 +8,27 @@ export class EnrollmentService {
   constructor(private prisma: PrismaService) { }
   async enroll(dto: CreateEnrollmentDto, user: { userId: number; role: string }) {
     // هنا ممكن تعمل check على صلاحيات user قبل التسجيل
+    // Check if already enrolled
+    const existingEnrollment = await this.prisma.enrollment.findUnique({
+      where: {
+        studentId_courseId_unique: {
+          studentId: dto.studentId,
+          courseId: dto.courseId,
+        },
+      },
+    });
+
+    if (existingEnrollment) {
+      // Already enrolled, just remove the request if any and return
+      await this.prisma.enrollmentRequest.deleteMany({
+        where: {
+          studentId: dto.studentId,
+          courseId: dto.courseId,
+        },
+      });
+      return existingEnrollment;
+    }
+
     const enrollment = await this.prisma.enrollment.create({
       data: {
         studentId: dto.studentId,
@@ -66,7 +87,6 @@ export class EnrollmentService {
   }
 
   async coursesForStudent(studentId: number, user: { userId: number; role: string }) {
-    // هنا ممكن تعمل check على صلاحيات user قبل الجلب
     return this.prisma.enrollment.findMany({
       where: { studentId },
       include: {
