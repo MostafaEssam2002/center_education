@@ -1,0 +1,102 @@
+services:
+  # MySQL Database (unchanged from production)
+  mysql:
+    image: mysql:8.0
+    container_name: center_education_mysql
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: center_education
+      MYSQL_USER: center_user
+      MYSQL_PASSWORD: center_password
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - center_education_network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpassword"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # phpMyAdmin (unchanged from production)
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: center_education_phpmyadmin
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+      MYSQL_ROOT_PASSWORD: rootpassword
+    ports:
+      - "8080:80"
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - center_education_network
+
+  # NestJS Application (development configuration)
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    container_name: center_education_app
+    restart: unless-stopped
+    dns:
+      - 8.8.8.8
+      - 8.8.4.4
+    environment:
+      DATABASE_URL: mysql://center_user:center_password@mysql:3306/center_education
+      PORT: 3000
+      NODE_ENV: development
+      JWT_SECRET: your-super-secret-jwt-key-change-this-in-production
+    ports:
+      - "3001:3000"
+    volumes:
+      # Bind mount source code for live reload (Windows-compatible paths)
+      - ./src:/app/src
+      - ./prisma:/app/prisma
+      - ./public:/app/public
+      - ./package.json:/app/package.json
+      - ./package-lock.json:/app/package-lock.json
+      - ./tsconfig.json:/app/tsconfig.json
+      - ./tsconfig.build.json:/app/tsconfig.build.json
+      - ./nest-cli.json:/app/nest-cli.json
+      # Named volume for node_modules to avoid overwriting container's node_modules
+      - node_modules_dev:/app/node_modules
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - center_education_network
+    command: >
+      sh -c "
+        echo 'Waiting for MySQL to be ready...' &&
+        sleep 10 &&
+        echo 'Generating Prisma Client...' &&
+        npx prisma generate &&
+        echo 'Starting development server with live reload...' &&
+        npm run start:dev
+      "
+
+volumes:
+  mysql_data:
+    driver: local
+  node_modules_dev:
+    driver: local
+
+networks:
+  center_education_network:
+    driver: bridge
+

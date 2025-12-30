@@ -41,4 +41,10 @@ export class AuthService {
     console.log("find all function in auth service called");
     return users
   }
+  async findOne(id: number) {
+    return this.prisma.user.findUnique({
+      where: { id },
+    });
+  }
+
 }

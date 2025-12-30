@@ -7,16 +7,14 @@ import { JwtModule } from '@nestjs/jwt';
 import { LocalStrategy } from './strategies/local.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
+import { CaslModule } from './casl/casl.module';
 
 @Module({
   imports: [
-    UserModule, // 🔴 مهم
+    CaslModule,
+    UserModule,
     PassportModule,
-    JwtModule.register({
-      // secret: process.env.JWT_SECRET || 'SECRET_KEY',
-      secret: process.env.JWT_SECRET ,
-      signOptions: { expiresIn: '1d' },
-    }),
+    JwtModule.register({secret: process.env.JWT_SECRET ,signOptions: { expiresIn: '1d' },}),
   ],
   // imports: [UserService],
   controllers: [AuthController],

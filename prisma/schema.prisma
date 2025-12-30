@@ -15,23 +15,83 @@ datasource db {
 
 enum Role {
   USER
+  STUDENT
   ADMIN
   TEACHER
   ASSISTANT
   EMPLOYEE
 }
 
-model User {
-  id         Int      @id @default(autoincrement())
-  email      String   @unique
-  first_name String?
-  last_name  String?
+model Chapter {
+  id        Int      @id @default(autoincrement())
+  title     String
+  content   String? // شرح نصي (اختياري)
+  videoPath String // مسار الفيديو
+  pdfPath   String? // مسار الـ PDF
+  order     Int
+  courseId  Int
+  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([courseId, order]) // مهم جدًا
+}
+
+model Course {
+  id          Int                 @id @default(autoincrement())
+  title       String
+  description String?
+  teacherId   Int
   image_path String?
-  age        Int?
-  password   String
-  phone      String?
-  address    String?
-  role       Role     @default(USER)
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  teacher     User                @relation("TeacherCourses", fields: [teacherId], references: [id])
+  enrollments Enrollment[]
+  requests    EnrollmentRequest[]
+  chapters    Chapter[]
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+}
+
+model User {
+  id          Int          @id @default(autoincrement())
+  email       String       @unique
+  first_name  String?
+  last_name   String?
+  image_path  String?
+  age         Int?
+  password    String
+  phone       String?
+  address     String?
+  enrollments Enrollment[]
+
+  role              Role                @default(USER)
+  teachingCourses   Course[]            @relation("TeacherCourses")
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  EnrollmentRequest EnrollmentRequest[]
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  courseId  Int
+  createdAt DateTime @default(now())
+
+  user   User   @relation(fields: [studentId], references: [id])
+  course Course @relation(fields: [courseId], references: [id])
+
+  // @@unique([studentId, courseId])
+  @@unique([studentId, courseId], name: "studentId_courseId_unique")
+}
+
+model EnrollmentRequest {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  courseId  Int
+  status    String   @default("pending") // pending, approved, rejected
+  createdAt DateTime @default(now())
+
+  student User   @relation(fields: [studentId], references: [id])
+  course  Course @relation(fields: [courseId], references: [id])
+
+  @@unique([studentId, courseId])
 }

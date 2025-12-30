@@ -1,0 +1,43 @@
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
+import { PrismaService } from 'src/prisma/prisma.service';
+
+interface OwnershipGuardOptions {
+  model: 'course' | 'chapter'; // ممكن تضيف أي جدول تاني
+  ownerField: string; // اسم الحقل اللي بيمثل صاحب الـ record
+  paramIdName?: string; // اسم البارامتر في URL (افتراضي 'id')
+}
+
+@Injectable()
+export class OwnershipGuard implements CanActivate {
+  constructor(private prisma: PrismaService, private options: OwnershipGuardOptions) {}
+
+  async canActivate(context: ExecutionContext): Promise<boolean> {
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+    const paramIdName = this.options.paramIdName || 'id';
+    const entityId = Number(request.params[paramIdName]);
+
+    if (!entityId) throw new ForbiddenException(`${paramIdName} is missing`);
+
+    // جلب الـ record بناءً على الموديل والحقل
+    const record = await this.prisma[this.options.model].findUnique({
+      where: { id: entityId },
+      select: {
+        [this.options.ownerField]: true,
+      },
+    });
+
+    if (!record) throw new ForbiddenException(`${this.options.model} not found`);
+
+    if (user.role === 'ADMIN' || record[this.options.ownerField] === user.userId) {
+      return true;
+    } else {
+      throw new ForbiddenException('You cannot access this resource');
+    }
+  }
+}
