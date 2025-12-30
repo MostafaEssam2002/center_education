@@ -143,5 +143,19 @@ export const enrollmentAPI = {
     api.get(`/enrollment/student/${studentId}`),
 };
 
-export default api;
+// Chapter Progress API
+export const chapterProgressAPI = {
+  // Update video progress
+  updateVideoProgress: (chapterId, progress) =>
+    api.post('/chapter-progress/video', { chapterId, progress }),
 
+  // Get chapter progress
+  getChapterProgress: (chapterId) =>
+    api.get(`/chapter-progress/chapter/${chapterId}`),
+
+  // Get course progress
+  getCourseProgress: (courseId) =>
+    api.get(`/chapter-progress/course/${courseId}`),
+};
+
+export default api;

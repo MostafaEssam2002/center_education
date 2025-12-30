@@ -142,6 +142,7 @@ const ChapterDetail = () => {
                     <VideoPlayer
                         src={getFullUrl(chapter.videoPath)}
                         title="فيديو الفصل"
+                        chapterId={chapter.id}
                     />
                 )}
 

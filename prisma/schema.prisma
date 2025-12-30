@@ -24,20 +24,21 @@ enum Role {
 }
 
 model Chapter {
-  id        Int      @id @default(autoincrement())
-  title     String
-  content   String? // شرح نصي (اختياري)
-  videoPath String // مسار الفيديو
-  pdfPath   String? // مسار الـ PDF
-  order     Int
-  courseId  Int
-  course    Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@unique([courseId, order]) // مهم جدًا
+  id             Int               @id @default(autoincrement())
+  title          String
+  content        String?           // شرح نصي (اختياري)
+  videoPath      String            // مسار الفيديو
+  pdfPath        String?           // مسار الـ PDF
+  order          Int
+  courseId       Int
+  course         Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+  chapterProgress ChapterProgress[]
+  @@unique([courseId, order], name: "chapter_course_order_unique")    
   @@map("chapter")
 }
+
 
 model Course {
   id          Int                 @id @default(autoincrement())
@@ -71,6 +72,7 @@ model User {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   EnrollmentRequest EnrollmentRequest[]
+  chapterProgress   ChapterProgress[]
   @@map("user")
 }
 
@@ -100,4 +102,18 @@ model EnrollmentRequest {
 
   @@unique([studentId, courseId])
   @@map("enrollmentrequest")
+}
+
+model ChapterProgress {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  chapterId Int
+  progress  Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student User    @relation(fields: [studentId], references: [id])
+  chapter Chapter @relation(fields: [chapterId], references: [id])
+
+  @@unique([studentId, chapterId])
 }

@@ -1,33 +1,101 @@
 import { useRef, useEffect, useState } from 'react';
+import { chapterProgressAPI } from '../services/api';
 
-const VideoPlayer = ({ src, title }) => {
+const VideoPlayer = ({ src, title, chapterId }) => {
     const videoRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
+    const progressUpdateTimerRef = useRef(null);
 
     useEffect(() => {
         const video = videoRef.current;
         if (!video) return;
 
-        const handleTimeUpdate = () => setCurrentTime(video.currentTime);
-        const handleLoadedMetadata = () => setDuration(video.duration);
+        const updateProgress = () => {
+            if (video.duration && video.currentTime && chapterId) {
+                const progress = Math.floor((video.currentTime / video.duration) * 100);
+
+                if (progress > 0 && progress <= 100) {
+                    chapterProgressAPI.updateVideoProgress(chapterId, progress)
+                        .catch(err => console.error('Error updating progress:', err));
+                }
+            }
+        };
+
+        const handleTimeUpdate = () => {
+            setCurrentTime(video.currentTime);
+
+            if (progressUpdateTimerRef.current) {
+                clearTimeout(progressUpdateTimerRef.current);
+            }
+
+            // Update progress every 3 seconds while watching
+            progressUpdateTimerRef.current = setTimeout(updateProgress, 3000);
+        };
+
+        const handleLoadedMetadata = () => {
+            setDuration(video.duration);
+
+            // Resume from last position if chapterId is provided
+            if (chapterId) {
+                console.log('Fetching progress for chapter:', chapterId);
+                chapterProgressAPI.getChapterProgress(chapterId)
+                    .then(response => {
+                        console.log('Progress API response:', response.data);
+                        const savedProgress = response.data?.progress;
+                        console.log('Saved progress:', savedProgress);
+                        if (savedProgress && savedProgress > 0 && savedProgress < 100) {
+                            // Calculate time from progress percentage
+                            const resumeTime = (savedProgress / 100) * video.duration;
+                            console.log(`Setting video time to: ${resumeTime}s (${savedProgress}%)`);
+                            video.currentTime = resumeTime;
+                            console.log(`Resumed video at ${savedProgress}% (${Math.floor(resumeTime)}s)`);
+                        } else {
+                            console.log('No valid progress to resume from:', savedProgress);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Error loading progress:', err);
+                        console.error('Error details:', err.response?.data);
+                    });
+            } else {
+                console.log('No chapterId provided, cannot resume');
+            }
+        };
+
         const handlePlay = () => setIsPlaying(true);
-        const handlePause = () => setIsPlaying(false);
+        const handlePause = () => {
+            setIsPlaying(false);
+            updateProgress(); // Update immediately on pause
+        };
+        const handleEnded = () => {
+            setIsPlaying(false);
+            if (chapterId) {
+                chapterProgressAPI.updateVideoProgress(chapterId, 100)
+                    .catch(err => console.error('Error updating progress:', err));
+            }
+        };
 
         video.addEventListener('timeupdate', handleTimeUpdate);
         video.addEventListener('loadedmetadata', handleLoadedMetadata);
         video.addEventListener('play', handlePlay);
         video.addEventListener('pause', handlePause);
+        video.addEventListener('ended', handleEnded);
 
         return () => {
             video.removeEventListener('timeupdate', handleTimeUpdate);
             video.removeEventListener('loadedmetadata', handleLoadedMetadata);
             video.removeEventListener('play', handlePlay);
             video.removeEventListener('pause', handlePause);
+            video.removeEventListener('ended', handleEnded);
+
+            if (progressUpdateTimerRef.current) {
+                clearTimeout(progressUpdateTimerRef.current);
+            }
         };
-    }, []);
+    }, [chapterId]);
 
     const togglePlay = () => {
         if (videoRef.current) {
