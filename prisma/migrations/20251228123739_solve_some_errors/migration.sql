@@ -1,7 +1,0 @@
--- AlterTable
-ALTER TABLE `user` ADD COLUMN `address` VARCHAR(191) NULL,
-    ADD COLUMN `age` INTEGER NULL,
-    ADD COLUMN `first_name` VARCHAR(191) NULL,
-    ADD COLUMN `image_path` VARCHAR(191) NULL,
-    ADD COLUMN `last_name` VARCHAR(191) NULL,
-    ADD COLUMN `phone` VARCHAR(191) NULL;

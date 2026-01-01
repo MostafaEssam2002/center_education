@@ -157,5 +157,22 @@ export const chapterProgressAPI = {
   getCourseProgress: (courseId) =>
     api.get(`/chapter-progress/course/${courseId}`),
 };
+// Course Schedule API
+export const courseScheduleAPI = {
+  create: (scheduleData) =>
+    api.post('/course-schedule', scheduleData),
+
+  update: (id, scheduleData) =>
+    api.patch(`/course-schedule/${id}`, scheduleData),
+
+  remove: (id) =>
+    api.delete(`/course-schedule/${id}`),
+
+  findWeeklySchedule: () =>
+    api.get('/course-schedule/weekly'),
+
+  findStudentSchedule: () =>
+    api.get('/course-schedule/student'),
+};
 
 export default api;

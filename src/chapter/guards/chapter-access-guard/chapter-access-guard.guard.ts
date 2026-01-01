@@ -4,7 +4,7 @@ import { Role } from '@prisma/client';
 
 @Injectable()
 export class ChapterAccessGuard implements CanActivate {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -35,7 +35,7 @@ export class ChapterAccessGuard implements CanActivate {
     if (user.role === Role.STUDENT) {
       const enrollment = await this.prisma.enrollment.findUnique({
         where: {
-          studentId_courseId_unique: { studentId: user.userId, courseId: chapter.course.id },
+          unique_enrollment_student_course: { studentId: user.userId, courseId: chapter.course.id },
         },
       });
 

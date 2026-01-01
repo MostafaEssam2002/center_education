@@ -11,7 +11,7 @@ export class EnrollmentService {
     // Check if already enrolled
     const existingEnrollment = await this.prisma.enrollment.findUnique({
       where: {
-        studentId_courseId_unique: {
+        unique_enrollment_student_course: {
           studentId: dto.studentId,
           courseId: dto.courseId,
         },
@@ -51,7 +51,7 @@ export class EnrollmentService {
     // التأكد إن الطلب موجود أصلاً
     const request = await this.prisma.enrollmentRequest.findUnique({
       where: {
-        studentId_courseId: {
+        unique_enrollment_request_student_course: {
           studentId,
           courseId,
         },
@@ -67,7 +67,7 @@ export class EnrollmentService {
     // حذف الطلب
     await this.prisma.enrollmentRequest.delete({
       where: {
-        studentId_courseId: {
+        unique_enrollment_request_student_course: {
           studentId,
           courseId,
         },
@@ -81,7 +81,7 @@ export class EnrollmentService {
     // هنا ممكن تعمل check على صلاحيات user قبل الحذف
     return this.prisma.enrollment.delete({
       where: {
-        studentId_courseId_unique: { studentId, courseId },
+        unique_enrollment_student_course: { studentId, courseId },
       },
     });
   }

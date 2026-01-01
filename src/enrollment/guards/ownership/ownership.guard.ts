@@ -4,7 +4,7 @@ import { Role } from '@prisma/client';
 
 @Injectable()
 export class EnrollmentOwnershipGuard implements CanActivate {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -33,7 +33,7 @@ export class EnrollmentOwnershipGuard implements CanActivate {
     if (user.role === Role.STUDENT) {
       // الطالب مسجل في الكورس
       const enrollment = await this.prisma.enrollment.findUnique({
-        where: { studentId_courseId_unique: { studentId: user.studentId, courseId } },
+        where: { unique_enrollment_student_course: { studentId: user.studentId, courseId } },
       });
       if (!enrollment) throw new ForbiddenException('You are not enrolled in this course');
       return true;

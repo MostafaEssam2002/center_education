@@ -13,6 +13,9 @@ import ChapterDetail from './pages/ChapterDetail';
 import EnrollmentRequests from './pages/EnrollmentRequests';
 import MyEnrollments from './pages/MyEnrollments';
 import CourseStudents from './pages/CourseStudents';
+import Schedule from './pages/Schedule';
+
+import StudentSchedule from './pages/StudentSchedule';
 
 function App() {
   return (
@@ -91,6 +94,22 @@ function App() {
               element={
                 <ProtectedRoute>
                   <MyEnrollments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/schedule"
+              element={
+                <ProtectedRoute>
+                  <Schedule />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/student-schedule"
+              element={
+                <ProtectedRoute>
+                  <StudentSchedule />
                 </ProtectedRoute>
               }
             />

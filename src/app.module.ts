@@ -8,9 +8,10 @@ import { CourseModule } from './course/course.module';
 import { ChapterModule } from './chapter/chapter.module';
 import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ChapterProgressModule } from './chapter-progress/chapter-progress.module';
+import { CourseScheduleModule } from './course-schedule/course-schedule.module';
 
 @Module({
-  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule],
+  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule],
   controllers: [AppController],
   providers: [AppService],
 })

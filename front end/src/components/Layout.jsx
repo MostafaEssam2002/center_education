@@ -59,6 +59,12 @@ const Layout = ({ children }) => {
               الكورسات
             </Link>
 
+            {!isStudent && (
+              <Link to="/schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                الجدول العام
+              </Link>
+            )}
+
             {isTeacher && (
               <>
                 <Link to="/chapters" className="btn btn-primary" style={{ textDecoration: 'none' }}>
@@ -71,9 +77,14 @@ const Layout = ({ children }) => {
             )}
 
             {isStudent && (
-              <Link to="/my-enrollments" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-                كورساتي
-              </Link>
+              <>
+                <Link to="/my-enrollments" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                  كورساتي
+                </Link>
+                <Link to="/student-schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                  مواعيدي
+                </Link>
+              </>
             )}
 
             {user && (

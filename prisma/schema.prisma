@@ -23,56 +23,71 @@ enum Role {
   EMPLOYEE
 }
 
-model Chapter {
-  id             Int               @id @default(autoincrement())
-  title          String
-  content        String?           // شرح نصي (اختياري)
-  videoPath      String            // مسار الفيديو
-  pdfPath        String?           // مسار الـ PDF
-  order          Int
-  courseId       Int
-  course         Course            @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  createdAt      DateTime          @default(now())
-  updatedAt      DateTime          @updatedAt
-  chapterProgress ChapterProgress[]
-  @@unique([courseId, order], name: "chapter_course_order_unique")    
-  @@map("chapter")
+enum DayOfWeek {
+  SAT
+  SUN
+  MON
+  TUE
+  WED
+  THU
+  FRI
 }
 
+model Chapter {
+  id              Int               @id @default(autoincrement())
+  title           String
+  content         String?           // شرح نصي (اختياري)
+  videoPath       String            // مسار الفيديو
+  pdfPath         String?           // مسار الـ PDF
+  order           Int
+  courseId        Int
+  course          Course            @relation("ChapterToCourse", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_chapter_course")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
+  
+  @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
+  @@index([courseId], map: "idx_chapter_course_id")
+  @@map("chapter")
+}
 
 model Course {
   id          Int                 @id @default(autoincrement())
   title       String
   description String?
   teacherId   Int
-  image_path String?
-  teacher     User                @relation("TeacherCourses", fields: [teacherId], references: [id])
-  enrollments Enrollment[]
-  requests    EnrollmentRequest[]
-  chapters    Chapter[]
+  image_path  String?
+  teacher     User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
+  enrollments Enrollment[]        @relation("CourseToEnrollment")
+  requests    EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
+  chapters    Chapter[]           @relation("ChapterToCourse")
+  schedules   CourseSchedule[]    @relation("CourseToCourseSchedule")
   createdAt   DateTime            @default(now())
   updatedAt   DateTime            @updatedAt
+  
+  @@index([teacherId], map: "idx_course_teacher_id")
   @@map("course")
 }
 
 model User {
-  id          Int          @id @default(autoincrement())
-  email       String       @unique
-  first_name  String?
-  last_name   String?
-  image_path  String?
-  age         Int?
-  password    String
-  phone       String?
-  address     String?
-  enrollments Enrollment[]
-
+  id                Int                 @id @default(autoincrement())
+  email             String              @unique(map: "unique_user_email")
+  first_name        String?
+  last_name         String?
+  image_path        String?
+  age               Int?
+  password          String
+  phone             String?
+  address           String?
   role              Role                @default(USER)
-  teachingCourses   Course[]            @relation("TeacherCourses")
+  enrollments       Enrollment[]        @relation("UserToEnrollment")
+  teachingCourses   Course[]            @relation("TeacherToCourse")
+  enrollmentRequest EnrollmentRequest[] @relation("UserToEnrollmentRequest")
+  chapterProgress   ChapterProgress[]   @relation("UserToChapterProgress")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  EnrollmentRequest EnrollmentRequest[]
-  chapterProgress   ChapterProgress[]
+  
+  @@index([email], map: "idx_user_email")
   @@map("user")
 }
 
@@ -82,11 +97,12 @@ model Enrollment {
   courseId  Int
   createdAt DateTime @default(now())
 
-  user   User   @relation(fields: [studentId], references: [id])
-  course Course @relation(fields: [courseId], references: [id])
+  user   User   @relation("UserToEnrollment", fields: [studentId], references: [id], map: "fk_enrollment_user")
+  course Course @relation("CourseToEnrollment", fields: [courseId], references: [id], map: "fk_enrollment_course")
 
-  // @@unique([studentId, courseId])
-  @@unique([studentId, courseId], name: "studentId_courseId_unique")
+  @@unique([studentId, courseId], name: "unique_enrollment_student_course", map: "idx_enrollment_student_course")
+  @@index([studentId], map: "idx_enrollment_student_id")
+  @@index([courseId], map: "idx_enrollment_course_id")
   @@map("enrollment")
 }
 
@@ -97,10 +113,13 @@ model EnrollmentRequest {
   status    String   @default("pending") // pending, approved, rejected
   createdAt DateTime @default(now())
 
-  student User   @relation(fields: [studentId], references: [id])
-  course  Course @relation(fields: [courseId], references: [id])
+  student User   @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
+  course  Course @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], map: "fk_enrollment_request_course")
 
-  @@unique([studentId, courseId])
+  @@unique([studentId, courseId], name: "unique_enrollment_request_student_course", map: "idx_enrollment_request_student_course")
+  @@index([studentId], map: "idx_enrollment_request_student_id")
+  @@index([courseId], map: "idx_enrollment_request_course_id")
+  @@index([status], map: "idx_enrollment_request_status")
   @@map("enrollmentrequest")
 }
 
@@ -112,8 +131,27 @@ model ChapterProgress {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  student User    @relation(fields: [studentId], references: [id])
-  chapter Chapter @relation(fields: [chapterId], references: [id])
+  student User    @relation("UserToChapterProgress", fields: [studentId], references: [id], map: "fk_chapter_progress_user")
+  chapter Chapter @relation("ChapterToChapterProgress", fields: [chapterId], references: [id], map: "fk_chapter_progress_chapter")
 
-  @@unique([studentId, chapterId])
+  @@unique([studentId, chapterId], name: "unique_chapter_progress_student_chapter", map: "idx_chapter_progress_student_chapter")
+  @@index([studentId], map: "idx_chapter_progress_student_id")
+  @@index([chapterId], map: "idx_chapter_progress_chapter_id")
+  @@map("chapterprogress")
+}
+
+model CourseSchedule {
+  id        Int       @id @default(autoincrement())
+  courseId  Int
+  day       DayOfWeek
+  startTime String    // "10:00"
+  endTime   String    // "12:00"
+  room      String?   // optional (قاعة 1 – Lab A)
+
+  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], map: "fk_course_schedule_course")
+
+  @@unique([day, startTime, room], name: "unique_course_schedule_day_time_room", map: "idx_course_schedule_day_time_room")
+  @@index([courseId], map: "idx_course_schedule_course_id")
+  @@index([day], map: "idx_course_schedule_day")
+  @@map("courseschedule")
 }

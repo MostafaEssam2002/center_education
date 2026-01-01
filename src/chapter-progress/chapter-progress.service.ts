@@ -14,7 +14,7 @@ export class ChapterProgressService {
     newProgress = Math.min(100, Math.max(0, newProgress));
     const existing = await this.prisma.chapterProgress.findUnique({
       where: {
-        studentId_chapterId: { studentId, chapterId },
+        unique_chapter_progress_student_chapter: { studentId, chapterId },
       },
     });
     // منع الرجوع للخلف
@@ -23,7 +23,7 @@ export class ChapterProgressService {
     }
     return this.prisma.chapterProgress.upsert({
       where: {
-        studentId_chapterId: { studentId, chapterId },
+        unique_chapter_progress_student_chapter: { studentId, chapterId },
       },
       update: {
         progress: newProgress,
@@ -42,7 +42,7 @@ export class ChapterProgressService {
   async getChapterProgress(studentId: number, chapterId: number) {
     return this.prisma.chapterProgress.findUnique({
       where: {
-        studentId_chapterId: { studentId, chapterId },
+        unique_chapter_progress_student_chapter: { studentId, chapterId },
       },
     });
   }
