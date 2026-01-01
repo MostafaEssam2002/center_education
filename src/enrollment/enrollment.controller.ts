@@ -9,6 +9,7 @@ import { Role } from '@prisma/client';
 import { OwnershipGuard as OwnershipGuardForCourse } from '../course/guards/ownership/ownership.guard';
 import { EnrollmentOwnershipGuard } from './guards/ownership/ownership.guard';
 import { EnrollmentRequestOwnershipGuard } from './guards/enrollment-request-ownership-guard/enrollment-request-ownership-guard.guard';
+import { EnrollmentAccessGuard } from './guards/enrollment-access.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiBody } from '@nestjs/swagger';
 
 @ApiTags('Enrollment')
@@ -80,8 +81,8 @@ export class EnrollmentController {
   // عرض كل الطلاب في كورس معين
   // =======================
   @Get('course/:courseId')
-  @Roles(Role.ADMIN, Role.TEACHER)
-  @UseGuards(JwtAuthGuard, RolesGuard, OwnershipGuardForCourse)
+  @Roles(Role.ADMIN, Role.TEACHER, Role.EMPLOYEE)
+  @UseGuards(JwtAuthGuard, RolesGuard, EnrollmentAccessGuard)
   @ApiOperation({ summary: 'Admin/Teacher views all students in a course-->يقوم المسؤول/المعلم بعرض جميع الطلاب في الدورة' })
   @ApiParam({ name: 'courseId', type: Number })
   @ApiResponse({ status: 200, description: 'List of students', type: [CreateEnrollmentDto] })

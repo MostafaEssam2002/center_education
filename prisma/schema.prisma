@@ -5,7 +5,7 @@
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -33,38 +33,45 @@ enum DayOfWeek {
   FRI
 }
 
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
 model Chapter {
   id              Int               @id @default(autoincrement())
   title           String
-  content         String?           // شرح نصي (اختياري)
-  videoPath       String            // مسار الفيديو
-  pdfPath         String?           // مسار الـ PDF
+  content         String? // شرح نصي (اختياري)
+  videoPath       String // مسار الفيديو
+  pdfPath         String? // مسار الـ PDF
   order           Int
   courseId        Int
   course          Course            @relation("ChapterToCourse", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_chapter_course")
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
-  
+
   @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
   @@index([courseId], map: "idx_chapter_course_id")
   @@map("chapter")
 }
 
 model Course {
-  id          Int                 @id @default(autoincrement())
-  title       String
-  description String?
-  teacherId   Int
-  image_path  String?
-  teacher     User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
-  enrollments Enrollment[]        @relation("CourseToEnrollment")
-  requests    EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
-  chapters    Chapter[]           @relation("ChapterToCourse")
-  schedules   CourseSchedule[]    @relation("CourseToCourseSchedule")
-  createdAt   DateTime            @default(now())
-  updatedAt   DateTime            @updatedAt
-  
+  id            Int                 @id @default(autoincrement())
+  title         String
+  description   String?
+  teacherId     Int
+  image_path    String?
+  teacher       User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
+  enrollments   Enrollment[]        @relation("CourseToEnrollment")
+  requests      EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
+  chapters      Chapter[]           @relation("ChapterToCourse")
+  schedules     CourseSchedule[]    @relation("CourseToCourseSchedule")
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  CourseSession CourseSession[]
+
   @@index([teacherId], map: "idx_course_teacher_id")
   @@map("course")
 }
@@ -86,7 +93,8 @@ model User {
   chapterProgress   ChapterProgress[]   @relation("UserToChapterProgress")
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
-  
+  Attendance        Attendance[]
+
   @@index([email], map: "idx_user_email")
   @@map("user")
 }
@@ -144,9 +152,9 @@ model CourseSchedule {
   id        Int       @id @default(autoincrement())
   courseId  Int
   day       DayOfWeek
-  startTime String    // "10:00"
-  endTime   String    // "12:00"
-  room      String?   // optional (قاعة 1 – Lab A)
+  startTime String // "10:00"
+  endTime   String // "12:00"
+  room      String? // optional (قاعة 1 – Lab A)
 
   course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], map: "fk_course_schedule_course")
 
@@ -154,4 +162,38 @@ model CourseSchedule {
   @@index([courseId], map: "idx_course_schedule_course_id")
   @@index([day], map: "idx_course_schedule_day")
   @@map("courseschedule")
+}
+
+model CourseSession {
+  id        Int      @id @default(autoincrement())
+  courseId  Int
+  date      DateTime // تاريخ الحصة (2026-01-01)
+  startTime String // "10:00"
+  endTime   String // "12:00"
+  room      String?
+
+  course     Course       @relation(fields: [courseId], references: [id])
+  attendance Attendance[]
+
+  createdAt DateTime @default(now())
+
+  @@index([courseId])
+  @@map("course_sessions")
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  sessionId Int
+  studentId Int
+  status    AttendanceStatus @default(PRESENT)
+
+  session CourseSession @relation(fields: [sessionId], references: [id])
+  student User          @relation(fields: [studentId], references: [id])
+
+  createdAt DateTime @default(now())
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@index([sessionId])
+  @@map("attendance")
 }

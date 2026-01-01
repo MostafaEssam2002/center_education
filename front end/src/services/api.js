@@ -175,4 +175,31 @@ export const courseScheduleAPI = {
     api.get('/course-schedule/student'),
 };
 
+// Attendance API
+export const attendanceAPI = {
+  // Create a new session
+  createSession: (sessionData) =>
+    api.post('/attendance/session', sessionData),
+
+  // Mark attendance for a single student
+  markAttendance: (attendanceData) =>
+    api.post('/attendance/mark', attendanceData),
+
+  // Mark bulk attendance for a session
+  markBulkAttendance: (sessionId, students) =>
+    api.post(`/attendance/mark-bulk/${sessionId}`, { students }),
+
+  // Get attendance for a specific session
+  getSessionAttendance: (sessionId) =>
+    api.get(`/attendance/session/${sessionId}`),
+
+  // Get all sessions for a course
+  getCourseSessions: (courseId) =>
+    api.get(`/attendance/course/${courseId}`),
+
+  // Get student attendance in a course
+  getStudentAttendanceInCourse: (courseId) =>
+    api.get(`/attendance/my/course/${courseId}`),
+};
+
 export default api;

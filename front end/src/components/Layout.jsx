@@ -59,6 +59,12 @@ const Layout = ({ children }) => {
               الكورسات
             </Link>
 
+            {(user?.role === 'EMPLOYEE') && (
+              <Link to="/attendance" className="btn btn-primary" style={{ textDecoration: 'none', backgroundColor: '#e53e3e', borderColor: '#e53e3e' }}>
+                تسجيل الحضور
+              </Link>
+            )}
+
             {!isStudent && (
               <Link to="/schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
                 الجدول العام
@@ -72,6 +78,9 @@ const Layout = ({ children }) => {
                 </Link>
                 <Link to="/enrollment-requests" className="btn btn-primary" style={{ textDecoration: 'none' }}>
                   طلبات الالتحاق
+                </Link>
+                <Link to="/attendance" className="btn btn-primary" style={{ textDecoration: 'none', backgroundColor: '#e53e3e', borderColor: '#e53e3e' }}>
+                  تسجيل الحضور
                 </Link>
               </>
             )}
