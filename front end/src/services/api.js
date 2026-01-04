@@ -202,4 +202,67 @@ export const attendanceAPI = {
     api.get(`/attendance/my/course/${courseId}`),
 };
 
+// Quiz API
+export const quizAPI = {
+  create: (quizData) =>
+    api.post('/quizzes', quizData),
+
+  update: (id, quizData) =>
+    api.patch(`/quizzes/${id}`, quizData),
+
+  publish: (quizId) =>
+    api.patch(`/quizzes/${quizId}/publish`),
+
+  findOne: (quizId) =>
+    api.get(`/quizzes/${quizId}`),
+
+  findByCourse: (courseId) =>
+    api.get(`/quizzes/course/${courseId}`),
+
+  getStats: (quizId) =>
+    api.get(`/quiz-attempts/${quizId}/stats`),
+};
+
+// Quiz Question API
+export const quizQuestionAPI = {
+  create: (questionData) =>
+    api.post('/quiz-questions', questionData),
+
+  findAll: (quizId) =>
+    api.get(`/quiz-questions/${quizId}`),
+
+  update: (id, questionData) =>
+    api.patch(`/quiz-questions/${id}`, questionData),
+
+  remove: (id) =>
+    api.delete(`/quiz-questions/${id}`),
+};
+
+// Quiz Option API
+export const quizOptionAPI = {
+  create: (optionData) =>
+    api.post('/quiz-options', optionData),
+
+  remove: (id) =>
+    api.delete(`/quiz-options/${id}`),
+};
+
+// Quiz Attempt API
+export const quizAttemptAPI = {
+  start: (quizId) =>
+    api.post(`/quiz-attempts/start/${quizId}`),
+
+  submitAnswer: (attemptId, questionId, optionId) =>
+    api.post(`/quiz-attempts/${attemptId}/answer`, { questionId, optionId }),
+
+  finish: (attemptId) =>
+    api.post(`/quiz-attempts/${attemptId}/finish`),
+
+  review: (attemptId) =>
+    api.get(`/quiz-attempts/${attemptId}/review`),
+
+  deleteAnswer: (attemptId, questionId) =>
+    api.delete(`/quiz-attempts/${attemptId}/answer/${questionId}`),
+};
+
 export default api;

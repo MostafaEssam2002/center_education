@@ -93,6 +93,9 @@ const Layout = ({ children }) => {
                 <Link to="/student-schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
                   مواعيدي
                 </Link>
+                <Link to="/my-quizzes" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                  اختباراتي
+                </Link>
               </>
             )}
 

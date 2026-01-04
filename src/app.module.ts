@@ -10,9 +10,17 @@ import { EnrollmentModule } from './enrollment/enrollment.module';
 import { ChapterProgressModule } from './chapter-progress/chapter-progress.module';
 import { CourseScheduleModule } from './course-schedule/course-schedule.module';
 import { AttendanceModule } from './attendance/attendance.module';
+// import { QuizModule } from './quiz/quiz.module';
+// import { QuizQuestionModule } from './quiz-question/quiz-question.module';
+// import { QuizOptionModule } from './quiz-option/quiz-option.module';
+// import { QuizAttemptModule } from './quiz-attempt/quiz-attempt.module';
+import { QuizModule } from './quiz/quiz.module';
+import { QuizQuestionModule } from './quiz-question/quiz-question.module';
+import { QuizOptionModule } from './quiz-option/quiz-option.module';
+import { QuizAttemptModule } from './quiz-attempt/quiz-attempt.module';
 
 @Module({
-  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule],
+  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule],
   controllers: [AppController],
   providers: [AppService],
 })

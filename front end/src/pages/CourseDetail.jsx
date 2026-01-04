@@ -201,6 +201,9 @@ const CourseDetail = () => {
                         <button className="btn btn-secondary" onClick={handleViewEnrollmentRequests}>
                             طلبات الالتحاق
                         </button>
+                        <button className="btn btn-secondary" onClick={() => navigate(`/courses/${id}/quizzes`)}>
+                            إدارة الاختبارات
+                        </button>
                     </div>
                 )}
 

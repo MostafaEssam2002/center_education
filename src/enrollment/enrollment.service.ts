@@ -92,7 +92,16 @@ export class EnrollmentService {
       include: {
         course: {
           include: {
-            teacher: true
+            teacher: true,
+            Quiz: {
+              where: { isPublished: true },
+              include: {
+                questions: true,
+                attempts: {
+                  where: { studentId },
+                },
+              },
+            },
           }
         }
       },

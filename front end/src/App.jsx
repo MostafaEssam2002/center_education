@@ -15,8 +15,15 @@ import MyEnrollments from './pages/MyEnrollments';
 import CourseStudents from './pages/CourseStudents';
 import Schedule from './pages/Schedule';
 import Attendance from './pages/Attendance';
-
 import StudentSchedule from './pages/StudentSchedule';
+import ManageQuizzes from './pages/ManageQuizzes';
+import CreateQuiz from './pages/CreateQuiz';
+import EditQuiz from './pages/EditQuiz';
+import ManageQuestions from './pages/ManageQuestions';
+import StudentQuizzes from './pages/StudentQuizzes';
+import TakeQuiz from './pages/TakeQuiz';
+import QuizResults from './pages/QuizResults';
+import QuizStatistics from './pages/QuizStatistics';
 
 function App() {
   return (
@@ -119,6 +126,70 @@ function App() {
               element={
                 <ProtectedRoute>
                   <Attendance />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/quizzes"
+              element={
+                <ProtectedRoute>
+                  <ManageQuizzes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/courses/:courseId/quizzes/create"
+              element={
+                <ProtectedRoute>
+                  <CreateQuiz />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quizzes/:quizId/questions"
+              element={
+                <ProtectedRoute>
+                  <ManageQuestions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quizzes/:quizId/statistics"
+              element={
+                <ProtectedRoute>
+                  <QuizStatistics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quizzes/:quizId/edit"
+              element={
+                <ProtectedRoute>
+                  <EditQuiz />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-quizzes"
+              element={
+                <ProtectedRoute>
+                  <StudentQuizzes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quizzes/:quizId/take"
+              element={
+                <ProtectedRoute>
+                  <TakeQuiz />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/quiz-attempts/:attemptId/results"
+              element={
+                <ProtectedRoute>
+                  <QuizResults />
                 </ProtectedRoute>
               }
             />

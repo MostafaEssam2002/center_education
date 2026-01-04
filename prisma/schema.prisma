@@ -39,6 +39,17 @@ enum AttendanceStatus {
   LATE
 }
 
+enum QuizType {
+  CHAPTER
+  FINAL
+}
+
+enum QuizStatus {
+  IN_PROGRESS
+  SUBMITTED
+  TIMED_OUT
+}
+
 model Chapter {
   id              Int               @id @default(autoincrement())
   title           String
@@ -51,6 +62,7 @@ model Chapter {
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
   chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
+  Quiz            Quiz[]
 
   @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
   @@index([courseId], map: "idx_chapter_course_id")
@@ -71,6 +83,7 @@ model Course {
   createdAt     DateTime            @default(now())
   updatedAt     DateTime            @updatedAt
   CourseSession CourseSession[]
+  Quiz          Quiz[]
 
   @@index([teacherId], map: "idx_course_teacher_id")
   @@map("course")
@@ -94,6 +107,8 @@ model User {
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   Attendance        Attendance[]
+  QuizAttempt       QuizAttempt[]
+  Quiz              Quiz[]
 
   @@index([email], map: "idx_user_email")
   @@map("user")
@@ -196,4 +211,97 @@ model Attendance {
   @@index([studentId])
   @@index([sessionId])
   @@map("attendance")
+}
+
+model Quiz {
+  id          Int     @id @default(autoincrement())
+  title       String
+  description String?
+
+  type      QuizType
+  courseId  Int?
+  chapterId Int?
+
+  startTime   DateTime
+  endTime     DateTime
+  durationMin Int
+  totalMarks  Int
+  keepAnswers Boolean  @default(false)
+  isPublished Boolean  @default(false)
+
+  createdBy Int
+  teacher   User @relation(fields: [createdBy], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course    Course?        @relation(fields: [courseId], references: [id])
+  chapter   Chapter?       @relation(fields: [chapterId], references: [id])
+  questions QuizQuestion[]
+  attempts  QuizAttempt[]
+}
+
+model QuizQuestion {
+  id     Int @id @default(autoincrement())
+  quizId Int
+
+  question String
+  marks    Int    @default(1)
+
+  createdAt DateTime @default(now())
+
+  quiz              Quiz                @relation(fields: [quizId], references: [id])
+  options           QuizOption[]
+  QuizAttemptAnswer QuizAttemptAnswer[]
+
+  @@index([quizId])
+}
+
+model QuizOption {
+  id         Int @id @default(autoincrement())
+  questionId Int
+
+  text      String
+  isCorrect Boolean @default(false)
+
+  question          QuizQuestion        @relation(fields: [questionId], references: [id])
+  QuizAttemptAnswer QuizAttemptAnswer[]
+
+  @@index([questionId])
+}
+
+model QuizAttempt {
+  id        Int @id @default(autoincrement())
+  quizId    Int
+  studentId Int
+
+  score  Int        @default(0)
+  status QuizStatus // IN_PROGRESS | SUBMITTED | TIMED_OUT
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  quiz    Quiz @relation(fields: [quizId], references: [id])
+  student User @relation(fields: [studentId], references: [id])
+
+  answers QuizAttemptAnswer[]
+
+  @@unique([quizId, studentId])
+  @@index([studentId])
+}
+
+model QuizAttemptAnswer {
+  id         Int @id @default(autoincrement())
+  attemptId  Int
+  questionId Int
+  optionId   Int
+
+  isCorrect Boolean
+
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id])
+  question QuizQuestion @relation(fields: [questionId], references: [id])
+  option   QuizOption   @relation(fields: [optionId], references: [id])
+
+  @@unique([attemptId, questionId])
+  @@index([attemptId])
 }
