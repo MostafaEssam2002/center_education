@@ -27,15 +27,21 @@ export class AuthService {
     }
     // شيل الباسورد قبل الإرجاع
     const { password, ...result } = user;
+    console.log(`the result =  ${result}`)
     return result;
   }
 
   async login(user:{id:number,email:string,role:string}) {
+    console.log('req.user = ', JSON.stringify(user, null, 2));
     const payload = { email: user.email,role:user.role ,sub: user.id };
         console.log(payload)
         return {
           message:"login successfully",
-          access_token: this.jwtService.sign(payload),
+          data:
+          {
+            user:user,
+            access_token: this.jwtService.sign(payload)
+          },
         };
   }
   async findAll() {

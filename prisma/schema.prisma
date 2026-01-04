@@ -239,6 +239,11 @@ model Quiz {
   chapter   Chapter?       @relation(fields: [chapterId], references: [id])
   questions QuizQuestion[]
   attempts  QuizAttempt[]
+
+  @@index([courseId], map: "Quiz_courseId_idx")
+  @@index([chapterId], map: "Quiz_chapterId_idx")
+  @@index([createdBy], map: "Quiz_createdBy_fkey")
+  @@map("quiz")
 }
 
 model QuizQuestion {
@@ -254,7 +259,8 @@ model QuizQuestion {
   options           QuizOption[]
   QuizAttemptAnswer QuizAttemptAnswer[]
 
-  @@index([quizId])
+  @@index([quizId], map: "QuizQuestion_quizId_idx")
+  @@map("quizquestion")
 }
 
 model QuizOption {
@@ -267,7 +273,8 @@ model QuizOption {
   question          QuizQuestion        @relation(fields: [questionId], references: [id])
   QuizAttemptAnswer QuizAttemptAnswer[]
 
-  @@index([questionId])
+  @@index([questionId], map: "QuizOption_questionId_idx")
+  @@map("quizoption")
 }
 
 model QuizAttempt {
@@ -286,8 +293,9 @@ model QuizAttempt {
 
   answers QuizAttemptAnswer[]
 
-  @@unique([quizId, studentId])
-  @@index([studentId])
+  @@unique([quizId, studentId], map: "QuizAttempt_quizId_studentId_key")
+  @@index([studentId], map: "QuizAttempt_studentId_idx")
+  @@map("quizattempt")
 }
 
 model QuizAttemptAnswer {
@@ -302,6 +310,9 @@ model QuizAttemptAnswer {
   question QuizQuestion @relation(fields: [questionId], references: [id])
   option   QuizOption   @relation(fields: [optionId], references: [id])
 
-  @@unique([attemptId, questionId])
-  @@index([attemptId])
+  @@unique([attemptId, questionId], map: "QuizAttemptAnswer_attemptId_questionId_key")
+  @@index([attemptId], map: "QuizAttemptAnswer_attemptId_idx")
+  @@index([questionId], map: "QuizAttemptAnswer_questionId_fkey")
+  @@index([optionId], map: "QuizAttemptAnswer_optionId_fkey")
+  @@map("quizattemptanswer")
 }

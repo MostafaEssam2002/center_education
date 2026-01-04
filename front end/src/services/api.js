@@ -52,7 +52,7 @@ export const authAPI = {
 // User API
 export const userAPI = {
   register: (userData) =>
-    api.post('/user/register', userData),
+    api.post('/auth/register', userData),
 
   findAll: () =>
     api.get('/user'),

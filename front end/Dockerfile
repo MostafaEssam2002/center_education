@@ -7,7 +7,7 @@ COPY package*.json ./
 RUN npm ci
 
 COPY . .
-ENV VITE_API_BASE_URL=http://localhost:3001
+ENV VITE_API_BASE_URL=/api
 RUN npm run build
 
 # Production stage

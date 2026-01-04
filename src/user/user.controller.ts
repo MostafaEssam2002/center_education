@@ -13,15 +13,7 @@ import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 export class UserController {
   constructor(private readonly userService: UserService) { }
 
-  @Post('register')
-  @ApiOperation({ summary: 'Register a new user' })
-  @ApiBody({ type: CreateUserDto })
-  @HttpCode(200) 
-  @ApiResponse({ status: 200, description: 'User successfully registered' })
-  @ApiResponse({ status: 400, description: 'Bad Request' })
-  register(@Body() createUserDto: CreateUserDto) {
-    return this.userService.register(createUserDto);
-  }
+
 
   @Get()
   @Roles(Role.ADMIN)

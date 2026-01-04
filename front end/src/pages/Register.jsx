@@ -38,7 +38,7 @@ const Register = () => {
 
     try {
       let imageUrl = '';
-      
+
       // Upload image if provided
       if (imageFile) {
         try {
@@ -57,17 +57,20 @@ const Register = () => {
         age: parseInt(formData.age),
         image_path: imageUrl || undefined,
       };
-      
+
       delete userData.image_path; // Remove if empty
       if (!imageUrl) delete userData.image_path;
 
       const response = await userAPI.register(userData);
-      
+
       if (response.data) {
-        setSuccess('تم التسجيل بنجاح! يمكنك الآن تسجيل الدخول.');
+        localStorage.setItem('authToken', response.data.access_token);
+        localStorage.setItem('user', JSON.stringify(response.data.user));
+
+        setSuccess('تم التسجيل بنجاح! جاري تحويلك...');
         setTimeout(() => {
-          navigate('/login');
-        }, 2000);
+          navigate('/');
+        }, 1500);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التسجيل');
@@ -94,7 +97,7 @@ const Register = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="first_name">الاسم الأول <span className="required">*</span></label>
             <input
@@ -106,7 +109,7 @@ const Register = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="last_name">الاسم الأخير <span className="required">*</span></label>
             <input
@@ -118,7 +121,7 @@ const Register = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="age">العمر <span className="required">*</span></label>
             <input
@@ -132,7 +135,7 @@ const Register = () => {
               required
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="password">كلمة المرور <span className="required">*</span></label>
             <input
@@ -147,7 +150,7 @@ const Register = () => {
             />
             <small style={{ color: '#666', fontSize: '12px' }}>يجب أن تكون بين 6 و 15 حرف</small>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="phone">رقم الهاتف</label>
             <input
@@ -158,7 +161,7 @@ const Register = () => {
               onChange={handleChange}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="address">العنوان</label>
             <input
@@ -169,7 +172,7 @@ const Register = () => {
               onChange={handleChange}
             />
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="role">الدور <span className="required">*</span></label>
             <select
@@ -188,7 +191,7 @@ const Register = () => {
               <option value="ADMIN">مدير</option>
             </select>
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="image">صورة المستخدم (اختياري)</label>
             <input
@@ -208,10 +211,10 @@ const Register = () => {
               </div>
             )}
           </div>
-          
+
           {error && <div className="message error">{error}</div>}
           {success && <div className="message success">{success}</div>}
-          
+
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
             {loading ? (
               <>
