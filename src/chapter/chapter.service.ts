@@ -6,16 +6,16 @@ import { unlink } from 'fs/promises';
 import { join } from 'path';
 @Injectable()
 export class ChapterService {
-  constructor(private prisma:PrismaService){}
-  async create(createChapterDto: CreateChapterDto,user:{ userId: number, role: string, email: string }) {
+  constructor(private prisma: PrismaService) { }
+  async create(createChapterDto: CreateChapterDto, user: { userId: number, role: string, email: string }) {
     const course = await this.prisma.course.findUnique({
       where: { id: createChapterDto.courseId },
       select: { teacherId: true },
     });
-    if(!course){
+    if (!course) {
       throw new NotFoundException('Course not found');
     }
-    if(user.role !== 'ADMIN' && course?.teacherId!==user.userId){
+    if (user.role !== 'ADMIN' && course?.teacherId !== user.userId) {
       throw new ForbiddenException('You cannot add chapter to this course');
     }
     const lastChapter = await this.prisma.chapter.findFirst({
@@ -25,12 +25,14 @@ export class ChapterService {
     const order = createChapterDto.order ?? (lastChapter ? lastChapter.order + 1 : 1);
 
     return this.prisma.chapter.create(
-      {data:{
-          ...createChapterDto, 
+      {
+        data: {
+          ...createChapterDto,
           videoPath: createChapterDto.videoPath || '', // لو حابب
           pdfPath: createChapterDto.pdfPath || null,
-          order:order
-      }})
+          order: order
+        }
+      })
   }
 
   findAll(courseId: number) {
@@ -42,17 +44,18 @@ export class ChapterService {
 
 
   async findOne(id: number) {
-    const chapter =  await this.prisma.chapter.findUnique({
-      where:{id}
+    const chapter = await this.prisma.chapter.findUnique({
+      where: { id },
+      include: { course: true }
     })
-    if(!chapter){
+    if (!chapter) {
       throw new NotFoundException('Chapter not found');
     }
     return chapter
   }
 
   async update(id: number, updateChapterDto: UpdateChapterDto) {
-  const chapter = await this.prisma.chapter.findUnique({ where: { id } });
+    const chapter = await this.prisma.chapter.findUnique({ where: { id } });
     if (!chapter) {
       throw new NotFoundException('Chapter not found');
     }
@@ -71,10 +74,10 @@ export class ChapterService {
 
     // حذف ملفات الفيديو وPDF من السيرفر لو موجودة
     if (chapter.videoPath) {
-      await unlink(join(process.cwd(), 'public', 'videos', chapter.videoPath)).catch(() => {});
+      await unlink(join(process.cwd(), 'public', 'videos', chapter.videoPath)).catch(() => { });
     }
     if (chapter.pdfPath) {
-      await unlink(join(process.cwd(), 'public', 'pdfs', chapter.pdfPath)).catch(() => {});
+      await unlink(join(process.cwd(), 'public', 'pdfs', chapter.pdfPath)).catch(() => { });
     }
 
     await this.prisma.chapter.delete({ where: { id } });

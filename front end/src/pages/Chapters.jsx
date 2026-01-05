@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { chapterAPI, courseAPI, uploadAPI } from '../services/api';
+import { useNavigate } from 'react-router-dom';
+import { chapterAPI, courseAPI, uploadAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const Chapters = () => {
@@ -24,6 +25,7 @@ const Chapters = () => {
   const [pdfFile, setPdfFile] = useState(null);
 
   const { user } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     loadCourses();
@@ -37,10 +39,17 @@ const Chapters = () => {
 
   const loadCourses = async () => {
     try {
-      const response = await courseAPI.findAll();
-      setCourses(response.data);
-      if (response.data.length > 0 && !selectedCourseId) {
-        setSelectedCourseId(response.data[0].id.toString());
+      if (user?.role === 'STUDENT') {
+        const response = await enrollmentAPI.getCoursesByStudent(user.id);
+        const enrolledCourses = response.data.map(e => e.course);
+        setCourses(enrolledCourses);
+        // Don't auto-select for students, show cards first
+      } else {
+        const response = await courseAPI.findAll();
+        setCourses(response.data);
+        if (response.data.length > 0 && !selectedCourseId) {
+          setSelectedCourseId(response.data[0].id.toString());
+        }
       }
     } catch (err) {
       console.error('Error loading courses:', err);
@@ -177,39 +186,98 @@ const Chapters = () => {
     <div className="container">
       <div className="card">
         <div className="card-header">
-          <h2>إدارة الفصول</h2>
+          <h2>{selectedCourseId ? `فصول: ${courses.find(c => c.id.toString() === selectedCourseId)?.title}` : 'إدارة الفصول'}</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
-            {canManageChapters && (
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowCreateModal(true); }}>
+            {selectedCourseId && (
+              <button className="btn btn-secondary" onClick={() => setSelectedCourseId('')}>
+                العودة للكورسات
+              </button>
+            )}
+            {canManageChapters && selectedCourseId && (
+              <button className="btn btn-primary" onClick={() => { resetForm(); setShowCreateModal(true); formData.courseId = selectedCourseId; }}>
                 إضافة فصل جديد
               </button>
             )}
-            <button className="btn btn-secondary" onClick={() => selectedCourseId && loadChapters(selectedCourseId)}>
+            <button className="btn btn-secondary" onClick={() => selectedCourseId ? loadChapters(selectedCourseId) : loadCourses()}>
               تحديث
             </button>
           </div>
         </div>
 
-        <div style={{ marginBottom: '20px' }}>
-          <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>اختر الكورس:</label>
-          <select
-            value={selectedCourseId}
-            onChange={(e) => setSelectedCourseId(e.target.value)}
-            style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '2px solid #e0e0e0' }}
-          >
-            <option value="">اختر الكورس</option>
-            {courses.map((course) => (
-              <option key={course.id} value={course.id}>
-                {course.title}
-              </option>
-            ))}
-          </select>
-        </div>
-
         {error && <div className="message error">{error}</div>}
 
         {!selectedCourseId ? (
-          <div className="empty-state">يرجى اختيار كورس لعرض فصوله</div>
+          <div style={{ padding: '20px' }}>
+            <h3 style={{ marginBottom: '20px', color: '#666' }}>اختر الكورس لعرض المحتوى:</h3>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
+              gap: '20px'
+            }}>
+              {courses.map((course) => (
+                <div
+                  key={course.id}
+                  className="course-card"
+                  style={{
+                    background: 'white',
+                    borderRadius: '12px',
+                    padding: '20px',
+                    border: '1px solid #eee',
+                    boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s, box-shadow 0.2s',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between'
+                  }}
+                  onClick={() => setSelectedCourseId(course.id.toString())}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-5px)';
+                    e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                  }}
+                >
+                  <div>
+                    <div style={{
+                      width: '100%',
+                      height: '140px',
+                      backgroundColor: '#f0f2f5',
+                      borderRadius: '8px',
+                      marginBottom: '15px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '40px'
+                    }}>
+                      📚
+                    </div>
+                    <h3 style={{ color: '#333', marginBottom: '10px' }}>{course.title}</h3>
+                    <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '15px' }}>
+                      {course.description || 'لا يوجد وصف متاح'}
+                    </p>
+                  </div>
+                  <button
+                    className="btn btn-primary"
+                    style={{ width: '100%' }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedCourseId(course.id.toString());
+                    }}
+                  >
+                    عرض الفصول
+                  </button>
+                </div>
+              ))}
+            </div>
+            {courses.length === 0 && !loading && (
+              <div className="empty-state">
+                {user?.role === 'STUDENT' ? 'أنت غير مسجل في أي كورس حالياً' : 'لا يوجد كورسات متاحة'}
+              </div>
+            )}
+          </div>
         ) : loading ? (
           <div className="empty-state">جاري التحميل...</div>
         ) : chapters.length === 0 ? (
@@ -229,14 +297,18 @@ const Chapters = () => {
               </thead>
               <tbody>
                 {chapters.map((chapter) => (
-                  <tr key={chapter.id}>
+                  <tr
+                    key={chapter.id}
+                    onClick={() => navigate(`/courses/${selectedCourseId}/chapters/${chapter.id}`)}
+                    style={{ cursor: 'pointer' }}
+                  >
                     <td>{chapter.order}</td>
                     <td>{chapter.title}</td>
                     <td>{chapter.content ? (chapter.content.length > 50 ? chapter.content.substring(0, 50) + '...' : chapter.content) : '-'}</td>
                     <td>{chapter.videoPath ? '✓' : '-'}</td>
                     <td>{chapter.pdfPath ? '✓' : '-'}</td>
                     {canManageChapters && (
-                      <td>
+                      <td onClick={(e) => e.stopPropagation()}>
                         <button
                           className="btn btn-secondary"
                           style={{ padding: '5px 10px', marginLeft: '5px' }}

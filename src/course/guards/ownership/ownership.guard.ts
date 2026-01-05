@@ -16,7 +16,7 @@ export class OwnershipGuard implements CanActivate {
     if (user.role === Role.ADMIN) return true;
 
     // If teacherId is in body (e.g. creating/updating), check consistency (optional but existing logic preserved)
-    if (body && body.teacherId && user.userId !== Number(body.teacherId)) {
+    if (body && body.teacherId && user.id !== Number(body.teacherId)) {
       throw new ForbiddenException("You cannot act as another teacher");
     }
 
@@ -33,7 +33,7 @@ export class OwnershipGuard implements CanActivate {
         throw new ForbiddenException("Course not found");
       }
 
-      if (course.teacherId !== user.userId) {
+      if (course.teacherId !== user.id) {
         throw new ForbiddenException("You are not the owner of this course");
       }
 
@@ -41,7 +41,7 @@ export class OwnershipGuard implements CanActivate {
     }
 
     // Fallback: if we just checked teacherId in body above and no courseId involved
-    if (body && body.teacherId && user.userId === Number(body.teacherId)) {
+    if (body && body.teacherId && user.id === Number(body.teacherId)) {
       return true;
     }
 

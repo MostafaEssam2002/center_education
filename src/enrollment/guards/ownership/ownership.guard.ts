@@ -26,14 +26,14 @@ export class EnrollmentOwnershipGuard implements CanActivate {
       });
 
       if (!course) throw new ForbiddenException('Course not found');
-      if (course.teacherId === user.userId) return true;
+      if (course.teacherId === user.id) return true;
       throw new ForbiddenException('You cannot access this course');
     }
 
     if (user.role === Role.STUDENT) {
       // الطالب مسجل في الكورس
       const enrollment = await this.prisma.enrollment.findUnique({
-        where: { unique_enrollment_student_course: { studentId: user.studentId, courseId } },
+        where: { unique_enrollment_student_course: { studentId: user.id, courseId } },
       });
       if (!enrollment) throw new ForbiddenException('You are not enrolled in this course');
       return true;

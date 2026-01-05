@@ -49,6 +49,12 @@ enum QuizStatus {
   SUBMITTED
   TIMED_OUT
 }
+enum AssignmentSubmissionStatus {
+  SUBMITTED
+  LATE
+  REVIEWED
+}
+
 
 model Chapter {
   id              Int               @id @default(autoincrement())
@@ -63,7 +69,7 @@ model Chapter {
   updatedAt       DateTime          @updatedAt
   chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
   Quiz            Quiz[]
-
+  assignments Assignment[]
   @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
   @@index([courseId], map: "idx_chapter_course_id")
   @@map("chapter")
@@ -109,7 +115,8 @@ model User {
   Attendance        Attendance[]
   QuizAttempt       QuizAttempt[]
   Quiz              Quiz[]
-
+  assignmentSubmissions AssignmentSubmission[]
+  assignmentsCreated    Assignment[]
   @@index([email], map: "idx_user_email")
   @@map("user")
 }
@@ -315,4 +322,47 @@ model QuizAttemptAnswer {
   @@index([questionId], map: "QuizAttemptAnswer_questionId_fkey")
   @@index([optionId], map: "QuizAttemptAnswer_optionId_fkey")
   @@map("quizattemptanswer")
+}
+model Assignment {
+  id          Int      @id @default(autoincrement())
+  chapterId   Int
+  title       String
+  description String?
+  dueDate     DateTime
+  maxGrade    Int
+  allowLate   Boolean  @default(true)
+
+  createdBy  Int
+  teacher    User     @relation(fields: [createdBy], references: [id])
+
+  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  submissions AssignmentSubmission[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([chapterId])
+  @@index([createdBy])
+  @@map("assignment")
+}
+
+model AssignmentSubmission {
+  id           Int      @id @default(autoincrement())
+  assignmentId Int
+  studentId    Int
+
+  filePath     String
+  submittedAt  DateTime @default(now())
+  status       AssignmentSubmissionStatus
+
+  grade    Int?
+  feedback String?
+
+  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student    User       @relation(fields: [studentId], references: [id])
+
+  @@unique([assignmentId, studentId], name: "unique_assignment_student")
+  @@index([studentId])
+  @@index([assignmentId])
+  @@map("assignmentsubmission")
 }

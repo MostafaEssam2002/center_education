@@ -27,7 +27,7 @@ export class EnrollmentRequestOwnershipGuard implements CanActivate {
         select: { teacherId: true },
       });
       if (!course) throw new ForbiddenException('Course not found');
-      if (course.teacherId === user.userId) return true;
+      if (course.teacherId === user.id) return true;
       throw new ForbiddenException('You cannot access requests for this course');
     }
 
@@ -36,7 +36,7 @@ export class EnrollmentRequestOwnershipGuard implements CanActivate {
       if (!studentId) {
         throw new ForbiddenException('Student id is required for this action');
       }
-      if (user.userId !== Number(studentId)) {
+      if (user.id !== Number(studentId)) {
         throw new ForbiddenException('You cannot access this request');
       }
       return true;

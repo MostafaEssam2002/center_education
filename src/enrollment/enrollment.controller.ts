@@ -29,7 +29,7 @@ export class EnrollmentController {
   @ApiResponse({ status: 201, description: 'Enrollment request created successfully.' })
   requestEnrollment(@Body() dto: CreateEnrollmentRequestDto, @Req() request: any) {
     const user = request.user;
-    return this.enrollmentService.requestEnrollment(dto.courseId, user.userId);
+    return this.enrollmentService.requestEnrollment(dto.courseId, user.id);
   }
 
   // =======================
@@ -46,7 +46,7 @@ export class EnrollmentController {
     @Req() request: any,
   ) {
     const user = request.user;
-    return this.enrollmentService.showRequestEnrollment(courseId, user.userId);
+    return this.enrollmentService.showRequestEnrollment(courseId, user.id);
   }
 
   // =======================
@@ -59,7 +59,24 @@ export class EnrollmentController {
   @ApiParam({ name: 'courseId', type: Number })
   @ApiResponse({ status: 200, description: 'Enrollment request withdrawn successfully.' })
   withdrawRequest(@Param('courseId', ParseIntPipe) courseId: number, @Req() request: any) {
-    const studentId = request.user.userId;
+    const studentId = request.user.id;
+    return this.enrollmentService.withdrawRequest(courseId, studentId);
+  }
+
+  // =======================
+  // المعلم/الادمن يرفض طلب الانضمام
+  // =======================
+  @Delete('request/:courseId/:studentId')
+  @Roles(Role.TEACHER, Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard, EnrollmentRequestOwnershipGuard)
+  @ApiOperation({ summary: 'Teacher/Admin rejects an enrollment request-->المعلم/الادمن يرفض طلب الانضمام' })
+  @ApiParam({ name: 'courseId', type: Number })
+  @ApiParam({ name: 'studentId', type: Number })
+  @ApiResponse({ status: 200, description: 'Enrollment request rejected successfully.' })
+  rejectRequest(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Param('studentId', ParseIntPipe) studentId: number
+  ) {
     return this.enrollmentService.withdrawRequest(courseId, studentId);
   }
 
@@ -102,7 +119,7 @@ export class EnrollmentController {
   courses(@Param('studentId') studentId: string, @Req() request: any) {
     const user = request.user;
     // Check if student is accessing their own data
-    if (user.role === Role.STUDENT && user.userId !== +studentId) {
+    if (user.role === Role.STUDENT && user.id !== +studentId) {
       throw new ForbiddenException('You can only view your own enrollments');
     }
     return this.enrollmentService.coursesForStudent(+studentId, user);

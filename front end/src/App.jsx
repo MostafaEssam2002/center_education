@@ -24,179 +24,210 @@ import StudentQuizzes from './pages/StudentQuizzes';
 import TakeQuiz from './pages/TakeQuiz';
 import QuizResults from './pages/QuizResults';
 import QuizStatistics from './pages/QuizStatistics';
+import ManageAssignments from './pages/ManageAssignments';
+import AssignmentSubmissions from './pages/AssignmentSubmissions';
+import StudentAssignments from './pages/StudentAssignments';
+
+import { ToastProvider } from './context/ToastContext';
 
 function App() {
   return (
     <AuthProvider>
-      <Router>
-        <Layout>
-          <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
-            <Route
-              path="/dashboard"
-              element={
-                <ProtectedRoute>
-                  <Dashboard />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/users"
-              element={
-                <ProtectedRoute>
-                  <Users />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses"
-              element={
-                <ProtectedRoute>
-                  <Courses />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:id"
-              element={
-                <ProtectedRoute>
-                  <CourseDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:courseId/chapters/:id"
-              element={
-                <ProtectedRoute>
-                  <ChapterDetail />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:id/students"
-              element={
-                <ProtectedRoute>
-                  <CourseStudents />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/chapters"
-              element={
-                <ProtectedRoute>
-                  <Chapters />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/enrollment-requests"
-              element={
-                <ProtectedRoute>
-                  <EnrollmentRequests />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/my-enrollments"
-              element={
-                <ProtectedRoute>
-                  <MyEnrollments />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/schedule"
-              element={
-                <ProtectedRoute>
-                  <Schedule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/student-schedule"
-              element={
-                <ProtectedRoute>
-                  <StudentSchedule />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/attendance"
-              element={
-                <ProtectedRoute>
-                  <Attendance />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:courseId/quizzes"
-              element={
-                <ProtectedRoute>
-                  <ManageQuizzes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/courses/:courseId/quizzes/create"
-              element={
-                <ProtectedRoute>
-                  <CreateQuiz />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quizzes/:quizId/questions"
-              element={
-                <ProtectedRoute>
-                  <ManageQuestions />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quizzes/:quizId/statistics"
-              element={
-                <ProtectedRoute>
-                  <QuizStatistics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quizzes/:quizId/edit"
-              element={
-                <ProtectedRoute>
-                  <EditQuiz />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/my-quizzes"
-              element={
-                <ProtectedRoute>
-                  <StudentQuizzes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quizzes/:quizId/take"
-              element={
-                <ProtectedRoute>
-                  <TakeQuiz />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/quiz-attempts/:attemptId/results"
-              element={
-                <ProtectedRoute>
-                  <QuizResults />
-                </ProtectedRoute>
-              }
-            />
-            <Route path="/" element={<Navigate to="/dashboard" replace />} />
-          </Routes>
-        </Layout>
-      </Router>
+      <ToastProvider>
+        <Router>
+          <Layout>
+            <Routes>
+              <Route path="/login" element={<Login />} />
+              <Route path="/register" element={<Register />} />
+              <Route
+                path="/dashboard"
+                element={
+                  <ProtectedRoute>
+                    <Dashboard />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/users"
+                element={
+                  <ProtectedRoute>
+                    <Users />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses"
+                element={
+                  <ProtectedRoute>
+                    <Courses />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:id"
+                element={
+                  <ProtectedRoute>
+                    <CourseDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:courseId/chapters/:id"
+                element={
+                  <ProtectedRoute>
+                    <ChapterDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:id/students"
+                element={
+                  <ProtectedRoute>
+                    <CourseStudents />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chapters"
+                element={
+                  <ProtectedRoute>
+                    <Chapters />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/enrollment-requests"
+                element={
+                  <ProtectedRoute>
+                    <EnrollmentRequests />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-enrollments"
+                element={
+                  <ProtectedRoute>
+                    <MyEnrollments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/schedule"
+                element={
+                  <ProtectedRoute>
+                    <Schedule />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/student-schedule"
+                element={
+                  <ProtectedRoute>
+                    <StudentSchedule />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/attendance"
+                element={
+                  <ProtectedRoute>
+                    <Attendance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:courseId/quizzes"
+                element={
+                  <ProtectedRoute>
+                    <ManageQuizzes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:courseId/quizzes/create"
+                element={
+                  <ProtectedRoute>
+                    <CreateQuiz />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quizzes/:quizId/questions"
+                element={
+                  <ProtectedRoute>
+                    <ManageQuestions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quizzes/:quizId/statistics"
+                element={
+                  <ProtectedRoute>
+                    <QuizStatistics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quizzes/:quizId/edit"
+                element={
+                  <ProtectedRoute>
+                    <EditQuiz />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-quizzes"
+                element={
+                  <ProtectedRoute>
+                    <StudentQuizzes />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quizzes/:quizId/take"
+                element={
+                  <ProtectedRoute>
+                    <TakeQuiz />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/quiz-attempts/:attemptId/results"
+                element={
+                  <ProtectedRoute>
+                    <QuizResults />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/:courseId/chapters/:chapterId/assignments"
+                element={
+                  <ProtectedRoute>
+                    <ManageAssignments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/assignments/:assignmentId/submissions"
+                element={
+                  <ProtectedRoute>
+                    <AssignmentSubmissions />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/my-assignments"
+                element={
+                  <ProtectedRoute>
+                    <StudentAssignments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            </Routes>
+          </Layout>
+        </Router>
+      </ToastProvider>
     </AuthProvider>
   );
 }

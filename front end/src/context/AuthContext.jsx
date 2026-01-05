@@ -19,7 +19,7 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const storedToken = localStorage.getItem('authToken');
     const storedUser = localStorage.getItem('user');
-    
+
     if (storedToken && storedUser) {
       setToken(storedToken);
       try {
@@ -34,34 +34,47 @@ export const AuthProvider = ({ children }) => {
   const login = async (email, password) => {
     try {
       const response = await authAPI.login(email, password);
-      const { access_token } = response.data;
-      
-      if (!access_token) {
+      // Backend returns: { message, data: { user, access_token } }
+      const token = response.data?.data?.access_token;
+      const userData = response.data?.data?.user;
+
+      if (!token) {
         return {
           success: false,
           error: 'لم يتم استلام token',
         };
       }
-      
-      setToken(access_token);
-      // Store email temporarily, we'll fetch user data later if needed
-      const userData = { email };
-      setUser(userData);
-      localStorage.setItem('authToken', access_token);
-      localStorage.setItem('user', JSON.stringify(userData));
-      
-      // Try to fetch user details
-      try {
-        const userResponse = await userAPI.findByEmail(email);
-        if (userResponse.data) {
-          const { password: _, ...userWithoutPassword } = userResponse.data;
-          setUser(userWithoutPassword);
-          localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-        }
-      } catch (err) {
-        console.warn('Could not fetch user details:', err);
+
+      setToken(token);
+
+      // Use user data from login response if available
+      if (userData) {
+        const { password: _, ...userWithoutPassword } = userData;
+        setUser(userWithoutPassword);
+        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+      } else {
+        // Fallback to email only
+        const tempUserData = { email };
+        setUser(tempUserData);
+        localStorage.setItem('user', JSON.stringify(tempUserData));
       }
-      
+
+      localStorage.setItem('authToken', token);
+
+      // Try to fetch complete user details if not already available
+      if (!userData) {
+        try {
+          const userResponse = await userAPI.findByEmail(email);
+          if (userResponse.data) {
+            const { password: _, ...userWithoutPassword } = userResponse.data;
+            setUser(userWithoutPassword);
+            localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+          }
+        } catch (err) {
+          console.warn('Could not fetch user details:', err);
+        }
+      }
+
       return { success: true };
     } catch (error) {
       return {

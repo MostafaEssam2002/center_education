@@ -810,8 +810,15 @@ table tbody tr:hover {
 }
 
 @keyframes pulse {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.7;
+  }
 }
 
 .quiz-content-wrapper {
@@ -1497,5 +1504,300 @@ table tbody tr:hover {
   .distribution-bar-container {
     grid-template-columns: 80px 1fr 40px;
     gap: 10px;
+  }
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  min-width: 300px;
+  padding: 15px 20px;
+  border-radius: 8px;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  animation: slideIn 0.3s ease;
+  font-weight: 500;
+}
+
+.toast-success {
+  background: linear-gradient(135deg, #48bb78 0%, #38a169 100%);
+}
+
+.toast-error {
+  background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+}
+
+.toast-info {
+  background: linear-gradient(135deg, #4299e1 0%, #3182ce 100%);
+}
+
+.toast button {
+  background: none;
+  border: none;
+  color: white;
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 0 0 10px;
+  opacity: 0.8;
+  transition: opacity 0.2s;
+}
+
+.toast button:hover {
+  opacity: 1;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+/* Modern SweetAlert-style Modal */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  backdrop-filter: blur(2px);
+  animation: fadeIn 0.3s;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 15px;
+  width: 90%;
+  max-width: 400px;
+  padding: 30px;
+  text-align: center;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+  transform: scale(0.7);
+  animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+  position: relative;
+}
+
+.modal-icon-wrapper {
+  margin-bottom: 20px;
+  height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Success Icon Animation */
+.modal-icon-success {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #a5dc86;
+  border-radius: 50%;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+}
+
+.modal-icon-success::before {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 30px;
+  background-color: #a5dc86;
+  border-radius: 2px;
+  transform: rotate(45deg);
+  right: 18px;
+  bottom: 18px;
+}
+
+.modal-icon-success::after {
+  content: '';
+  position: absolute;
+  width: 5px;
+  height: 15px;
+  background-color: #a5dc86;
+  border-radius: 2px;
+  transform: rotate(-45deg);
+  left: 18px;
+  bottom: 24px;
+}
+
+/* Error/Danger Icon (X) */
+.modal-icon-danger {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #f27474;
+  border-radius: 50%;
+  position: relative;
+  margin: 0 auto;
+  animation: pulseError 0.5s forwards;
+}
+
+.modal-icon-danger::before,
+.modal-icon-danger::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 50px;
+  height: 4px;
+  background-color: #f27474;
+  border-radius: 2px;
+}
+
+.modal-icon-danger::before {
+  transform: translate(-50%, -50%) rotate(45deg);
+}
+
+.modal-icon-danger::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+/* Warning Icon (!) */
+.modal-icon-warning {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #facea8;
+  border-radius: 50%;
+  margin: 0 auto;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #f8bb86;
+  font-size: 50px;
+  font-family: Arial, sans-serif;
+}
+
+.modal-icon-warning::before {
+  content: '!';
+}
+
+/* Info Icon (i) */
+.modal-icon-info {
+  width: 80px;
+  height: 80px;
+  border: 4px solid #9de0f6;
+  border-radius: 50%;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #3fc3ee;
+  font-size: 50px;
+  font-family: serif;
+  font-weight: bold;
+}
+
+.modal-icon-info::before {
+  content: 'i';
+}
+
+.modal-title {
+  color: #545454;
+  font-size: 1.8rem;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.modal-message {
+  color: #545454;
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  line-height: 1.5;
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.btn-modal {
+  padding: 10px 24px;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: transform 0.1s;
+  outline: none;
+}
+
+.btn-modal:active {
+  transform: scale(0.98);
+}
+
+.btn-confirm {
+  background-color: #3085d6;
+  color: white;
+}
+
+.btn-danger-action {
+  background-color: #d33;
+  color: white;
+}
+
+.btn-cancel {
+  background-color: #aaa;
+  color: white;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.7);
+    opacity: 0;
+  }
+
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+@keyframes pulseError {
+  0% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.1);
+  }
+
+  100% {
+    transform: scale(1);
   }
 }

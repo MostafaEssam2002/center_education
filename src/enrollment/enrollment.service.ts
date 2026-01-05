@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, ConflictException } from '@nestjs/common';
 import { CreateEnrollmentDto } from './dto/create-enrollment.dto';
 import { UpdateEnrollmentDto } from './dto/update-enrollment.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
@@ -117,6 +117,28 @@ export class EnrollmentService {
     });
   }
   async requestEnrollment(courseId: number, studentId: number) {
+    // Check if already enrolled
+    const existingEnrollment = await this.prisma.enrollment.findUnique({
+      where: {
+        unique_enrollment_student_course: { studentId, courseId },
+      },
+    });
+
+    if (existingEnrollment) {
+      throw new ConflictException('You are already enrolled in this course');
+    }
+
+    // Check if request already exists
+    const existingRequest = await this.prisma.enrollmentRequest.findUnique({
+      where: {
+        unique_enrollment_request_student_course: { studentId, courseId },
+      },
+    });
+
+    if (existingRequest) {
+      throw new ConflictException('Enrollment request already sent');
+    }
+
     return this.prisma.enrollmentRequest.create({
       data: {
         studentId,

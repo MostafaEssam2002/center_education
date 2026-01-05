@@ -35,7 +35,7 @@ export class EnrollmentAccessGuard implements CanActivate {
                 throw new ForbiddenException("Course not found");
             }
 
-            if (course.teacherId !== user.userId) {
+            if (course.teacherId !== user.id) {
                 throw new ForbiddenException("You are not the owner of this course");
             }
 

@@ -138,9 +138,13 @@ export const enrollmentAPI = {
   getStudentsByCourse: (courseId) =>
     api.get(`/enrollment/course/${courseId}`),
 
-  // Admin/Student views all courses of a student
+  // Admin/Students views all courses of a student
   getCoursesByStudent: (studentId) =>
     api.get(`/enrollment/student/${studentId}`),
+
+  // Teacher/Admin rejects an enrollment request
+  rejectRequest: (courseId, studentId) =>
+    api.delete(`/enrollment/request/${courseId}/${studentId}`),
 };
 
 // Chapter Progress API
@@ -263,6 +267,41 @@ export const quizAttemptAPI = {
 
   deleteAnswer: (attemptId, questionId) =>
     api.delete(`/quiz-attempts/${attemptId}/answer/${questionId}`),
+};
+
+// Assignment API
+export const assignmentAPI = {
+  // Teacher creates assignment
+  create: (assignmentData) =>
+    api.post('/assignments', assignmentData),
+
+  // Teacher updates assignment
+  update: (id, assignmentData) =>
+    api.patch(`/assignments/${id}`, assignmentData),
+
+  // Teacher gets submissions for an assignment
+  getSubmissions: (assignmentId) =>
+    api.get(`/assignments/${assignmentId}/submissions`),
+
+  // Teacher reviews a submission
+  reviewSubmission: (submissionId, reviewData) =>
+    api.patch(`/assignments/submissions/${submissionId}/review`, reviewData),
+
+  // Student gets their assignments
+  getMyAssignments: () =>
+    api.get('/assignments/my'),
+
+  // Student submits assignment
+  submitAssignment: (assignmentId, filePath) =>
+    api.post(`/assignments/${assignmentId}/submit`, { filePath }),
+
+  // Get assignments by chapter
+  getByChapter: (chapterId) =>
+    api.get(`/assignments/chapter/${chapterId}`),
+
+  // Delete assignment
+  delete: (id) =>
+    api.delete(`/assignments/${id}`),
 };
 
 export default api;

@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, quizQuestionAPI, quizOptionAPI } from '../services/api';
+import { useToast } from '../context/ToastContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function ManageQuestions() {
     const { quizId } = useParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [quiz, setQuiz] = useState(null);
     const [questions, setQuestions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,6 +21,14 @@ export default function ManageQuestions() {
             { text: '', isCorrect: true },
             { text: '', isCorrect: false },
         ],
+    });
+
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        onConfirm: () => { },
     });
 
     useEffect(() => {
@@ -44,7 +55,7 @@ export default function ManageQuestions() {
 
     const handleAddOption = () => {
         if (newQuestion.options.length >= 6) {
-            alert('Maximum 6 options allowed');
+            showToast('Maximum 6 options allowed', 'info');
             return;
         }
         setNewQuestion(prev => ({
@@ -55,7 +66,7 @@ export default function ManageQuestions() {
 
     const handleRemoveOption = (index) => {
         if (newQuestion.options.length <= 2) {
-            alert('Minimum 2 options required');
+            showToast('Minimum 2 options required', 'info');
             return;
         }
         setNewQuestion(prev => ({
@@ -87,18 +98,18 @@ export default function ManageQuestions() {
 
         // Validation
         if (!newQuestion.question.trim()) {
-            setError('Question text is required');
+            showToast('Question text is required', 'error');
             return;
         }
 
         if (newQuestion.options.some(opt => !opt.text.trim())) {
-            setError('All options must have text');
+            showToast('All options must have text', 'error');
             return;
         }
 
         const correctCount = newQuestion.options.filter(opt => opt.isCorrect).length;
         if (correctCount !== 1) {
-            setError('Exactly one option must be marked as correct');
+            showToast('Exactly one option must be marked as correct', 'error');
             return;
         }
 
@@ -123,7 +134,7 @@ export default function ManageQuestions() {
                 )
             );
 
-            alert('Question added successfully!');
+            showToast('Question added successfully!', 'success');
             setShowAddForm(false);
             setNewQuestion({
                 question: '',
@@ -135,46 +146,60 @@ export default function ManageQuestions() {
             });
             fetchQuizAndQuestions();
         } catch (err) {
-            setError(err.response?.data?.message || 'Failed to add question');
+            showToast(err.response?.data?.message || 'Failed to add question', 'error');
             console.error(err);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleDeleteQuestion = async (questionId) => {
-        if (!window.confirm('Are you sure you want to delete this question?')) {
-            return;
-        }
-
-        try {
-            await quizQuestionAPI.remove(questionId);
-            alert('Question deleted successfully!');
-            fetchQuizAndQuestions();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to delete question');
-            console.error(err);
-        }
+    const handleDeleteQuestion = (questionId) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Delete Question',
+            message: 'Are you sure you want to delete this question?',
+            type: 'danger',
+            confirmText: 'Delete',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                try {
+                    await quizQuestionAPI.remove(questionId);
+                    showToast('Question deleted successfully!', 'success');
+                    fetchQuizAndQuestions();
+                } catch (err) {
+                    showToast(err.response?.data?.message || 'Failed to delete question', 'error');
+                    console.error(err);
+                }
+                setConfirmModal({ ...confirmModal, isOpen: false });
+            }
+        });
     };
 
-    const handlePublish = async () => {
+    const handlePublish = () => {
         if (questions.length === 0) {
-            alert('Cannot publish quiz without questions');
+            showToast('Cannot publish quiz without questions', 'error');
             return;
         }
 
-        if (!window.confirm('Are you sure you want to publish this quiz? Students will be able to see it.')) {
-            return;
-        }
-
-        try {
-            await quizAPI.publish(quizId);
-            alert('Quiz published successfully!');
-            navigate(-1);
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to publish quiz');
-            console.error(err);
-        }
+        setConfirmModal({
+            isOpen: true,
+            title: 'Publish Quiz',
+            message: 'Are you sure you want to publish this quiz? Students will be able to see it.',
+            type: 'info',
+            confirmText: 'Publish',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                try {
+                    await quizAPI.publish(quizId);
+                    showToast('Quiz published successfully!', 'success');
+                    navigate(-1);
+                } catch (err) {
+                    showToast(err.response?.data?.message || 'Failed to publish quiz', 'error');
+                    console.error(err);
+                }
+                setConfirmModal({ ...confirmModal, isOpen: false });
+            }
+        });
     };
 
     if (loading && !quiz) {
@@ -190,6 +215,16 @@ export default function ManageQuestions() {
 
     return (
         <div className="container">
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                confirmText={confirmModal.confirmText}
+                cancelText={confirmModal.cancelText}
+                onConfirm={confirmModal.onConfirm}
+            />
             <div className="page-header">
                 <div>
                     <h1>Manage Questions</h1>

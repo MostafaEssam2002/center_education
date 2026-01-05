@@ -1,4 +1,4 @@
-import { Controller, Post, Body, UseGuards, Patch, Param, Get, Req } from '@nestjs/common'
+import { Controller, Post, Body, UseGuards, Patch, Param, Get, Req, Delete } from '@nestjs/common'
 import { QuizService } from './quiz.service'
 import { CreateQuizDto } from './dto/create-quiz.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -14,7 +14,7 @@ export class QuizController {
   @Roles(Role.ADMIN, Role.TEACHER)
   create(
     @Body() dto: CreateQuizDto,
-    @GetUser('userId') teacherId: number
+    @GetUser('id') teacherId: number
   ) {
     return this.quizService.create(dto, teacherId)
   }
@@ -26,7 +26,7 @@ export class QuizController {
   update(
     @Param('id') id: string,
     @Body() dto: CreateQuizDto,
-    @GetUser('userId') teacherId: number
+    @GetUser('id') teacherId: number
   ) {
     return this.quizService.update(+id, dto, teacherId)
   }
@@ -36,7 +36,7 @@ export class QuizController {
   @Roles(Role.ADMIN, Role.TEACHER)
   publish(
     @Param('id') id: string,
-    @GetUser('userId') teacherId: number
+    @GetUser('id') teacherId: number
   ) {
     return this.quizService.publish(+id, teacherId)
   }
@@ -53,5 +53,12 @@ export class QuizController {
   @Roles(Role.ADMIN, Role.TEACHER, Role.STUDENT)
   findOne(@Param('id') id: string) {
     return this.quizService.findOne(+id)
+  }
+
+  @Delete(':id')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN, Role.TEACHER)
+  remove(@Param('id') id: string, @GetUser('id') teacherId: number) {
+    return this.quizService.remove(+id, teacherId)
   }
 }

@@ -202,4 +202,31 @@ export class QuizService {
 
     return quiz
   }
+
+  async remove(id: number, teacherId: number) {
+    const quiz = await this.prisma.quiz.findUnique({
+      where: { id },
+      include: {
+        course: true,
+        chapter: { include: { course: true } },
+      },
+    })
+
+    if (!quiz) {
+      throw new NotFoundException('Quiz not found')
+    }
+
+    const ownerId =
+      quiz.course?.teacherId ?? quiz.chapter?.course.teacherId
+
+    if (ownerId !== teacherId) {
+      throw new ForbiddenException(
+        'You are not allowed to delete this quiz',
+      )
+    }
+
+    return this.prisma.quiz.delete({
+      where: { id },
+    })
+  }
 }

@@ -8,7 +8,7 @@ export class ChapterAccessGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // { userId, role, email }
+    const user = request.user; // { id, role, email }
     const chapterId = Number(request.params.id);
 
     if (!chapterId) {
@@ -29,13 +29,13 @@ export class ChapterAccessGuard implements CanActivate {
     if (user.role === Role.ADMIN) return true;
 
     // Teacher: لو هو صاحب الكورس
-    if (user.role === Role.TEACHER && chapter.course.teacherId === user.userId) return true;
+    if (user.role === Role.TEACHER && chapter.course.teacherId === user.id) return true;
 
     // Student: لو مسجل في الكورس
     if (user.role === Role.STUDENT) {
       const enrollment = await this.prisma.enrollment.findUnique({
         where: {
-          unique_enrollment_student_course: { studentId: user.userId, courseId: chapter.course.id },
+          unique_enrollment_student_course: { studentId: user.id, courseId: chapter.course.id },
         },
       });
 

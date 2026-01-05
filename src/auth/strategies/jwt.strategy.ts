@@ -11,12 +11,12 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
             throw new Error('JWT_SECRET is not defined');
         }
         super({
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
-        secretOrKey: jwtSecret 
-        // secretOrKey: process.env.JWT_SECRET || 'SECRET_KEY',
+            jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+            secretOrKey: jwtSecret
+            // secretOrKey: process.env.JWT_SECRET || 'SECRET_KEY',
         });
     }
-    async validate(payload: any){
-        return { userId: payload.sub,role:payload.role ,email: payload.email };
+    async validate(payload: any) {
+        return { id: payload.sub, role: payload.role, email: payload.email };
     }
 }

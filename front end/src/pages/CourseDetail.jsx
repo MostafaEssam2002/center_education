@@ -2,11 +2,13 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { courseAPI, chapterAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useToast } from '../context/ToastContext';
 
 const CourseDetail = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useAuth();
+    const { showToast } = useToast();
 
     const [course, setCourse] = useState(null);
     const [chapters, setChapters] = useState([]);
@@ -68,9 +70,14 @@ const CourseDetail = () => {
         try {
             await enrollmentAPI.requestEnrollment(parseInt(id));
             setEnrollmentStatus('pending');
-            alert('تم إرسال طلب الالتحاق بنجاح');
+            showToast('تم إرسال طلب الالتحاق بنجاح', 'success');
         } catch (err) {
-            alert(err.response?.data?.message || 'فشل إرسال طلب الالتحاق');
+            const errorMsg = err.response?.data?.message || 'فشل إرسال طلب الالتحاق';
+            if (err.response?.status === 409) {
+                showToast(errorMsg, 'info');
+            } else {
+                showToast(errorMsg, 'error');
+            }
         } finally {
             setEnrolling(false);
         }

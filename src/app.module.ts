@@ -18,9 +18,10 @@ import { QuizModule } from './quiz/quiz.module';
 import { QuizQuestionModule } from './quiz-question/quiz-question.module';
 import { QuizOptionModule } from './quiz-option/quiz-option.module';
 import { QuizAttemptModule } from './quiz-attempt/quiz-attempt.module';
+import { AssignmentModule } from './assignment/assignment.module';
 
 @Module({
-  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule],
+  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule, AssignmentModule],
   controllers: [AppController],
   providers: [AppService],
 })

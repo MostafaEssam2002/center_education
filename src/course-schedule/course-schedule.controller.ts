@@ -49,6 +49,6 @@ export class CourseScheduleController {
   @Get('student')
   @Roles(Role.STUDENT)
   findStudentSchedule(@Req() req) {
-    return this.service.findStudentSchedule(req.user.userId);
+    return this.service.findStudentSchedule(req.user.id);
   }
 }

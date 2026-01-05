@@ -2,12 +2,24 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, quizQuestionAPI } from '../services/api';
 
+import { useToast } from '../context/ToastContext';
+import ConfirmationModal from '../components/ConfirmationModal';
+
 export default function ManageQuizzes() {
     const { courseId } = useParams();
     const navigate = useNavigate();
+    const { showToast } = useToast();
     const [quizzes, setQuizzes] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+
+    const [confirmModal, setConfirmModal] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'danger',
+        onConfirm: () => { },
+    });
 
     useEffect(() => {
         fetchQuizzes();
@@ -27,19 +39,26 @@ export default function ManageQuizzes() {
         }
     };
 
-    const handlePublish = async (quizId) => {
-        if (!window.confirm('Are you sure you want to publish this quiz? Students will be able to see it.')) {
-            return;
-        }
-
-        try {
-            await quizAPI.publish(quizId);
-            alert('Quiz published successfully!');
-            fetchQuizzes();
-        } catch (err) {
-            alert(err.response?.data?.message || 'Failed to publish quiz');
-            console.error(err);
-        }
+    const handlePublish = (quizId) => {
+        setConfirmModal({
+            isOpen: true,
+            title: 'Publish Quiz',
+            message: 'Are you sure you want to publish this quiz? Students will be able to see it.',
+            type: 'info',
+            confirmText: 'Publish',
+            cancelText: 'Cancel',
+            onConfirm: async () => {
+                try {
+                    await quizAPI.publish(quizId);
+                    showToast('Quiz published successfully!', 'success');
+                    fetchQuizzes();
+                } catch (err) {
+                    showToast(err.response?.data?.message || 'Failed to publish quiz', 'error');
+                    console.error(err);
+                }
+                setConfirmModal({ ...confirmModal, isOpen: false });
+            }
+        });
     };
 
     const getQuizStatus = (quiz) => {
@@ -76,6 +95,16 @@ export default function ManageQuizzes() {
 
     return (
         <div className="container">
+            <ConfirmationModal
+                isOpen={confirmModal.isOpen}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                title={confirmModal.title}
+                message={confirmModal.message}
+                type={confirmModal.type}
+                confirmText={confirmModal.confirmText}
+                cancelText={confirmModal.cancelText}
+                onConfirm={confirmModal.onConfirm}
+            />
             <div className="page-header">
                 <div>
                     <h1>Manage Quizzes</h1>

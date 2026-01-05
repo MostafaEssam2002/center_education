@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { quizAPI, chapterAPI, courseAPI } from '../services/api';
 
 export default function CreateQuiz() {
     const { courseId } = useParams();
     const navigate = useNavigate();
+    const [searchParams] = useSearchParams();
     const [loading, setLoading] = useState(false);
     const [chapters, setChapters] = useState([]);
     const [course, setCourse] = useState(null);
@@ -36,6 +37,16 @@ export default function CreateQuiz() {
             const foundCourse = courseRes.data.find(c => c.id === parseInt(courseId));
             setCourse(foundCourse);
             setChapters(chaptersRes.data);
+
+            // Check if chapterId is provided in URL params
+            const urlChapterId = searchParams.get('chapterId');
+            if (urlChapterId) {
+                setFormData(prev => ({
+                    ...prev,
+                    chapterId: urlChapterId,
+                    type: 'CHAPTER',
+                }));
+            }
         } catch (err) {
             setError('Failed to load course data');
             console.error(err);

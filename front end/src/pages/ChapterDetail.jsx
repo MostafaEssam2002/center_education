@@ -95,9 +95,28 @@ const ChapterDetail = () => {
             <div className="card">
                 <div className="card-header">
                     <h2>{chapter.title}</h2>
-                    <button className="btn btn-secondary" onClick={() => navigate(`/courses/${courseId}`)}>
-                        العودة للكورس
-                    </button>
+                    <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+                        {chapter.course?.teacherId === user?.id && (
+                            <>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate(`/courses/${courseId}/chapters/${id}/assignments`)}
+                                >
+                                    إدارة الواجبات
+                                </button>
+                                <button
+                                    className="btn btn-primary"
+                                    onClick={() => navigate(`/courses/${courseId}/quizzes/create?chapterId=${id}`)}
+                                    style={{ background: '#48bb78', borderColor: '#48bb78' }}
+                                >
+                                    إنشاء اختبار
+                                </button>
+                            </>
+                        )}
+                        <button className="btn btn-secondary" onClick={() => navigate(`/courses/${courseId}`)}>
+                            العودة للكورس
+                        </button>
+                    </div>
                 </div>
 
                 {/* Chapter Navigation */}

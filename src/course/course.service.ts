@@ -29,6 +29,9 @@ export class CourseService {
         teacher: true,
         chapters: true, // اختياري
         enrollments: true,
+        _count: {
+          select: { requests: true }
+        }
       },
     });
   }
