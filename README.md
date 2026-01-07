@@ -110,6 +110,10 @@
 3. **حل المشكلات (Troubleshooting)**:
    - في حال واجهت مشاكل في تشغيل Docker، راجع ملف [DOCKER_TROUBLESHOOTING.md](DOCKER_TROUBLESHOOTING.md).
    - للمساعدة في مشاكل اتصال قاعدة البيانات، راجع [fix-docker-connection.md](fix-docker-connection.md).
+4. **ايقاف السرفر**:
+    ```bash
+    docker-compose down
+    ```
 
 ---
 
