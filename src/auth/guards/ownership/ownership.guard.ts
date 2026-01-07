@@ -8,8 +8,7 @@ export class OwnershipGuard implements CanActivate {
     context: ExecutionContext,
   ): boolean | Promise<boolean> | Observable<boolean> {
     const request = context.switchToHttp().getRequest();
-    console.log(request.params.id )
-    if(request.user.role!==Role.ADMIN && request.user.userId!== +request.params.id){
+    if(request.user.role!==Role.ADMIN && request.user.id!== +request.params.id){
       throw new ForbiddenException('Access denied');
     }
     return true;
