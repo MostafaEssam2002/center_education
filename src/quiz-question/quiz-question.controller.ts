@@ -14,7 +14,8 @@ export class QuizQuestionController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
-  create(@Body() dto: CreateQuizQuestionDto, @GetUser('userId') teacherId: number) {
+  create(@Body() dto: CreateQuizQuestionDto, @GetUser('id') teacherId: number) {
+    // console.log(teacherId)
     return this.service.create(dto, teacherId)
   }
 
@@ -31,7 +32,7 @@ export class QuizQuestionController {
   update(
     @Param('id') id: string,
     @Body() dto: Partial<CreateQuizQuestionDto>,
-    @GetUser('userId') teacherId: number
+    @GetUser('id') teacherId: number
   ) {
     return this.service.update(+id, dto, teacherId)
   }
@@ -39,7 +40,7 @@ export class QuizQuestionController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
-  remove(@Param('id') id: string, @GetUser('userId') teacherId: number) {
+  remove(@Param('id') id: string, @GetUser('id') teacherId: number) {
     return this.service.remove(+id, teacherId)
   }
 }

@@ -14,7 +14,7 @@ export class QuizAttemptController {
   constructor(private readonly service: QuizAttemptService) { }
 
   @Post('start/:quizId')
-  startQuiz(@Param('quizId') quizId: string, @GetUser('userId') studentId: number) {
+  startQuiz(@Param('quizId') quizId: string, @GetUser('id') studentId: number) {
     return this.service.startQuiz(+quizId, studentId);
   }
 
@@ -22,24 +22,24 @@ export class QuizAttemptController {
   submitAnswer(
     @Param('attemptId') attemptId: string,
     @Body() dto: SubmitAnswerDto,
-    @GetUser('userId') studentId: number,
+    @GetUser('id') studentId: number,
   ) {
     return this.service.submitAnswer(+attemptId, dto.questionId, dto.optionId, studentId);
   }
 
   @Post(':attemptId/finish')
-  finishQuiz(@Param('attemptId') attemptId: string, @GetUser('userId') studentId: number) {
+  finishQuiz(@Param('attemptId') attemptId: string, @GetUser('id') studentId: number) {
     return this.service.finishQuiz(+attemptId, studentId);
   }
 
   @Get(':attemptId/review')
   @Roles(Role.STUDENT, Role.TEACHER)
-  reviewAttempt(@Param('attemptId') attemptId: string, @GetUser('userId') userId: number) {
+  reviewAttempt(@Param('attemptId') attemptId: string, @GetUser('id') userId: number) {
     return this.service.reviewAttempt(+attemptId, userId);
   }
 
   @Delete(':attemptId/answer/:questionId')
-  deleteAnswer(@Param('attemptId') attemptId: string, @Param('questionId') questionId: string, @GetUser('userId') studentId: number,) {
+  deleteAnswer(@Param('attemptId') attemptId: string, @Param('questionId') questionId: string, @GetUser('id') studentId: number,) {
     return this.service.deleteAnswer(+attemptId, +questionId, studentId);
   }
   @Get(':quizId/stats')

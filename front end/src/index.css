@@ -1648,31 +1648,33 @@ table tbody tr:hover {
 .modal-icon-danger {
   width: 80px;
   height: 80px;
-  border: 4px solid #f27474;
+  background-color: #ef4444;
+  /* Deeper red like the image */
   border-radius: 50%;
   position: relative;
   margin: 0 auto;
   animation: pulseError 0.5s forwards;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modal-icon-danger::before,
 .modal-icon-danger::after {
   content: '';
   position: absolute;
-  top: 50%;
-  left: 50%;
-  width: 50px;
+  width: 40px;
   height: 4px;
-  background-color: #f27474;
+  background-color: white;
   border-radius: 2px;
 }
 
 .modal-icon-danger::before {
-  transform: translate(-50%, -50%) rotate(45deg);
+  transform: rotate(45deg);
 }
 
 .modal-icon-danger::after {
-  transform: translate(-50%, -50%) rotate(-45deg);
+  transform: rotate(-45deg);
 }
 
 /* Warning Icon (!) */
@@ -1757,13 +1759,17 @@ table tbody tr:hover {
 }
 
 .btn-danger-action {
-  background-color: #d33;
+  background-color: #ef4444;
   color: white;
+  font-weight: 600;
+  padding: 12px 30px;
 }
 
 .btn-cancel {
-  background-color: #aaa;
+  background-color: #b1b1b1;
+  /* Specific gray from the image */
   color: white;
+  padding: 12px 30px;
 }
 
 @keyframes fadeIn {

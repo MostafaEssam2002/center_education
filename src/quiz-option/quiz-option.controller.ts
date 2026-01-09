@@ -15,7 +15,8 @@ export class QuizOptionController {
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
-  create(@Body() dto: CreateQuizOptionDto, @GetUser('userId') teacherId: number) {
+  create(@Body() dto: CreateQuizOptionDto, @GetUser('id') teacherId: number) {
+    console.log(`teacherId = ${teacherId}`)
     return this.service.create(dto, teacherId);
   }
 
@@ -29,14 +30,14 @@ export class QuizOptionController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
-  update(@Param('id') id: string, @Body() dto: UpdateQuizOptionDto, @GetUser('userId') teacherId: number) {
+  update(@Param('id') id: string, @Body() dto: UpdateQuizOptionDto, @GetUser('id') teacherId: number) {
     return this.service.update(+id, dto, teacherId);
   }
 
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
-  remove(@Param('id') id: string, @GetUser('userId') teacherId: number) {
+  remove(@Param('id') id: string, @GetUser('id') teacherId: number) {
     return this.service.remove(+id, teacherId);
   }
 }

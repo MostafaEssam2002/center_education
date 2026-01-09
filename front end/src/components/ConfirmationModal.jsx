@@ -8,7 +8,8 @@ const ConfirmationModal = ({
     message,
     confirmText = 'تأكيد',
     cancelText = 'إلغاء',
-    type = 'danger' // danger, warning, info, success
+    type = 'danger', // danger, warning, info, success
+    hideCancel = false
 }) => {
     if (!isOpen) return null;
 
@@ -26,12 +27,14 @@ const ConfirmationModal = ({
                 <p className="modal-message">{message}</p>
 
                 <div className="modal-actions">
-                    <button
-                        onClick={onClose}
-                        className="btn-modal btn-cancel"
-                    >
-                        {cancelText}
-                    </button>
+                    {!hideCancel && (
+                        <button
+                            onClick={onClose}
+                            className="btn-modal btn-cancel"
+                        >
+                            {cancelText}
+                        </button>
+                    )}
                     <button
                         onClick={onConfirm}
                         className={`btn-modal ${type === 'danger' ? 'btn-danger-action' : 'btn-confirm'}`}

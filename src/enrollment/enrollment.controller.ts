@@ -84,7 +84,7 @@ export class EnrollmentController {
   // تسجيل طالب في كورس (Admin/Teacher)
   // =======================
   @Post()
-  @Roles(Role.ADMIN, Role.TEACHER)
+  @Roles(Role.ADMIN, Role.TEACHER,Role.STUDENT)
   @UseGuards(JwtAuthGuard, RolesGuard, OwnershipGuardForCourse)
   @ApiOperation({ summary: 'Admin/Teacher enrolls a student in a course-->يقوم المسؤول/المعلم بتسجيل طالب في دورة تدريبية' })
   @ApiBody({ type: CreateEnrollmentDto })

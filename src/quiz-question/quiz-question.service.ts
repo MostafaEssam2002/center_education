@@ -17,7 +17,6 @@ export class QuizQuestionService {
     const ownerId = quiz.course?.teacherId ?? quiz.chapter?.course.teacherId
     if (ownerId !== teacherId)
       throw new ForbiddenException('Not allowed to add question to this quiz')
-
     return this.prisma.quizQuestion.create({
       data: { quizId: dto.quizId, question: dto.question, marks: dto.marks },
     })

@@ -3,6 +3,7 @@ import { courseAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import CourseCard from '../components/CourseCard';
 import FileUpload from '../components/FileUpload';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 const Courses = () => {
   const [courses, setCourses] = useState([]);
@@ -17,6 +18,16 @@ const Courses = () => {
     description: '',
     teacherId: '',
     imagePath: '',
+  });
+  const [modalConfig, setModalConfig] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'danger',
+    confirmText: 'تأكيد',
+    cancelText: 'إلغاء',
+    hideCancel: false,
+    onConfirm: () => { }
   });
   const { user } = useAuth();
 
@@ -72,7 +83,15 @@ const Courses = () => {
       setFormData({ title: '', description: '', teacherId: '', imagePath: '' });
       loadCourses();
     } catch (err) {
-      alert('فشل الإنشاء: ' + (err.response?.data?.message || err.message));
+      setModalConfig({
+        isOpen: true,
+        title: 'خطأ',
+        message: 'فشل الإنشاء: ' + (err.response?.data?.message || err.message),
+        type: 'danger',
+        confirmText: 'موافق',
+        hideCancel: true,
+        onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+      });
     }
   };
 
@@ -98,19 +117,45 @@ const Courses = () => {
       setShowEditModal(false);
       loadCourses();
     } catch (err) {
-      alert('فشل التحديث: ' + (err.response?.data?.message || err.message));
+      setModalConfig({
+        isOpen: true,
+        title: 'خطأ',
+        message: 'فشل التحديث: ' + (err.response?.data?.message || err.message),
+        type: 'danger',
+        confirmText: 'موافق',
+        hideCancel: true,
+        onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+      });
     }
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذا الكورس؟')) return;
-
-    try {
-      await courseAPI.remove(id);
-      loadCourses();
-    } catch (err) {
-      alert('فشل الحذف: ' + (err.response?.data?.message || err.message));
-    }
+  const handleDelete = (id) => {
+    setModalConfig({
+      isOpen: true,
+      title: 'حذف الكورس',
+      message: 'هل أنت متأكد من حذف هذا الكورس؟ سيتم حذف جميع التسليمات المرتبطة به.',
+      type: 'danger',
+      confirmText: 'نعم، حذف',
+      cancelText: 'إلغاء',
+      hideCancel: false,
+      onConfirm: async () => {
+        try {
+          await courseAPI.remove(id);
+          setModalConfig(prev => ({ ...prev, isOpen: false }));
+          loadCourses();
+        } catch (err) {
+          setModalConfig({
+            isOpen: true,
+            title: 'خطأ',
+            message: 'فشل الحذف: ' + (err.response?.data?.message || err.message),
+            type: 'danger',
+            confirmText: 'موافق',
+            hideCancel: true,
+            onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+          });
+        }
+      }
+    });
   };
 
   const canManageCourses = user?.role === 'ADMIN' || user?.role === 'TEACHER';
@@ -318,6 +363,18 @@ const Courses = () => {
           </div>
         </div>
       )}
+
+      <ConfirmationModal
+        isOpen={modalConfig.isOpen}
+        onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={modalConfig.onConfirm}
+        title={modalConfig.title}
+        message={modalConfig.message}
+        type={modalConfig.type}
+        confirmText={modalConfig.confirmText}
+        cancelText={modalConfig.cancelText}
+        hideCancel={modalConfig.hideCancel}
+      />
     </div>
   );
 };

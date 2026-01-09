@@ -9,6 +9,7 @@ export class EnrollmentService {
   async enroll(dto: CreateEnrollmentDto, user: { userId: number; role: string }) {
     // هنا ممكن تعمل check على صلاحيات user قبل التسجيل
     // Check if already enrolled
+    console.log("hello from enrollment service ")
     const existingEnrollment = await this.prisma.enrollment.findUnique({
       where: {
         unique_enrollment_student_course: {

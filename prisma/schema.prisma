@@ -49,12 +49,12 @@ enum QuizStatus {
   SUBMITTED
   TIMED_OUT
 }
+
 enum AssignmentSubmissionStatus {
   SUBMITTED
   LATE
   REVIEWED
 }
-
 
 model Chapter {
   id              Int               @id @default(autoincrement())
@@ -69,7 +69,8 @@ model Chapter {
   updatedAt       DateTime          @updatedAt
   chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
   Quiz            Quiz[]
-  assignments Assignment[]
+  assignments     Assignment[]
+
   @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
   @@index([courseId], map: "idx_chapter_course_id")
   @@map("chapter")
@@ -96,27 +97,28 @@ model Course {
 }
 
 model User {
-  id                Int                 @id @default(autoincrement())
-  email             String              @unique(map: "unique_user_email")
-  first_name        String?
-  last_name         String?
-  image_path        String?
-  age               Int?
-  password          String
-  phone             String?
-  address           String?
-  role              Role                @default(USER)
-  enrollments       Enrollment[]        @relation("UserToEnrollment")
-  teachingCourses   Course[]            @relation("TeacherToCourse")
-  enrollmentRequest EnrollmentRequest[] @relation("UserToEnrollmentRequest")
-  chapterProgress   ChapterProgress[]   @relation("UserToChapterProgress")
-  createdAt         DateTime            @default(now())
-  updatedAt         DateTime            @updatedAt
-  Attendance        Attendance[]
-  QuizAttempt       QuizAttempt[]
-  Quiz              Quiz[]
+  id                    Int                    @id @default(autoincrement())
+  email                 String                 @unique(map: "unique_user_email")
+  first_name            String?
+  last_name             String?
+  image_path            String?
+  age                   Int?
+  password              String
+  phone                 String?
+  address               String?
+  role                  Role                   @default(USER)
+  enrollments           Enrollment[]           @relation("UserToEnrollment")
+  teachingCourses       Course[]               @relation("TeacherToCourse")
+  enrollmentRequest     EnrollmentRequest[]    @relation("UserToEnrollmentRequest")
+  chapterProgress       ChapterProgress[]      @relation("UserToChapterProgress")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  Attendance            Attendance[]
+  QuizAttempt           QuizAttempt[]
+  Quiz                  Quiz[]
   assignmentSubmissions AssignmentSubmission[]
   assignmentsCreated    Assignment[]
+
   @@index([email], map: "idx_user_email")
   @@map("user")
 }
@@ -128,7 +130,7 @@ model Enrollment {
   createdAt DateTime @default(now())
 
   user   User   @relation("UserToEnrollment", fields: [studentId], references: [id], map: "fk_enrollment_user")
-  course Course @relation("CourseToEnrollment", fields: [courseId], references: [id], map: "fk_enrollment_course")
+  course Course @relation("CourseToEnrollment", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_course")
 
   @@unique([studentId, courseId], name: "unique_enrollment_student_course", map: "idx_enrollment_student_course")
   @@index([studentId], map: "idx_enrollment_student_id")
@@ -144,7 +146,7 @@ model EnrollmentRequest {
   createdAt DateTime @default(now())
 
   student User   @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
-  course  Course @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], map: "fk_enrollment_request_course")
+  course  Course @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
 
   @@unique([studentId, courseId], name: "unique_enrollment_request_student_course", map: "idx_enrollment_request_student_course")
   @@index([studentId], map: "idx_enrollment_request_student_id")
@@ -162,7 +164,7 @@ model ChapterProgress {
   updatedAt DateTime @updatedAt
 
   student User    @relation("UserToChapterProgress", fields: [studentId], references: [id], map: "fk_chapter_progress_user")
-  chapter Chapter @relation("ChapterToChapterProgress", fields: [chapterId], references: [id], map: "fk_chapter_progress_chapter")
+  chapter Chapter @relation("ChapterToChapterProgress", fields: [chapterId], references: [id], onDelete: Cascade, map: "fk_chapter_progress_chapter")
 
   @@unique([studentId, chapterId], name: "unique_chapter_progress_student_chapter", map: "idx_chapter_progress_student_chapter")
   @@index([studentId], map: "idx_chapter_progress_student_id")
@@ -178,7 +180,7 @@ model CourseSchedule {
   endTime   String // "12:00"
   room      String? // optional (قاعة 1 – Lab A)
 
-  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], map: "fk_course_schedule_course")
+  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_course_schedule_course")
 
   @@unique([day, startTime, room], name: "unique_course_schedule_day_time_room", map: "idx_course_schedule_day_time_room")
   @@index([courseId], map: "idx_course_schedule_course_id")
@@ -194,7 +196,7 @@ model CourseSession {
   endTime   String // "12:00"
   room      String?
 
-  course     Course       @relation(fields: [courseId], references: [id])
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   attendance Attendance[]
 
   createdAt DateTime @default(now())
@@ -209,7 +211,7 @@ model Attendance {
   studentId Int
   status    AttendanceStatus @default(PRESENT)
 
-  session CourseSession @relation(fields: [sessionId], references: [id])
+  session CourseSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
   student User          @relation(fields: [studentId], references: [id])
 
   createdAt DateTime @default(now())
@@ -242,14 +244,14 @@ model Quiz {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  course    Course?        @relation(fields: [courseId], references: [id])
-  chapter   Chapter?       @relation(fields: [chapterId], references: [id])
+  course    Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  chapter   Chapter?       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   questions QuizQuestion[]
   attempts  QuizAttempt[]
 
   @@index([courseId], map: "Quiz_courseId_idx")
   @@index([chapterId], map: "Quiz_chapterId_idx")
-  @@index([createdBy], map: "Quiz_createdBy_fkey")
+  @@index([createdBy], map: "idx_quiz_created_by")
   @@map("quiz")
 }
 
@@ -262,7 +264,7 @@ model QuizQuestion {
 
   createdAt DateTime @default(now())
 
-  quiz              Quiz                @relation(fields: [quizId], references: [id])
+  quiz              Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
   options           QuizOption[]
   QuizAttemptAnswer QuizAttemptAnswer[]
 
@@ -277,7 +279,7 @@ model QuizOption {
   text      String
   isCorrect Boolean @default(false)
 
-  question          QuizQuestion        @relation(fields: [questionId], references: [id])
+  question          QuizQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
   QuizAttemptAnswer QuizAttemptAnswer[]
 
   @@index([questionId], map: "QuizOption_questionId_idx")
@@ -295,7 +297,7 @@ model QuizAttempt {
   startedAt   DateTime  @default(now())
   submittedAt DateTime?
 
-  quiz    Quiz @relation(fields: [quizId], references: [id])
+  quiz    Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
   student User @relation(fields: [studentId], references: [id])
 
   answers QuizAttemptAnswer[]
@@ -313,9 +315,9 @@ model QuizAttemptAnswer {
 
   isCorrect Boolean
 
-  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id])
-  question QuizQuestion @relation(fields: [questionId], references: [id])
-  option   QuizOption   @relation(fields: [optionId], references: [id])
+  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  option   QuizOption   @relation(fields: [optionId], references: [id], onDelete: Cascade)
 
   @@unique([attemptId, questionId], map: "QuizAttemptAnswer_attemptId_questionId_key")
   @@index([attemptId], map: "QuizAttemptAnswer_attemptId_idx")
@@ -323,6 +325,7 @@ model QuizAttemptAnswer {
   @@index([optionId], map: "QuizAttemptAnswer_optionId_fkey")
   @@map("quizattemptanswer")
 }
+
 model Assignment {
   id          Int      @id @default(autoincrement())
   chapterId   Int
@@ -332,10 +335,10 @@ model Assignment {
   maxGrade    Int
   allowLate   Boolean  @default(true)
 
-  createdBy  Int
-  teacher    User     @relation(fields: [createdBy], references: [id])
+  createdBy Int
+  teacher   User @relation(fields: [createdBy], references: [id])
 
-  chapter    Chapter  @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  chapter     Chapter                @relation(fields: [chapterId], references: [id], onDelete: Cascade)
   submissions AssignmentSubmission[]
 
   createdAt DateTime @default(now())
@@ -347,13 +350,13 @@ model Assignment {
 }
 
 model AssignmentSubmission {
-  id           Int      @id @default(autoincrement())
+  id           Int @id @default(autoincrement())
   assignmentId Int
   studentId    Int
 
-  filePath     String
-  submittedAt  DateTime @default(now())
-  status       AssignmentSubmissionStatus
+  filePath    String
+  submittedAt DateTime                   @default(now())
+  status      AssignmentSubmissionStatus
 
   grade    Int?
   feedback String?

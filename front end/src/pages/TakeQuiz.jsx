@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { quizAPI, quizAttemptAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function TakeQuiz() {
     const { quizId } = useParams();
@@ -18,6 +19,16 @@ export default function TakeQuiz() {
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState('');
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'info',
+        confirmText: 'تأكيد',
+        cancelText: 'إلغاء',
+        hideCancel: false,
+        onConfirm: () => { }
+    });
 
     const timerRef = useRef(null);
     const answerSaveTimeoutRef = useRef(null);
@@ -33,8 +44,63 @@ export default function TakeQuiz() {
 
         window.addEventListener('beforeunload', handleBeforeUnload);
 
+        // Handle browser back button/navigation
+        window.history.pushState(null, null, window.location.pathname);
+        const handlePopState = () => {
+            window.history.pushState(null, null, window.location.pathname);
+            setModalConfig({
+                isOpen: true,
+                title: 'تنبيه مغادرة',
+                message: 'هل أنت متأكد من رغبتك في مغادرة صفحة الاختبار؟ الإجابات التي لم يتم حفظها قد تضيع.',
+                type: 'danger',
+                confirmText: 'نعم، مغادرة',
+                cancelText: 'البقاء',
+                hideCancel: false,
+                onConfirm: () => {
+                    setModalConfig(prev => ({ ...prev, isOpen: false }));
+                    navigate('/my-quizzes');
+                }
+            });
+        };
+
+        window.addEventListener('popstate', handlePopState);
+
+        // Handle Keyboard Reload/Close Shortcuts (F5, Ctrl+R, Ctrl+W, Alt+F4)
+        const handleKeyDown = (e) => {
+            const isReload = (e.which || e.keyCode) === 116 || (e.ctrlKey && e.keyCode === 82);
+            const isClose = (e.ctrlKey && e.keyCode === 87) || (e.altKey && e.keyCode === 115);
+
+            if (isReload || isClose) {
+                e.preventDefault();
+                setModalConfig({
+                    isOpen: true,
+                    title: isReload ? 'تنبيه إعادة تحميل' : 'تنبيه إغلاق',
+                    message: isReload
+                        ? 'هل أنت متأكد من رغبتك في إعادة تحميل الصفحة؟ قد يتم فقدان أي تغييرات غير محفوظة.'
+                        : 'هل أنت متأكد من رغبتك في إغلاق الصفحة؟ قد يتم فقدان أي تغييرات غير محفوظة.',
+                    type: 'danger',
+                    confirmText: isReload ? 'نعم، إعادة تحميل' : 'نعم، إغلاق',
+                    cancelText: 'إلغاء',
+                    hideCancel: false,
+                    onConfirm: () => {
+                        window.removeEventListener('beforeunload', handleBeforeUnload);
+                        setModalConfig(prev => ({ ...prev, isOpen: false }));
+                        if (isReload) {
+                            window.location.reload();
+                        } else {
+                            window.close();
+                        }
+                    }
+                });
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+
         return () => {
             window.removeEventListener('beforeunload', handleBeforeUnload);
+            window.removeEventListener('popstate', handlePopState);
+            window.removeEventListener('keydown', handleKeyDown);
             if (timerRef.current) clearInterval(timerRef.current);
             if (answerSaveTimeoutRef.current) clearTimeout(answerSaveTimeoutRef.current);
         };
@@ -148,40 +214,90 @@ export default function TakeQuiz() {
 
         setSubmitting(true);
         try {
-            await quizAttemptAPI.finish(attempt.id);
-            alert('Time is up! Quiz has been automatically submitted.');
-            navigate('/my-quizzes');
+            const result = await quizAttemptAPI.finish(attempt.id);
+            setModalConfig({
+                isOpen: true,
+                title: 'انتهى الوقت',
+                message: `انتهى وقت الاختبار! تم تسليم اختبارك تلقائياً.\n\nدرجتك هو: ${result.data.score}/${quiz.totalMarks}`,
+                type: 'info',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => {
+                    setModalConfig(prev => ({ ...prev, isOpen: false }));
+                    if (quiz.keepAnswers) {
+                        navigate(`/quiz-attempts/${attempt.id}/results`);
+                    } else {
+                        navigate('/my-quizzes');
+                    }
+                }
+            });
         } catch (err) {
             console.error('Auto-submit failed:', err);
-            alert('Failed to submit quiz. Please try again.');
+            setModalConfig({
+                isOpen: true,
+                title: 'خطأ',
+                message: 'فشل في تسليم الاختبار تلقائياً. يرجى المحاولة مرة أخرى.',
+                type: 'danger',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+            });
             setSubmitting(false);
         }
     };
 
-    const handleSubmit = async () => {
+    const handleSubmit = () => {
         const unansweredCount = questions.length - Object.keys(answers).length;
 
-        let confirmMessage = 'Are you sure you want to submit your quiz?';
+        let message = 'هل أنت متأكد من رغبتك في تسليم الاختبار؟';
         if (unansweredCount > 0) {
-            confirmMessage += `\n\nYou have ${unansweredCount} unanswered question${unansweredCount > 1 ? 's' : ''}.`;
+            message += `\n\nلديك ${unansweredCount} سؤال لم يتم الإجابة عليه${unansweredCount > 1 ? 'ا' : 'ه'}.`;
         }
 
-        if (!window.confirm(confirmMessage)) {
-            return;
-        }
+        setModalConfig({
+            isOpen: true,
+            title: 'تسليم الاختبار',
+            message: message,
+            type: 'warning',
+            confirmText: 'نعم، تسليم',
+            cancelText: 'إلغاء',
+            hideCancel: false,
+            onConfirm: handleConfirmSubmit
+        });
+    };
 
+    const handleConfirmSubmit = async () => {
+        setModalConfig(prev => ({ ...prev, isOpen: false }));
         setSubmitting(true);
         try {
             const result = await quizAttemptAPI.finish(attempt.id);
-            alert(`Quiz submitted successfully!\n\nYour score: ${result.data.score}/${quiz.totalMarks}`);
 
-            if (quiz.keepAnswers) {
-                navigate(`/quiz-attempts/${attempt.id}/results`);
-            } else {
-                navigate('/my-quizzes');
-            }
+            setModalConfig({
+                isOpen: true,
+                title: 'تم التسليم',
+                message: `تم تسليم الاختبار بنجاح!\n\nدرجتك هو: ${result.data.score}/${quiz.totalMarks}`,
+                type: 'success',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => {
+                    setModalConfig(prev => ({ ...prev, isOpen: false }));
+                    if (quiz.keepAnswers) {
+                        navigate(`/quiz-attempts/${attempt.id}/results`);
+                    } else {
+                        navigate('/my-quizzes');
+                    }
+                }
+            });
         } catch (err) {
-            alert(err.response?.data?.message || 'Failed to submit quiz');
+            setModalConfig({
+                isOpen: true,
+                title: 'خطأ',
+                message: err.response?.data?.message || 'فشل في تسليم الاختبار',
+                type: 'danger',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+            });
             console.error(err);
             setSubmitting(false);
         }
@@ -389,6 +505,18 @@ export default function TakeQuiz() {
                     </button>
                 </div>
             </div>
+
+            <ConfirmationModal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={modalConfig.onConfirm}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                confirmText={modalConfig.confirmText}
+                cancelText={modalConfig.cancelText}
+                type={modalConfig.type}
+                hideCancel={modalConfig.hideCancel}
+            />
         </div>
     );
 }

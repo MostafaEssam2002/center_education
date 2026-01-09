@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { quizAPI, chapterAPI, courseAPI } from '../services/api';
+import ConfirmationModal from '../components/ConfirmationModal';
 
 export default function CreateQuiz() {
     const { courseId } = useParams();
@@ -21,6 +22,16 @@ export default function CreateQuiz() {
         durationMin: 30,
         totalMarks: 10,
         keepAnswers: false,
+    });
+
+    const [modalConfig, setModalConfig] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        type: 'success',
+        confirmText: 'موافق',
+        hideCancel: true,
+        onConfirm: () => { }
     });
 
     useEffect(() => {
@@ -114,11 +125,31 @@ export default function CreateQuiz() {
             console.log('Current user from token:', localStorage.getItem('user'));
 
             const response = await quizAPI.create(quizData);
-            alert('Quiz created successfully!');
-            navigate(`/quizzes/${response.data.id}/questions`);
+
+
+            setModalConfig({
+                isOpen: true,
+                title: 'تم إنشاء الاختبار',
+                message: 'تم إنشاء الاختبار بنجاح!',
+                type: 'success',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => {
+                    setModalConfig(prev => ({ ...prev, isOpen: false }));
+                    navigate(`/quizzes/${response.data.id}/questions`);
+                }
+            });
         } catch (err) {
             console.error('Quiz creation error:', err.response?.data);
-            setError(err.response?.data?.message || 'Failed to create quiz');
+            setModalConfig({
+                isOpen: true,
+                title: 'خطأ',
+                message: err.response?.data?.message || 'فشل إنشاء الاختبار',
+                type: 'danger',
+                confirmText: 'موافق',
+                hideCancel: true,
+                onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+            });
             console.error(err);
         } finally {
             setLoading(false);
@@ -295,6 +326,18 @@ export default function CreateQuiz() {
                     </button>
                 </div>
             </form>
-        </div>
+
+            <ConfirmationModal
+                isOpen={modalConfig.isOpen}
+                onClose={() => setModalConfig(prev => ({ ...prev, isOpen: false }))}
+                onConfirm={modalConfig.onConfirm}
+                title={modalConfig.title}
+                message={modalConfig.message}
+                type={modalConfig.type}
+                confirmText={modalConfig.confirmText}
+                cancelText={modalConfig.cancelText}
+                hideCancel={modalConfig.hideCancel}
+            />
+        </div >
     );
 }
