@@ -16,12 +16,12 @@ export class CourseScheduleService {
       );
     }
   }
-  private async checkOverlap(params: { day: any; startTime: string; endTime: string; room?: string | null; excludeId?: number; }) {
-    const { day, startTime, endTime, room, excludeId } = params;
+  private async checkOverlap(params: { day: any; startTime: string; endTime: string; roomId: number; excludeId?: number; }) {
+    const { day, startTime, endTime, roomId, excludeId } = params;
     const conflicts = await this.prisma.courseSchedule.findMany({
       where: {
         day,
-        room: room ?? null,
+        roomId,
         ...(excludeId && { id: { not: excludeId } }),
         AND: [
           { startTime: { lt: endTime } },
@@ -32,7 +32,7 @@ export class CourseScheduleService {
 
     if (conflicts.length > 0) {
       throw new BadRequestException(
-        'Schedule conflict detected for this day and time',
+        'Schedule conflict detected for this day and time in the selected room',
       );
     }
   }
@@ -48,12 +48,25 @@ export class CourseScheduleService {
     if (!course) {
       throw new NotFoundException('Course not found');
     }
+
+    // التأكد إن الغرفة موجودة
+    // const room = await this.prisma.room.findUnique({
+    //   where: { id: dto.roomId },
+    // });
+    const room = await this.prisma.room.findFirst({
+      where: { id: dto.roomId, isActive: true },
+    });
+
+    if (!room) {
+      throw new NotFoundException('Room not found');
+    }
+
     // منع التعارض في نفس اليوم + نفس القاعة
     await this.checkOverlap({
       day: dto.day,
       startTime: dto.startTime,
       endTime: dto.endTime,
-      room: dto.room,
+      roomId: dto.roomId,
     });
     return this.prisma.courseSchedule.create({
       data: dto,
@@ -64,6 +77,7 @@ export class CourseScheduleService {
             title: true,
           },
         },
+        room: true,
       },
     });
   }
@@ -81,13 +95,29 @@ export class CourseScheduleService {
     const startTime = dto.startTime ?? schedule.startTime;
     const endTime = dto.endTime ?? schedule.endTime;
     const day = dto.day ?? schedule.day;
-    const room = dto.room ?? schedule.room;
+    const roomId = dto.roomId ?? schedule.roomId;
+
     this.validateTime(startTime, endTime);
+
+    // Check if room exists if it's being updated
+    if (dto.roomId) {
+      // const room = await this.prisma.room.findUnique({
+      //   where: { id: dto.roomId },
+      // });
+      const room = await this.prisma.room.findFirst({
+        where: { id: dto.roomId, isActive: true },
+      });
+
+      if (!room) {
+        throw new NotFoundException('Room not found');
+      }
+    }
+
     await this.checkOverlap({
       day,
       startTime,
       endTime,
-      room,
+      roomId,
       excludeId: id,
     });
     return this.prisma.courseSchedule.update({
@@ -100,6 +130,7 @@ export class CourseScheduleService {
             title: true,
           },
         },
+        room: true,
       },
     });
   }

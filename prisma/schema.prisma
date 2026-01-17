@@ -23,6 +23,11 @@ enum Role {
   EMPLOYEE
 }
 
+enum RoomType {
+  ONLINE
+  OFFLINE
+}
+
 enum DayOfWeek {
   SAT
   SUN
@@ -56,6 +61,13 @@ enum AssignmentSubmissionStatus {
   REVIEWED
 }
 
+enum EnrollmentRequestStatus {
+  SENT
+  WAIT_FOR_PAY
+  APPROVED
+  REJECTED
+}
+
 model Chapter {
   id              Int               @id @default(autoincrement())
   title           String
@@ -82,6 +94,8 @@ model Course {
   description   String?
   teacherId     Int
   image_path    String?
+  price         Float               @default(100)
+  discount      Float?
   teacher       User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
   enrollments   Enrollment[]        @relation("CourseToEnrollment")
   requests      EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
@@ -139,11 +153,11 @@ model Enrollment {
 }
 
 model EnrollmentRequest {
-  id        Int      @id @default(autoincrement())
+  id        Int                     @id @default(autoincrement())
   studentId Int
   courseId  Int
-  status    String   @default("pending") // pending, approved, rejected
-  createdAt DateTime @default(now())
+  status    EnrollmentRequestStatus @default(SENT)
+  createdAt DateTime                @default(now())
 
   student User   @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
   course  Course @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
@@ -172,19 +186,36 @@ model ChapterProgress {
   @@map("chapterprogress")
 }
 
+// model CourseSchedule {
+//   id        Int       @id @default(autoincrement())
+//   courseId  Int
+//   day       DayOfWeek
+//   startTime String // "10:00"
+//   endTime   String // "12:00"
+//   roomId Int
+//   room   Room @relation(fields: [roomId], references: [id])
+//   course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_course_schedule_course")
+
+//   @@unique([day, startTime, room], name: "unique_course_schedule_day_time_room", map: "idx_course_schedule_day_time_room")
+//   @@index([courseId], map: "idx_course_schedule_course_id")
+//   @@index([day], map: "idx_course_schedule_day")
+//   @@map("courseschedule")
+// }
 model CourseSchedule {
   id        Int       @id @default(autoincrement())
   courseId  Int
+  roomId    Int
   day       DayOfWeek
-  startTime String // "10:00"
-  endTime   String // "12:00"
-  room      String? // optional (قاعة 1 – Lab A)
+  startTime String
+  endTime   String
 
-  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_course_schedule_course")
+  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade)
+  room   Room   @relation(fields: [roomId], references: [id])
 
-  @@unique([day, startTime, room], name: "unique_course_schedule_day_time_room", map: "idx_course_schedule_day_time_room")
-  @@index([courseId], map: "idx_course_schedule_course_id")
-  @@index([day], map: "idx_course_schedule_day")
+  @@unique([day, startTime, roomId], name: "unique_course_schedule_day_time_room")
+  @@index([courseId])
+  @@index([day])
+  @@index([roomId])
   @@map("courseschedule")
 }
 
@@ -194,13 +225,15 @@ model CourseSession {
   date      DateTime // تاريخ الحصة (2026-01-01)
   startTime String // "10:00"
   endTime   String // "12:00"
-  room      String?
+  roomId    Int
+  room      Room     @relation(fields: [roomId], references: [id])
 
   course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   attendance Attendance[]
 
   createdAt DateTime @default(now())
 
+  @@index([roomId])
   @@index([courseId])
   @@map("course_sessions")
 }
@@ -368,4 +401,21 @@ model AssignmentSubmission {
   @@index([studentId])
   @@index([assignmentId])
   @@map("assignmentsubmission")
+}
+
+model Room {
+  id       Int      @id @default(autoincrement())
+  name     String   @unique
+  type     RoomType
+  capacity Int?
+  location String?
+  isActive Boolean  @default(true)
+
+  schedules CourseSchedule[]
+  sessions  CourseSession[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@map("room")
 }

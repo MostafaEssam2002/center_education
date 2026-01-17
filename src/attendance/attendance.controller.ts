@@ -19,7 +19,7 @@ export class AttendanceController {
       date: string; // تاريخ الحصة
       startTime: string; // "08:00"
       endTime: string;   // "09:00"
-      room?: string;
+      roomId: number;
     },
   ) {
     return this.attendanceService.createSession(
@@ -27,7 +27,7 @@ export class AttendanceController {
       new Date(body.date),
       body.startTime,
       body.endTime,
-      body.room,
+      body.roomId,
     );
   }
 

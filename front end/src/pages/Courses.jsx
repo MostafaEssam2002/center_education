@@ -18,6 +18,8 @@ const Courses = () => {
     description: '',
     teacherId: '',
     imagePath: '',
+    price: '',
+    discount: '',
   });
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -77,10 +79,12 @@ const Courses = () => {
       const courseData = {
         ...formData,
         teacherId: parseInt(formData.teacherId),
+        price: parseFloat(formData.price) || 0,
+        discount: parseFloat(formData.discount) || 0,
       };
       await courseAPI.create(courseData);
       setShowCreateModal(false);
-      setFormData({ title: '', description: '', teacherId: '', imagePath: '' });
+      setFormData({ title: '', description: '', teacherId: '', imagePath: '', price: '', discount: '' });
       loadCourses();
     } catch (err) {
       setModalConfig({
@@ -102,6 +106,8 @@ const Courses = () => {
       description: course.description || '',
       teacherId: course.teacherId?.toString() || '',
       imagePath: course.imagePath || '',
+      price: course.price || '',
+      discount: course.discount || '',
     });
     setShowEditModal(true);
   };
@@ -112,6 +118,8 @@ const Courses = () => {
       const courseData = {
         ...formData,
         teacherId: parseInt(formData.teacherId),
+        price: parseFloat(formData.price) || 0,
+        discount: parseFloat(formData.discount) || 0,
       };
       await courseAPI.update(selectedCourse.id, courseData);
       setShowEditModal(false);
@@ -255,6 +263,27 @@ const Courses = () => {
                 />
               </div>
               <div className="form-group">
+                <label>السعر <span className="required">*</span></label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="form-group">
+                <label>الخصم (المبلغ)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.discount}
+                  onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
                 <label>معرف المعلم <span className="required">*</span></label>
                 <input
                   type="number"
@@ -328,6 +357,26 @@ const Courses = () => {
                 <textarea
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>السعر</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.price}
+                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                />
+              </div>
+              <div className="form-group">
+                <label>الخصم (المبلغ)</label>
+                <input
+                  type="number"
+                  min="0"
+                  step="0.01"
+                  value={formData.discount}
+                  onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
                 />
               </div>
               <div className="form-group">

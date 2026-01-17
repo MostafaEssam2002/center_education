@@ -96,14 +96,15 @@ CREATE TABLE `chapterprogress` (
 CREATE TABLE `courseschedule` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `courseId` INTEGER NOT NULL,
+    `roomId` INTEGER NOT NULL,
     `day` ENUM('SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI') NOT NULL,
     `startTime` VARCHAR(191) NOT NULL,
     `endTime` VARCHAR(191) NOT NULL,
-    `room` VARCHAR(191) NULL,
 
-    INDEX `idx_course_schedule_course_id`(`courseId`),
-    INDEX `idx_course_schedule_day`(`day`),
-    UNIQUE INDEX `idx_course_schedule_day_time_room`(`day`, `startTime`, `room`),
+    INDEX `courseschedule_courseId_idx`(`courseId`),
+    INDEX `courseschedule_day_idx`(`day`),
+    INDEX `courseschedule_roomId_idx`(`roomId`),
+    UNIQUE INDEX `courseschedule_day_startTime_roomId_key`(`day`, `startTime`, `roomId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
@@ -114,9 +115,10 @@ CREATE TABLE `course_sessions` (
     `date` DATETIME(3) NOT NULL,
     `startTime` VARCHAR(191) NOT NULL,
     `endTime` VARCHAR(191) NOT NULL,
-    `room` VARCHAR(191) NULL,
+    `roomId` INTEGER NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
 
+    INDEX `course_sessions_roomId_idx`(`roomId`),
     INDEX `course_sessions_courseId_idx`(`courseId`),
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
@@ -247,6 +249,21 @@ CREATE TABLE `assignmentsubmission` (
     PRIMARY KEY (`id`)
 ) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
+-- CreateTable
+CREATE TABLE `room` (
+    `id` INTEGER NOT NULL AUTO_INCREMENT,
+    `name` VARCHAR(191) NOT NULL,
+    `type` ENUM('ONLINE', 'OFFLINE') NOT NULL,
+    `capacity` INTEGER NULL,
+    `location` VARCHAR(191) NULL,
+    `isActive` BOOLEAN NOT NULL DEFAULT true,
+    `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
+    `updatedAt` DATETIME(3) NOT NULL,
+
+    UNIQUE INDEX `room_name_key`(`name`),
+    PRIMARY KEY (`id`)
+) DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
 -- AddForeignKey
 ALTER TABLE `chapter` ADD CONSTRAINT `fk_chapter_course` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
@@ -272,7 +289,13 @@ ALTER TABLE `chapterprogress` ADD CONSTRAINT `fk_chapter_progress_user` FOREIGN 
 ALTER TABLE `chapterprogress` ADD CONSTRAINT `fk_chapter_progress_chapter` FOREIGN KEY (`chapterId`) REFERENCES `chapter`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE `courseschedule` ADD CONSTRAINT `fk_course_schedule_course` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE `courseschedule` ADD CONSTRAINT `courseschedule_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `courseschedule` ADD CONSTRAINT `courseschedule_roomId_fkey` FOREIGN KEY (`roomId`) REFERENCES `room`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE `course_sessions` ADD CONSTRAINT `course_sessions_roomId_fkey` FOREIGN KEY (`roomId`) REFERENCES `room`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE `course_sessions` ADD CONSTRAINT `course_sessions_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course`(`id`) ON DELETE CASCADE ON UPDATE CASCADE;

@@ -173,6 +173,23 @@ const CourseDetail = () => {
                         <strong style={{ color: '#667eea' }}>عدد الفصول:</strong>
                         <p style={{ margin: '5px 0 0' }}>{chapters.length}</p>
                     </div>
+                    <div>
+                        <strong style={{ color: '#667eea' }}>السعر:</strong>
+                        <div style={{ margin: '5px 0 0' }}>
+                            {course.discount && course.discount > 0 ? (
+                                <div>
+                                    <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px', fontSize: '0.9em' }}>
+                                        {course.price} ج.م
+                                    </span>
+                                    <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                        {course.price - course.discount} ج.م
+                                    </span>
+                                </div>
+                            ) : (
+                                <span>{course.price ? `${course.price} ج.م` : 'مجاني'}</span>
+                            )}
+                        </div>
+                    </div>
                 </div>
 
                 {/* Enrollment Actions for Students */}

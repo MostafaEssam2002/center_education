@@ -14,7 +14,7 @@ export class AttendanceService {
     date: Date,
     startTime: string,
     endTime: string,
-    room?: string,
+    roomId: number,
   ) {
     // 1. Check if course exists
     const course = await this.prisma.course.findUnique({
@@ -23,6 +23,14 @@ export class AttendanceService {
 
     if (!course) {
       throw new NotFoundException('Course not found');
+    }
+
+    // Check if room exists and is active
+    const room = await this.prisma.room.findFirst({
+      where: { id: roomId, isActive: true },
+    });
+    if (!room) {
+      throw new NotFoundException('Room not found or inactive');
     }
 
     // 2. Validate Session Time against CourseSchedule
@@ -60,7 +68,7 @@ export class AttendanceService {
         date,
         startTime,
         endTime,
-        room,
+        roomId,
       },
     });
   }

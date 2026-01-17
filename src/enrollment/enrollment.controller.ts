@@ -64,6 +64,19 @@ export class EnrollmentController {
   }
 
   // =======================
+  // عرض طلبات الطالب الخاصة
+  // =======================
+  @Get('my-requests')
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Student views their own enrollment requests-->يعرض الطالب طلبات التسجيل الخاصة به' })
+  @ApiResponse({ status: 200, description: 'List of my enrollment requests' })
+  getMyRequests(@Req() request: any) {
+    const studentId = request.user.id;
+    return this.enrollmentService.getMyRequests(studentId);
+  }
+
+  // =======================
   // المعلم/الادمن يرفض طلب الانضمام
   // =======================
   @Delete('request/:courseId/:studentId')
@@ -81,10 +94,27 @@ export class EnrollmentController {
   }
 
   // =======================
+  // الطالب يدفع بعد موافقة المدرس
+  // =======================
+  @Post('confirm-payment/:courseId')
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiOperation({ summary: 'Student confirms payment after teacher approval-->الطالب يدفع بعد موافقة المدرس' })
+  @ApiParam({ name: 'courseId', type: Number })
+  @ApiResponse({ status: 201, description: 'Payment confirmed and student enrolled successfully.' })
+  confirmPayment(
+    @Param('courseId', ParseIntPipe) courseId: number,
+    @Req() request: any
+  ) {
+    const studentId = request.user.id;
+    return this.enrollmentService.confirmPayment(courseId, studentId);
+  }
+
+  // =======================
   // تسجيل طالب في كورس (Admin/Teacher)
   // =======================
   @Post()
-  @Roles(Role.ADMIN, Role.TEACHER,Role.STUDENT)
+  @Roles(Role.ADMIN, Role.TEACHER, Role.STUDENT)
   @UseGuards(JwtAuthGuard, RolesGuard, OwnershipGuardForCourse)
   @ApiOperation({ summary: 'Admin/Teacher enrolls a student in a course-->يقوم المسؤول/المعلم بتسجيل طالب في دورة تدريبية' })
   @ApiBody({ type: CreateEnrollmentDto })

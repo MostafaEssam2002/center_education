@@ -1,5 +1,5 @@
 import { DayOfWeek } from '@prisma/client';
-import { IsEnum,IsInt,IsNotEmpty,IsOptional,IsString,Matches,} from 'class-validator';
+import { IsEnum, IsInt, IsNotEmpty, IsOptional, IsString, Matches, } from 'class-validator';
 
 export class CreateCourseScheduleDto {
   @IsInt()
@@ -24,7 +24,7 @@ export class CreateCourseScheduleDto {
   })
   endTime: string;
 
-  @IsOptional()
-  @IsString()
-  room?: string;
+  @IsInt()
+  @IsNotEmpty()
+  roomId: number;
 }

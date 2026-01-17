@@ -36,6 +36,23 @@ const CourseCard = ({ course, onEdit, onDelete }) => {
                         : course.description}
                 </p>
 
+                <div className="course-card-price" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                    {course.discount && course.discount > 0 ? (
+                        <div>
+                            <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
+                                {course.price} ج.م
+                            </span>
+                            <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                {course.price - course.discount} ج.م
+                            </span>
+                        </div>
+                    ) : (
+                        <span style={{ fontWeight: 'bold' }}>
+                            {course.price ? `${course.price} ج.م` : 'مجاني'}
+                        </span>
+                    )}
+                </div>
+
                 <div className="course-card-meta">
                     <div className="course-meta-item">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

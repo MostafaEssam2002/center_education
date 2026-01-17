@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 04, 2026 at 08:09 PM
+-- Generation Time: Jan 10, 2026 at 07:10 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -11,8 +11,6 @@ SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
 SET time_zone = "+00:00";
 
-
-USE center_education;
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -22,6 +20,42 @@ USE center_education;
 --
 -- Database: `center_education`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `assignment`
+--
+
+CREATE TABLE `assignment` (
+  `id` int(11) NOT NULL,
+  `chapterId` int(11) NOT NULL,
+  `title` varchar(191) NOT NULL,
+  `description` varchar(191) DEFAULT NULL,
+  `dueDate` datetime(3) NOT NULL,
+  `maxGrade` int(11) NOT NULL,
+  `allowLate` tinyint(1) NOT NULL DEFAULT 1,
+  `createdBy` int(11) NOT NULL,
+  `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
+  `updatedAt` datetime(3) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `assignmentsubmission`
+--
+
+CREATE TABLE `assignmentsubmission` (
+  `id` int(11) NOT NULL,
+  `assignmentId` int(11) NOT NULL,
+  `studentId` int(11) NOT NULL,
+  `filePath` varchar(191) NOT NULL,
+  `submittedAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
+  `status` enum('SUBMITTED','LATE','REVIEWED') NOT NULL,
+  `grade` int(11) DEFAULT NULL,
+  `feedback` varchar(191) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
@@ -36,14 +70,6 @@ CREATE TABLE `attendance` (
   `status` enum('PRESENT','ABSENT','LATE') NOT NULL DEFAULT 'PRESENT',
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `attendance`
---
-
-INSERT INTO `attendance` (`id`, `sessionId`, `studentId`, `status`, `createdAt`) VALUES
-(8, 5, 16, 'PRESENT', '2026-01-01 12:49:19.106'),
-(9, 5, 15, 'ABSENT', '2026-01-01 12:49:19.106');
 
 -- --------------------------------------------------------
 
@@ -68,10 +94,10 @@ CREATE TABLE `chapter` (
 --
 
 INSERT INTO `chapter` (`id`, `title`, `content`, `videoPath`, `pdfPath`, `order`, `courseId`, `createdAt`, `updatedAt`) VALUES
-(4, 'chapter1', 'chapter1', '/videos/1767023058120-754837650.mp4', '/pdfs/1767023058139-358092834.pdf', 1, 9, '2025-12-29 15:44:18.151', '2025-12-29 15:44:18.151'),
-(5, 'CHAPTER 2 ', 'import {\n  CanActivate,\n  ExecutionContext,\n  Injectable,\n  ForbiddenException,\n} from \'@nestjs/common\';\nimport { PrismaService } from \'src/prisma/prisma.service\';\nimport { Role } from \'@pris', '/videos/1767023137631-51829886.mp4', '/pdfs/1767023137643-930340734.pdf', 2, 9, '2025-12-29 15:45:37.657', '2025-12-29 15:45:37.657'),
-(6, 'ch4', 'v454v54v54v', '/videos/1767029520976-761807342.mp4', '/pdfs/1767029521004-979311338.pdf', 3, 9, '2025-12-29 17:32:01.042', '2025-12-29 17:32:01.042'),
-(7, 'chapter 3 ', 'typescript', '/videos/1767036461910-100556933.mp4', NULL, 4, 9, '2025-12-29 19:27:41.998', '2025-12-29 19:27:41.998');
+(4, 'chapter1', 'chapter1', '/videos/1767023058120-754837650.mp4', '/pdfs/1767023058139-358092834.pdf', 1, 3, '2025-12-29 15:44:18.151', '2025-12-29 15:44:18.151'),
+(5, 'CHAPTER 2 ', 'import {\n  CanActivate,\n  ExecutionContext,\n  Injectable,\n  ForbiddenException,\n} from \'@nestjs/common\';\nimport { PrismaService } from \'src/prisma/prisma.service\';\nimport { Role } from \'@pris', '/videos/1767023137631-51829886.mp4', '/pdfs/1767023137643-930340734.pdf', 2, 3, '2025-12-29 15:45:37.657', '2025-12-29 15:45:37.657'),
+(6, 'ch4', 'v454v54v54v', '/videos/1767029520976-761807342.mp4', '/pdfs/1767029521004-979311338.pdf', 3, 3, '2025-12-29 17:32:01.042', '2025-12-29 17:32:01.042'),
+(7, 'chapter 3 ', 'typescript', '/videos/1767036461910-100556933.mp4', NULL, 4, 3, '2025-12-29 19:27:41.998', '2025-12-29 19:27:41.998');
 
 -- --------------------------------------------------------
 
@@ -109,9 +135,30 @@ CREATE TABLE `course` (
 --
 
 INSERT INTO `course` (`id`, `title`, `description`, `teacherId`, `image_path`, `createdAt`, `updatedAt`) VALUES
-(6, 'ATH 101', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 12:48:21.249', '2025-12-28 12:48:21.249'),
-(8, 'math 6', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 21:19:25.930', '2025-12-28 21:19:25.930'),
-(9, 'js', 'java script', 17, '/images/1767079738969-570493753.png', '2025-12-29 08:29:16.289', '2025-12-30 07:28:59.958');
+(1, 'ATH 101', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 12:48:21.249', '2025-12-28 12:48:21.249'),
+(2, 'math 6', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 21:19:25.930', '2025-12-28 21:19:25.930'),
+(3, 'js', 'java script', 17, '/images/1767079738969-570493753.png', '2025-12-29 08:29:16.289', '2025-12-30 07:28:59.958'),
+(4, 'Math 101', 'Basic Mathematics', 10, '/images/math.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(5, 'Math 102', 'Intermediate Mathematics', 10, '/images/math102.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(6, 'Physics 101', 'Basic Physics', 10, '/images/physics.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(7, 'Physics 102', 'Advanced Physics', 10, '/images/physics.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(8, 'Chemistry 101', 'Intro to Chemistry', 10, '/images/chemistry.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(9, 'Statistics 101', 'Statistics Basics', 10, '/images/stat.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(10, 'Algebra', 'Linear Algebra Course', 10, '/images/algebra.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(11, 'Calculus I', 'Limits & Derivatives', 10, '/images/calculus.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(12, 'JS Basics', 'JavaScript for Beginners', 17, '/images/js.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(13, 'Advanced JS', 'Deep JavaScript Concepts', 17, '/images/js.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(14, 'Node.js', 'Backend with Node.js', 17, '/images/node.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(15, 'Express.js', 'REST APIs with Express', 17, '/images/express.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(16, 'NestJS', 'Scalable Backend with NestJS', 17, '/images/nest.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(17, 'MySQL', 'Relational Database Basics', 17, '/images/mysql.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(18, 'Prisma ORM', 'Modern ORM with Prisma', 17, '/images/prisma.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(19, 'GraphQL', 'API with GraphQL', 17, '/images/graphql.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(20, 'HTML & CSS', 'Frontend Basics', 10, '/images/html.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(21, 'React Basics', 'Frontend with React', 17, '/images/react.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(22, 'TypeScript', 'Typed JavaScript', 17, '/images/ts.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(23, 'Git & GitHub', 'Version Control', 10, '/images/git.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000'),
+(24, 'Problem Solving', 'Algorithms Basics', 10, '/images/ps.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000');
 
 -- --------------------------------------------------------
 
@@ -122,26 +169,51 @@ INSERT INTO `course` (`id`, `title`, `description`, `teacherId`, `image_path`, `
 CREATE TABLE `courseschedule` (
   `id` int(11) NOT NULL,
   `courseId` int(11) NOT NULL,
+  `roomId` int(11) NOT NULL,
   `day` enum('SAT','SUN','MON','TUE','WED','THU','FRI') NOT NULL,
   `startTime` varchar(191) NOT NULL,
-  `endTime` varchar(191) NOT NULL,
-  `room` varchar(191) DEFAULT NULL
+  `endTime` varchar(191) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `courseschedule`
 --
 
-INSERT INTO `courseschedule` (`id`, `courseId`, `day`, `startTime`, `endTime`, `room`) VALUES
-(6, 6, 'SAT', '10:00', '11:00', 'Online'),
-(7, 8, 'SUN', '09:00', '10:00', 'Online'),
-(9, 6, 'SAT', '09:00', '10:00', 'Online'),
-(10, 9, 'SAT', '08:00', '09:00', 'Online'),
-(11, 9, 'SUN', '08:00', '09:00', 'Online'),
-(12, 9, 'MON', '08:00', '09:00', 'Online'),
-(13, 9, 'TUE', '08:00', '09:00', 'Online'),
-(14, 9, 'WED', '08:00', '09:00', 'Online'),
-(15, 9, 'THU', '08:00', '09:00', 'Online');
+INSERT INTO `courseschedule` (`id`, `courseId`, `roomId`, `day`, `startTime`, `endTime`) VALUES
+(82, 1, 1, 'SAT', '08:00', '09:30'),
+(83, 2, 2, 'SAT', '09:30', '11:00'),
+(84, 3, 3, 'SAT', '11:00', '12:30'),
+(86, 9, 7, 'SAT', '18:00', '19:30'),
+(87, 10, 8, 'SAT', '19:30', '21:00'),
+(88, 5, 1, 'SUN', '08:00', '09:30'),
+(89, 6, 4, 'SUN', '09:30', '11:00'),
+(90, 7, 5, 'SUN', '11:00', '12:30'),
+(91, 8, 6, 'SUN', '12:30', '14:00'),
+(92, 11, 9, 'SUN', '18:00', '19:30'),
+(93, 12, 10, 'SUN', '19:30', '21:00'),
+(94, 13, 2, 'MON', '08:00', '09:30'),
+(95, 14, 3, 'MON', '09:30', '11:00'),
+(96, 15, 4, 'MON', '11:00', '12:30'),
+(97, 16, 6, 'MON', '12:30', '14:00'),
+(98, 17, 7, 'MON', '18:00', '19:30'),
+(99, 18, 1, 'TUE', '09:00', '10:30'),
+(100, 19, 2, 'TUE', '10:30', '12:00'),
+(101, 20, 3, 'TUE', '12:00', '13:30'),
+(102, 9, 8, 'TUE', '18:00', '19:30'),
+(103, 10, 4, 'WED', '08:00', '09:30'),
+(104, 11, 5, 'WED', '09:30', '11:00'),
+(105, 12, 6, 'WED', '11:00', '12:30'),
+(106, 13, 7, 'WED', '18:00', '19:30'),
+(107, 14, 1, 'THU', '09:00', '10:30'),
+(108, 15, 2, 'THU', '10:30', '12:00'),
+(109, 16, 3, 'THU', '12:00', '13:30'),
+(110, 17, 9, 'THU', '18:00', '19:30'),
+(111, 19, 3, 'SAT', '08:00', '09:00'),
+(112, 20, 2, 'SAT', '08:00', '09:00'),
+(114, 6, 9, 'SAT', '08:00', '08:30'),
+(115, 6, 9, 'SAT', '08:30', '09:00'),
+(117, 6, 4, 'SAT', '08:30', '09:00'),
+(118, 5, 5, 'SAT', '08:00', '09:30');
 
 -- --------------------------------------------------------
 
@@ -155,16 +227,9 @@ CREATE TABLE `course_sessions` (
   `date` datetime(3) NOT NULL,
   `startTime` varchar(191) NOT NULL,
   `endTime` varchar(191) NOT NULL,
-  `room` varchar(191) DEFAULT NULL,
+  `roomId` int(11) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Dumping data for table `course_sessions`
---
-
-INSERT INTO `course_sessions` (`id`, `courseId`, `date`, `startTime`, `endTime`, `room`, `createdAt`) VALUES
-(5, 9, '2026-01-01 00:00:00.000', '14:49', '14:50', '', '2026-01-01 12:49:09.609');
 
 -- --------------------------------------------------------
 
@@ -184,11 +249,7 @@ CREATE TABLE `enrollment` (
 --
 
 INSERT INTO `enrollment` (`id`, `studentId`, `courseId`, `createdAt`) VALUES
-(1, 16, 9, '2025-12-29 16:07:22.781'),
-(5, 15, 9, '2025-12-29 16:12:08.788'),
-(6, 15, 6, '2025-12-31 12:09:48.317'),
-(7, 15, 8, '2025-12-31 12:09:51.947'),
-(8, 19, 9, '2026-01-04 11:07:52.566');
+(1, 16, 3, '2026-01-10 07:39:30.649');
 
 -- --------------------------------------------------------
 
@@ -223,18 +284,18 @@ CREATE TABLE `quiz` (
   `totalMarks` int(11) NOT NULL,
   `keepAnswers` tinyint(1) NOT NULL DEFAULT 0,
   `isPublished` tinyint(1) NOT NULL DEFAULT 0,
+  `createdBy` int(11) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL,
-  `createdBy` int(11) NOT NULL
+  `updatedAt` datetime(3) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `quiz`
 --
 
-INSERT INTO `quiz` (`id`, `title`, `description`, `type`, `courseId`, `chapterId`, `startTime`, `endTime`, `durationMin`, `totalMarks`, `keepAnswers`, `isPublished`, `createdAt`, `updatedAt`, `createdBy`) VALUES
-(5, 'q1', 'q1', 'CHAPTER', 9, 4, '2026-01-03 19:22:00.000', '2026-01-03 20:22:00.000', 30, 10, 0, 1, '2026-01-03 19:22:25.000', '2026-01-03 19:25:44.949', 17),
-(6, 'q2', 'q2', 'CHAPTER', 9, 5, '2026-01-03 16:12:00.000', '2026-01-04 11:05:00.000', 1, 4, 0, 1, '2026-01-03 20:12:57.241', '2026-01-04 11:01:20.970', 17);
+INSERT INTO `quiz` (`id`, `title`, `description`, `type`, `courseId`, `chapterId`, `startTime`, `endTime`, `durationMin`, `totalMarks`, `keepAnswers`, `isPublished`, `createdBy`, `createdAt`, `updatedAt`) VALUES
+(5, 'q1', 'q1', 'CHAPTER', 3, 4, '2026-01-03 19:22:00.000', '2026-01-03 20:22:00.000', 30, 10, 0, 1, 17, '2026-01-03 19:22:25.000', '2026-01-03 19:25:44.949'),
+(6, 'q2', 'q2', 'CHAPTER', 3, 5, '2026-01-03 16:12:00.000', '2026-01-04 11:05:00.000', 1, 4, 0, 1, 17, '2026-01-03 20:12:57.241', '2026-01-04 11:01:20.970');
 
 -- --------------------------------------------------------
 
@@ -349,6 +410,42 @@ INSERT INTO `quizquestion` (`id`, `quizId`, `question`, `marks`, `createdAt`) VA
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `room`
+--
+
+CREATE TABLE `room` (
+  `id` int(11) NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `type` enum('ONLINE','OFFLINE') NOT NULL,
+  `capacity` int(11) DEFAULT NULL,
+  `location` varchar(191) DEFAULT NULL,
+  `isActive` tinyint(1) NOT NULL DEFAULT 1,
+  `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
+  `updatedAt` datetime(3) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `room`
+--
+
+INSERT INTO `room` (`id`, `name`, `type`, `capacity`, `location`, `isActive`, `createdAt`, `updatedAt`) VALUES
+(1, 'Room A', 'OFFLINE', 30, 'Building A - Floor 1', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(2, 'Room B', 'OFFLINE', 25, 'Building A - Floor 2', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(3, 'Room C', 'OFFLINE', 40, 'Building B - Floor 1', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(4, 'Lab 1', 'OFFLINE', 20, 'Building C - Lab Area', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(5, 'Lab 2', 'OFFLINE', 15, 'Building C - Lab Area', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(6, 'Hall 1', 'OFFLINE', 60, 'Main Building - Ground Floor', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(7, 'Zoom Room 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(8, 'Zoom Room 2', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(9, 'Google Meet 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(10, 'Teams Room 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(27, 'room vip', 'OFFLINE', 500, 'city starts', 0, '2026-01-10 09:04:34.030', '2026-01-10 09:05:31.595'),
+(28, 'asd', 'OFFLINE', 222, 'sadsadsa', 0, '2026-01-10 09:06:29.701', '2026-01-10 09:06:38.319'),
+(29, 'test', 'OFFLINE', 1, 'palm stip', 1, '2026-01-10 17:38:16.460', '2026-01-10 17:38:16.460');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user`
 --
 
@@ -407,16 +504,28 @@ CREATE TABLE `_prisma_migrations` (
 --
 
 INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) VALUES
-('20691a09-7b87-4eae-90d5-d805e4ebaa05', '911d2b28f4617746d7c32ac408c6d1bddd957b63b4e8df80539a040ace94d5bd', '2026-01-01 18:28:19.308', '20260101182819_make_course_id_nullable', NULL, NULL, '2026-01-01 18:28:19.197', 1),
-('8bee913f-09f1-4747-8d21-5bb321fb08c9', '742c8d51db2bfed7967268fd9be58472e6bc2555a340d006792c290f38903e25', '2026-01-01 09:21:12.972', '20260101092112_add_attendance_table_and_course_session_table', NULL, NULL, '2026-01-01 09:21:12.795', 1),
-('90c7c8bc-2210-4818-80e4-a835dcf28c88', 'a7c178af5b88a1a27d76c06f55c556d97ac853586e06c0e195af6a279d7d33e7', '2026-01-01 15:01:41.827', '20260101150140_add_quiz_system', NULL, NULL, '2026-01-01 15:01:40.260', 1),
-('a65b3c52-9ebc-4a7d-99fa-568dcf658e01', 'c9512a2d70f61c7013b0d989caf00d718ca572581a7f7af8782b37fa852c97a1', '2026-01-02 09:50:42.283', '20260102095042_add_quiz_created_by', NULL, NULL, '2026-01-02 09:50:42.235', 1),
-('d6be65ae-2bee-40b3-8670-6fab2f3e2446', '5ca12e52e4afd53344eb5e575b5c475d7ba0e56f28437661e018941983e9acf1', '2025-12-31 08:43:25.118', '20251231083651_add_course_schedule_table', NULL, NULL, '2025-12-31 08:43:24.543', 1),
-('e97b7f58-3985-419b-aefa-ee1cf4645ef8', '85679eabd81abbf43b01e9ee2d6c0c7419187e3251e38722f45d64e7d27bdfa2', '2026-01-03 09:22:55.160', '20260103092255_update_constraint', NULL, NULL, '2026-01-03 09:22:55.145', 1);
+('828fd9ae-85a9-4d6d-a250-f18b386b81e9', '87c17b3cc385b70da7f48a2dd92a1d143c7492109a8717c411f9e762e77e7e5d', '2026-01-10 06:54:48.074', '20260110065440_add_all_tables', NULL, NULL, '2026-01-10 06:54:40.952', 1);
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `assignment`
+--
+ALTER TABLE `assignment`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `assignment_chapterId_idx` (`chapterId`),
+  ADD KEY `assignment_createdBy_idx` (`createdBy`);
+
+--
+-- Indexes for table `assignmentsubmission`
+--
+ALTER TABLE `assignmentsubmission`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `assignmentsubmission_assignmentId_studentId_key` (`assignmentId`,`studentId`),
+  ADD KEY `assignmentsubmission_studentId_idx` (`studentId`),
+  ADD KEY `assignmentsubmission_assignmentId_idx` (`assignmentId`);
 
 --
 -- Indexes for table `attendance`
@@ -456,15 +565,17 @@ ALTER TABLE `course`
 --
 ALTER TABLE `courseschedule`
   ADD PRIMARY KEY (`id`),
-  ADD UNIQUE KEY `idx_course_schedule_day_time_room` (`day`,`startTime`,`room`),
-  ADD KEY `idx_course_schedule_course_id` (`courseId`),
-  ADD KEY `idx_course_schedule_day` (`day`);
+  ADD UNIQUE KEY `courseschedule_day_startTime_roomId_key` (`day`,`startTime`,`roomId`),
+  ADD KEY `courseschedule_courseId_idx` (`courseId`),
+  ADD KEY `courseschedule_day_idx` (`day`),
+  ADD KEY `courseschedule_roomId_idx` (`roomId`);
 
 --
 -- Indexes for table `course_sessions`
 --
 ALTER TABLE `course_sessions`
   ADD PRIMARY KEY (`id`),
+  ADD KEY `course_sessions_roomId_idx` (`roomId`),
   ADD KEY `course_sessions_courseId_idx` (`courseId`);
 
 --
@@ -493,7 +604,7 @@ ALTER TABLE `quiz`
   ADD PRIMARY KEY (`id`),
   ADD KEY `Quiz_courseId_idx` (`courseId`),
   ADD KEY `Quiz_chapterId_idx` (`chapterId`),
-  ADD KEY `Quiz_createdBy_fkey` (`createdBy`);
+  ADD KEY `idx_quiz_created_by` (`createdBy`);
 
 --
 -- Indexes for table `quizattempt`
@@ -528,6 +639,13 @@ ALTER TABLE `quizquestion`
   ADD KEY `QuizQuestion_quizId_idx` (`quizId`);
 
 --
+-- Indexes for table `room`
+--
+ALTER TABLE `room`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `room_name_key` (`name`);
+
+--
 -- Indexes for table `user`
 --
 ALTER TABLE `user`
@@ -546,10 +664,22 @@ ALTER TABLE `_prisma_migrations`
 --
 
 --
+-- AUTO_INCREMENT for table `assignment`
+--
+ALTER TABLE `assignment`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `assignmentsubmission`
+--
+ALTER TABLE `assignmentsubmission`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `chapter`
@@ -567,31 +697,31 @@ ALTER TABLE `chapterprogress`
 -- AUTO_INCREMENT for table `course`
 --
 ALTER TABLE `course`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 --
 -- AUTO_INCREMENT for table `courseschedule`
 --
 ALTER TABLE `courseschedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=119;
 
 --
 -- AUTO_INCREMENT for table `course_sessions`
 --
 ALTER TABLE `course_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `enrollmentrequest`
 --
 ALTER TABLE `enrollmentrequest`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `quiz`
@@ -603,7 +733,7 @@ ALTER TABLE `quiz`
 -- AUTO_INCREMENT for table `quizattempt`
 --
 ALTER TABLE `quizattempt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
 
 --
 -- AUTO_INCREMENT for table `quizattemptanswer`
@@ -624,6 +754,12 @@ ALTER TABLE `quizquestion`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
+-- AUTO_INCREMENT for table `room`
+--
+ALTER TABLE `room`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=30;
+
+--
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
@@ -634,10 +770,24 @@ ALTER TABLE `user`
 --
 
 --
+-- Constraints for table `assignment`
+--
+ALTER TABLE `assignment`
+  ADD CONSTRAINT `assignment_chapterId_fkey` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `assignment_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `assignmentsubmission`
+--
+ALTER TABLE `assignmentsubmission`
+  ADD CONSTRAINT `assignmentsubmission_assignmentId_fkey` FOREIGN KEY (`assignmentId`) REFERENCES `assignment` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `assignmentsubmission_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+
+--
 -- Constraints for table `attendance`
 --
 ALTER TABLE `attendance`
-  ADD CONSTRAINT `attendance_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `course_sessions` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `attendance_sessionId_fkey` FOREIGN KEY (`sessionId`) REFERENCES `course_sessions` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `attendance_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
@@ -650,7 +800,7 @@ ALTER TABLE `chapter`
 -- Constraints for table `chapterprogress`
 --
 ALTER TABLE `chapterprogress`
-  ADD CONSTRAINT `fk_chapter_progress_chapter` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_chapter_progress_chapter` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_chapter_progress_user` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
@@ -663,62 +813,64 @@ ALTER TABLE `course`
 -- Constraints for table `courseschedule`
 --
 ALTER TABLE `courseschedule`
-  ADD CONSTRAINT `fk_course_schedule_course` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `courseschedule_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `courseschedule_roomId_fkey` FOREIGN KEY (`roomId`) REFERENCES `room` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `course_sessions`
 --
 ALTER TABLE `course_sessions`
-  ADD CONSTRAINT `course_sessions_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `course_sessions_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `course_sessions_roomId_fkey` FOREIGN KEY (`roomId`) REFERENCES `room` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  ADD CONSTRAINT `fk_enrollment_course` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_enrollment_course` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_enrollment_user` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `enrollmentrequest`
 --
 ALTER TABLE `enrollmentrequest`
-  ADD CONSTRAINT `fk_enrollment_request_course` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `fk_enrollment_request_course` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_enrollment_request_user` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `quiz`
 --
 ALTER TABLE `quiz`
-  ADD CONSTRAINT `Quiz_chapterId_fkey` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `Quiz_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE SET NULL ON UPDATE CASCADE,
-  ADD CONSTRAINT `Quiz_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `quiz_chapterId_fkey` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `quiz_courseId_fkey` FOREIGN KEY (`courseId`) REFERENCES `course` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `quiz_createdBy_fkey` FOREIGN KEY (`createdBy`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `quizattempt`
 --
 ALTER TABLE `quizattempt`
-  ADD CONSTRAINT `QuizAttempt_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quiz` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `QuizAttempt_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `quizattempt_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quiz` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `quizattempt_studentId_fkey` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `quizattemptanswer`
 --
 ALTER TABLE `quizattemptanswer`
-  ADD CONSTRAINT `QuizAttemptAnswer_attemptId_fkey` FOREIGN KEY (`attemptId`) REFERENCES `quizattempt` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `QuizAttemptAnswer_optionId_fkey` FOREIGN KEY (`optionId`) REFERENCES `quizoption` (`id`) ON UPDATE CASCADE,
-  ADD CONSTRAINT `QuizAttemptAnswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `quizquestion` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `quizattemptanswer_attemptId_fkey` FOREIGN KEY (`attemptId`) REFERENCES `quizattempt` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `quizattemptanswer_optionId_fkey` FOREIGN KEY (`optionId`) REFERENCES `quizoption` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `quizattemptanswer_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `quizquestion` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `quizoption`
 --
 ALTER TABLE `quizoption`
-  ADD CONSTRAINT `QuizOption_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `quizquestion` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `quizoption_questionId_fkey` FOREIGN KEY (`questionId`) REFERENCES `quizquestion` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
 -- Constraints for table `quizquestion`
 --
 ALTER TABLE `quizquestion`
-  ADD CONSTRAINT `QuizQuestion_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quiz` (`id`) ON UPDATE CASCADE;
+  ADD CONSTRAINT `quizquestion_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quiz` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

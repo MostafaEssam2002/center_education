@@ -12,10 +12,12 @@ import Chapters from './pages/Chapters';
 import ChapterDetail from './pages/ChapterDetail';
 import EnrollmentRequests from './pages/EnrollmentRequests';
 import MyEnrollments from './pages/MyEnrollments';
+import PendingPayments from './pages/PendingPayments';
 import CourseStudents from './pages/CourseStudents';
 import Schedule from './pages/Schedule';
 import Attendance from './pages/Attendance';
 import StudentSchedule from './pages/StudentSchedule';
+import RoomManagement from './pages/RoomManagement';
 import ManageQuizzes from './pages/ManageQuizzes';
 import CreateQuiz from './pages/CreateQuiz';
 import EditQuiz from './pages/EditQuiz';
@@ -112,6 +114,14 @@ function App() {
                 }
               />
               <Route
+                path="/pending-payments"
+                element={
+                  <ProtectedRoute>
+                    <PendingPayments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/schedule"
                 element={
                   <ProtectedRoute>
@@ -132,6 +142,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Attendance />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/rooms"
+                element={
+                  <ProtectedRoute>
+                    <RoomManagement />
                   </ProtectedRoute>
                 }
               />

@@ -192,6 +192,23 @@ const MyEnrollments = () => {
                                             {enrollment.course?.description?.length > 120 ? '...' : ''}
                                         </p>
 
+                                        <div className="course-card-price" style={{ marginTop: '10px', marginBottom: '10px' }}>
+                                            {enrollment.course?.discount && enrollment.course?.discount > 0 ? (
+                                                <div>
+                                                    <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
+                                                        {enrollment.course?.price} ج.م
+                                                    </span>
+                                                    <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                                        {enrollment.course?.price - enrollment.course?.discount} ج.م
+                                                    </span>
+                                                </div>
+                                            ) : (
+                                                <span style={{ fontWeight: 'bold' }}>
+                                                    {enrollment.course?.price ? `${enrollment.course?.price} ج.م` : 'مجاني'}
+                                                </span>
+                                            )}
+                                        </div>
+
                                         <div className="course-card-meta">
                                             {enrollment.course?.teacher && (
                                                 <div className="course-meta-item">

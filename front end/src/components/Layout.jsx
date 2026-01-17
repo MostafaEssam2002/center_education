@@ -66,9 +66,14 @@ const Layout = ({ children }) => {
             )}
 
             {!isStudent && (
-              <Link to="/schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
-                الجدول العام
-              </Link>
+              <>
+                <Link to="/schedule" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                  الجدول العام
+                </Link>
+                <Link to="/rooms" className="btn btn-primary" style={{ textDecoration: 'none' }}>
+                  إدارة الغرف
+                </Link>
+              </>
             )}
 
             {isTeacher && (
@@ -98,6 +103,9 @@ const Layout = ({ children }) => {
                 </Link>
                 <Link to="/my-assignments" className="btn btn-primary" style={{ textDecoration: 'none' }}>
                   واجباتي
+                </Link>
+                <Link to="/pending-payments" className="btn btn-primary" style={{ textDecoration: 'none', backgroundColor: '#ffd700', borderColor: '#ffd700', color: '#000' }}>
+                  💰 مدفوعات
                 </Link>
               </>
             )}

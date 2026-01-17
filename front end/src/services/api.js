@@ -145,6 +145,14 @@ export const enrollmentAPI = {
   // Teacher/Admin rejects an enrollment request
   rejectRequest: (courseId, studentId) =>
     api.delete(`/enrollment/request/${courseId}/${studentId}`),
+
+  // Student confirms payment after teacher approval
+  confirmPayment: (courseId) =>
+    api.post(`/enrollment/confirm-payment/${courseId}`),
+
+  // Student gets their own requests
+  getMyRequests: () =>
+    api.get('/enrollment/my-requests'),
 };
 
 // Chapter Progress API
@@ -177,6 +185,21 @@ export const courseScheduleAPI = {
 
   findStudentSchedule: () =>
     api.get('/course-schedule/student'),
+};
+
+// Room API
+export const roomAPI = {
+  findAll: () =>
+    api.get('/room'),
+
+  create: (roomData) =>
+    api.post('/room', roomData),
+
+  update: (id, roomData) =>
+    api.patch(`/room/${id}`, roomData),
+
+  remove: (id) =>
+    api.delete(`/room/${id}`),
 };
 
 // Attendance API

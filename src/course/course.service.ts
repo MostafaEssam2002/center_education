@@ -14,7 +14,9 @@ export class CourseService {
         title: createCourseDto.title,
         description: createCourseDto.description,
         teacherId: createCourseDto.teacherId,
-        image_path: createCourseDto.imagePath || createCourseDto.image_path
+        image_path: createCourseDto.imagePath || createCourseDto.image_path,
+        price: createCourseDto.price,
+        discount: createCourseDto.discount
       },
       include: {
         teacher: true,
@@ -29,6 +31,11 @@ export class CourseService {
         teacher: true,
         chapters: true, // اختياري
         enrollments: true,
+        schedules: {
+          include: {
+            room: true
+          }
+        },
         _count: {
           select: { requests: true }
         }
@@ -66,7 +73,9 @@ export class CourseService {
       data: {
         title: dto.title,
         description: dto.description,
-        image_path: dto.imagePath || dto.image_path
+        image_path: dto.imagePath || dto.image_path,
+        price: dto.price,
+        discount: dto.discount
       },
     });
   }

@@ -13,4 +13,10 @@ export class CreateCourseDto {
     image_path?: string;
     @IsOptional()
     imagePath?: string;
+    @IsOptional()
+    @IsNumber()
+    price?: number;
+    @IsOptional()
+    @IsNumber()
+    discount?: number;
 }
