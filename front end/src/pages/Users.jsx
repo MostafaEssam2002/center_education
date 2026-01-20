@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { userAPI } from '../services/api';
+import { userAPI, API_BASE_URL } from '../services/api';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -9,8 +9,6 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({});
-
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
   useEffect(() => {
     loadUsers();
@@ -34,7 +32,7 @@ const Users = () => {
       loadUsers();
       return;
     }
-    
+
     setLoading(true);
     setError('');
     try {
@@ -50,7 +48,7 @@ const Users = () => {
 
   const handleDelete = async (id) => {
     if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
-    
+
     try {
       await userAPI.remove(id);
       loadUsers();

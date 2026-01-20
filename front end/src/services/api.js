@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
+export const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -325,6 +325,13 @@ export const assignmentAPI = {
   // Delete assignment
   delete: (id) =>
     api.delete(`/assignments/${id}`),
+};
+
+// Payment API
+export const paymentAPI = {
+  // Student initiates payment for enrollment request
+  initiatePayment: (enrollmentRequestId, integration_id, walletPhoneNumber) =>
+    api.post('/payments/initiate', { enrollmentRequestId, integration_id, walletPhoneNumber }),
 };
 
 export default api;

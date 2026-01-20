@@ -1,11 +1,9 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { chapterAPI, courseAPI } from '../services/api';
+import { chapterAPI, courseAPI, API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import VideoPlayer from '../components/VideoPlayer';
 import PDFViewer from '../components/PDFViewer';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 const getFullUrl = (path) => {
     if (!path) return '';

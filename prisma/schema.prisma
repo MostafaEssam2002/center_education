@@ -14,6 +14,12 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum PaymentStatus {
+  PENDING
+  PAID
+  FAILED
+}
+
 enum Role {
   USER
   STUDENT
@@ -105,6 +111,7 @@ model Course {
   updatedAt     DateTime            @updatedAt
   CourseSession CourseSession[]
   Quiz          Quiz[]
+  Payment       Payment[]
 
   @@index([teacherId], map: "idx_course_teacher_id")
   @@map("course")
@@ -117,6 +124,7 @@ model User {
   last_name             String?
   image_path            String?
   age                   Int?
+  payments              Payment[]
   password              String
   phone                 String?
   address               String?
@@ -159,8 +167,9 @@ model EnrollmentRequest {
   status    EnrollmentRequestStatus @default(SENT)
   createdAt DateTime                @default(now())
 
-  student User   @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
-  course  Course @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
+  student User     @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
+  course  Course   @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
+  Payment Payment?
 
   @@unique([studentId, courseId], name: "unique_enrollment_request_student_course", map: "idx_enrollment_request_student_course")
   @@index([studentId], map: "idx_enrollment_request_student_id")
@@ -418,4 +427,26 @@ model Room {
   updatedAt DateTime @updatedAt
 
   @@map("room")
+}
+
+model Payment {
+  id                  Int @id @default(autoincrement())
+  userId              Int
+  courseId            Int
+  enrollmentRequestId Int
+
+  amountCents Int
+  status      PaymentStatus @default(PENDING)
+
+  paymobOrderId Int?
+  transactionId Int?
+
+  user      User              @relation(fields: [userId], references: [id])
+  course    Course            @relation(fields: [courseId], references: [id])
+  request   EnrollmentRequest @relation(fields: [enrollmentRequestId], references: [id], onDelete: Cascade)
+  createdAt DateTime          @default(now())
+
+  @@unique([enrollmentRequestId])
+  @@index([userId])
+  @@index([courseId])
 }

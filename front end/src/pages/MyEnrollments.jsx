@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { enrollmentAPI, chapterProgressAPI } from '../services/api';
+import { enrollmentAPI, chapterProgressAPI, API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
 const MyEnrollments = () => {
@@ -159,7 +159,7 @@ const MyEnrollments = () => {
                             const getImageUrl = (path) => {
                                 if (!path) return null;
                                 if (path.startsWith('http')) return path;
-                                return `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000'}/${path}`;
+                                return `${API_BASE_URL}/${path}`;
                             };
 
                             const imageUrl = getImageUrl(enrollment.course?.image_path);

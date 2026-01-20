@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { assignmentAPI } from '../services/api';
+import { assignmentAPI, API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000';
 
 const getFullUrl = (path) => {
     if (!path) return '';

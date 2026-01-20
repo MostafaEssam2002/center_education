@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Plus, Trash2, CheckCircle, ArrowLeft, X, Save, AlertCircle, FileQuestion } from 'lucide-react';
 import { quizAPI, quizQuestionAPI, quizOptionAPI } from '../services/api';
 import { useToast } from '../context/ToastContext';
 import ConfirmationModal from '../components/ConfirmationModal';
+import './ManageQuestions.css';
 
 export default function ManageQuestions() {
     const { quizId } = useParams();
@@ -14,12 +17,13 @@ export default function ManageQuestions() {
     const [error, setError] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
 
+    // Initial state with stable IDs for the form
     const [newQuestion, setNewQuestion] = useState({
         question: '',
         marks: 1,
         options: [
-            { text: '', isCorrect: true },
-            { text: '', isCorrect: false },
+            { id: `opt-${Date.now()}-1`, text: '', isCorrect: true },
+            { id: `opt-${Date.now()}-2`, text: '', isCorrect: false },
         ],
     });
 
@@ -60,34 +64,33 @@ export default function ManageQuestions() {
         }
         setNewQuestion(prev => ({
             ...prev,
-            options: [...prev.options, { text: '', isCorrect: false }],
+            options: [...prev.options, { id: `opt-${Date.now()}`, text: '', isCorrect: false }],
         }));
     };
 
-    const handleRemoveOption = (index) => {
+    const handleRemoveOption = (id) => {
         if (newQuestion.options.length <= 2) {
             showToast('Minimum 2 options required', 'info');
             return;
         }
         setNewQuestion(prev => ({
             ...prev,
-            options: prev.options.filter((_, i) => i !== index),
+            options: prev.options.filter(opt => opt.id !== id),
         }));
     };
 
-    const handleOptionChange = (index, field, value) => {
+    const handleOptionChange = (id, field, value) => {
         setNewQuestion(prev => {
-            const newOptions = [...prev.options];
-
-            if (field === 'isCorrect' && value) {
-                // Only one option can be correct
-                newOptions.forEach((opt, i) => {
-                    opt.isCorrect = i === index;
-                });
-            } else {
-                newOptions[index] = { ...newOptions[index], [field]: value };
-            }
-
+            const newOptions = prev.options.map(opt => {
+                if (opt.id === id) {
+                    return { ...opt, [field]: value };
+                }
+                // If setting this option as correct, uncheck others
+                if (field === 'isCorrect' && value === true) {
+                    return { ...opt, isCorrect: false };
+                }
+                return opt;
+            });
             return { ...prev, options: newOptions };
         });
     };
@@ -96,7 +99,6 @@ export default function ManageQuestions() {
         e.preventDefault();
         setError('');
 
-        // Validation
         if (!newQuestion.question.trim()) {
             showToast('Question text is required', 'error');
             return;
@@ -136,12 +138,13 @@ export default function ManageQuestions() {
 
             showToast('Question added successfully!', 'success');
             setShowAddForm(false);
+            // Reset form with new IDs
             setNewQuestion({
                 question: '',
                 marks: 1,
                 options: [
-                    { text: '', isCorrect: true },
-                    { text: '', isCorrect: false },
+                    { id: `opt-${Date.now()}-1`, text: '', isCorrect: true },
+                    { id: `opt-${Date.now()}-2`, text: '', isCorrect: false },
                 ],
             });
             fetchQuizAndQuestions();
@@ -204,17 +207,17 @@ export default function ManageQuestions() {
 
     if (loading && !quiz) {
         return (
-            <div className="container">
-                <div className="loading-spinner">
-                    <div className="spinner"></div>
-                    <p>Loading...</p>
-                </div>
+            <div className="mq-container" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+                <div className="loading-spinner" style={{ borderTopColor: '#2563eb', borderRightColor: '#2563eb' }}></div>
             </div>
         );
     }
 
+    const totalMarks = questions.reduce((sum, q) => sum + q.marks, 0);
+    const isMarksValid = quiz && totalMarks === quiz.totalMarks;
+
     return (
-        <div className="container">
+        <div className="mq-container">
             <ConfirmationModal
                 isOpen={confirmModal.isOpen}
                 onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
@@ -225,48 +228,64 @@ export default function ManageQuestions() {
                 cancelText={confirmModal.cancelText}
                 onConfirm={confirmModal.onConfirm}
             />
-            <div className="page-header">
-                <div>
+
+            <motion.div
+                initial={{ y: -20, opacity: 0 }}
+                animate={{ y: 0, opacity: 1 }}
+                className="mq-header"
+            >
+                <div className="mq-title-section">
                     <h1>Manage Questions</h1>
                     {quiz && (
                         <>
-                            <p className="subtitle">{quiz.title}</p>
-                            <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
-                                <span className="badge" style={{ backgroundColor: '#0d6efd' }}>
+                            <p className="mq-subtitle">{quiz.title}</p>
+                            <div className="mq-stats">
+                                <span className="mq-stat-badge primary">
+                                    <FileQuestion size={14} />
                                     {questions.length} Questions
                                 </span>
-                                <span className={`badge ${questions.reduce((sum, q) => sum + q.marks, 0) === quiz.totalMarks ? 'badge-success' : 'badge-warning'}`}
-                                    style={{ backgroundColor: questions.reduce((sum, q) => sum + q.marks, 0) === quiz.totalMarks ? '#198754' : '#dc3545' }}>
-                                    Total Marks: {questions.reduce((sum, q) => sum + q.marks, 0)} / {quiz.totalMarks}
+                                <span className={`mq-stat-badge ${isMarksValid ? 'success' : 'warning'}`}>
+                                    <CheckCircle size={14} />
+                                    Marks: {totalMarks} / {quiz.totalMarks}
                                 </span>
                             </div>
-                            {questions.reduce((sum, q) => sum + q.marks, 0) !== quiz.totalMarks && (
-                                <div className="alert alert-warning" style={{ marginTop: '10px', padding: '0.5rem' }}>
-                                    ⚠️ Warning: Start adding/removing questions or adjust marks. The total ({questions.reduce((sum, q) => sum + q.marks, 0)}) must equal ({quiz.totalMarks}) to publish.
-                                </div>
-                            )}
                         </>
                     )}
                 </div>
                 <div style={{ display: 'flex', gap: '10px' }}>
                     {quiz && !quiz.isPublished && (
                         <button
-                            className="btn btn-success"
+                            className="mq-btn mq-btn-primary"
                             onClick={handlePublish}
-                            disabled={questions.length === 0 || questions.reduce((sum, q) => sum + q.marks, 0) !== quiz.totalMarks}
-                            title={questions.reduce((sum, q) => sum + q.marks, 0) !== quiz.totalMarks ? "Total marks must match quiz total to publish" : "Publish Quiz"}
+                            disabled={!isMarksValid || questions.length === 0}
+                            title={!isMarksValid ? "Total marks must match quiz total to publish" : "Publish Quiz"}
+                            style={{ opacity: (!isMarksValid || questions.length === 0) ? 0.6 : 1 }}
                         >
                             Publish Quiz
                         </button>
                     )}
                     <button
-                        className="btn btn-secondary"
+                        className="mq-btn mq-btn-secondary"
                         onClick={() => navigate(-1)}
                     >
-                        Back
+                        <ArrowLeft size={16} /> Back
                     </button>
                 </div>
-            </div>
+            </motion.div>
+
+            {quiz && !isMarksValid && (
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="alert alert-warning"
+                    style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}
+                >
+                    <AlertCircle size={20} />
+                    <span>
+                        Warning: The total marks of questions ({totalMarks}) must equal the quiz total marks ({quiz.totalMarks}) to publish.
+                    </span>
+                </motion.div>
+            )}
 
             {error && (
                 <div className="alert alert-error">
@@ -274,151 +293,199 @@ export default function ManageQuestions() {
                 </div>
             )}
 
-            {/* Existing Questions */}
-            {questions.length > 0 && (
-                <div className="questions-list">
-                    <h2>Questions ({questions.length})</h2>
+            <div className="mq-question-list">
+                <AnimatePresence>
                     {questions.map((question, index) => (
-                        <div key={question.id} className="question-card">
-                            <div className="question-header">
-                                <h3>Question {index + 1}</h3>
-                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                    <span className="badge" style={{ backgroundColor: '#198754' }}>
-                                        {question.marks} {question.marks === 1 ? 'Mark' : 'Marks'}
+                        <motion.div
+                            key={question.id}
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.2 }}
+                            className="mq-question-card"
+                        >
+                            <div className="mq-q-header">
+                                <div>
+                                    <div className="mq-q-number">Question {index + 1}</div>
+                                    <div className="mq-q-text">{question.question}</div>
+                                </div>
+                                <div className="mq-q-actions">
+                                    <span className="mq-stat-badge success">
+                                        {question.marks} Mark{question.marks !== 1 && 's'}
                                     </span>
                                     {!quiz?.isPublished && (
                                         <button
-                                            className="btn-icon btn-danger"
+                                            className="mq-icon-btn danger"
                                             onClick={() => handleDeleteQuestion(question.id)}
                                             title="Delete Question"
                                         >
-                                            🗑️
+                                            <Trash2 size={18} />
                                         </button>
                                     )}
                                 </div>
                             </div>
-                            <p className="question-text">{question.question}</p>
-                            <div className="options-list">
+                            <div className="mq-options-grid">
                                 {question.options?.map((option, optIndex) => (
                                     <div
                                         key={option.id}
-                                        className={`option-item ${option.isCorrect ? 'correct-option' : ''}`}
+                                        className={`mq-option ${option.isCorrect ? 'correct' : ''}`}
                                     >
-                                        <span className="option-label">{String.fromCharCode(65 + optIndex)}.</span>
+                                        <span className="mq-option-marker">
+                                            {String.fromCharCode(65 + optIndex)}
+                                        </span>
                                         <span>{option.text}</span>
-                                        {option.isCorrect && <span className="correct-badge">✓ Correct</span>}
+                                        {option.isCorrect && <CheckCircle size={16} style={{ marginLeft: 'auto' }} />}
                                     </div>
                                 ))}
                             </div>
-                        </div>
+                        </motion.div>
                     ))}
-                </div>
-            )}
+                </AnimatePresence>
 
-            {/* Add Question Button/Form */}
+                {questions.length === 0 && !showAddForm && (
+                    <div className="mq-empty-state">
+                        <FileQuestion size={48} style={{ marginBottom: '16px', opacity: 0.5 }} />
+                        <h3>No questions yet</h3>
+                        <p>Click the button below to add your first question.</p>
+                    </div>
+                )}
+            </div>
+
             {!showAddForm && !quiz?.isPublished && (
-                <button
-                    className="btn btn-primary"
-                    style={{ marginTop: '20px', width: '100%' }}
-                    onClick={() => setShowAddForm(true)}
+                <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    style={{ marginTop: '24px' }}
                 >
-                    + Add New Question
-                </button>
+                    <button
+                        className="mq-add-option-btn"
+                        style={{ height: '60px', fontSize: '16px', border: '2px dashed #2563eb', color: '#2563eb', background: '#eff6ff' }}
+                        onClick={() => setShowAddForm(true)}
+                    >
+                        <Plus size={24} /> Add New Question
+                    </button>
+                </motion.div>
             )}
 
-            {showAddForm && (
-                <div className="add-question-form">
-                    <h2>Add New Question</h2>
-                    <form onSubmit={handleSubmitQuestion}>
-                        <div className="form-group">
-                            <label htmlFor="question">Question Text *</label>
-                            <textarea
-                                id="question"
-                                value={newQuestion.question}
-                                onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
-                                rows="3"
-                                placeholder="Enter your question here"
-                                required
-                            />
+            <AnimatePresence>
+                {showAddForm && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: 40 }}
+                        className="mq-form-container"
+                    >
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                            <h2 className="mq-form-title">Add New Question</h2>
+                            <button className="mq-icon-btn" onClick={() => setShowAddForm(false)}>
+                                <X size={24} />
+                            </button>
                         </div>
 
-                        <div className="form-group">
-                            <label htmlFor="marks">Marks *</label>
-                            <input
-                                type="number"
-                                id="marks"
-                                value={newQuestion.marks}
-                                onChange={(e) => setNewQuestion(prev => ({ ...prev, marks: e.target.value }))}
-                                min="1"
-                                style={{ maxWidth: '150px' }}
-                                required
-                            />
-                        </div>
+                        <form onSubmit={handleSubmitQuestion}>
+                            <div className="mq-input-group">
+                                <label className="mq-label" htmlFor="question">Question Text *</label>
+                                <textarea
+                                    id="question"
+                                    className="mq-input"
+                                    value={newQuestion.question}
+                                    onChange={(e) => setNewQuestion(prev => ({ ...prev, question: e.target.value }))}
+                                    rows="3"
+                                    placeholder="Type your question here..."
+                                    required
+                                />
+                            </div>
 
-                        <div className="form-group">
-                            <label>Options * (Select the correct answer)</label>
-                            {newQuestion.options.map((option, index) => (
-                                <div key={index} className="option-input-row">
-                                    <input
-                                        type="radio"
-                                        name="correctOption"
-                                        checked={option.isCorrect}
-                                        onChange={() => handleOptionChange(index, 'isCorrect', true)}
-                                    />
-                                    <span className="option-label">{String.fromCharCode(65 + index)}.</span>
-                                    <input
-                                        type="text"
-                                        value={option.text}
-                                        onChange={(e) => handleOptionChange(index, 'text', e.target.value)}
-                                        placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                        required
-                                    />
-                                    {newQuestion.options.length > 2 && (
-                                        <button
-                                            type="button"
-                                            className="btn-icon btn-danger"
-                                            onClick={() => handleRemoveOption(index)}
+                            <div className="mq-input-group">
+                                <label className="mq-label" htmlFor="marks">Marks *</label>
+                                <input
+                                    type="number"
+                                    id="marks"
+                                    className="mq-input"
+                                    value={newQuestion.marks}
+                                    onChange={(e) => setNewQuestion(prev => ({ ...prev, marks: e.target.value }))}
+                                    min="1"
+                                    style={{ maxWidth: '120px' }}
+                                    required
+                                />
+                            </div>
+
+                            <div className="mq-input-group">
+                                <label className="mq-label">Options * (Select correct answer)</label>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                    {newQuestion.options.map((option, index) => (
+                                        <motion.div
+                                            key={option.id}
+                                            initial={{ opacity: 0, x: -20 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            className="mq-input-row"
                                         >
-                                            ✕
-                                        </button>
-                                    )}
+                                            <input
+                                                type="radio"
+                                                name="correctOption"
+                                                className="mq-radio"
+                                                checked={option.isCorrect}
+                                                onChange={() => handleOptionChange(option.id, 'isCorrect', true)}
+                                                title="Mark as correct answer"
+                                            />
+                                            <span className="mq-option-marker" style={{ background: option.isCorrect ? '#2563eb' : '#f3f4f6', color: option.isCorrect ? 'white' : '#6b7280', border: 'none' }}>
+                                                {String.fromCharCode(65 + index)}
+                                            </span>
+                                            <input
+                                                type="text"
+                                                className="mq-input"
+                                                value={option.text}
+                                                onChange={(e) => handleOptionChange(option.id, 'text', e.target.value)}
+                                                placeholder={`Option ${String.fromCharCode(65 + index)}`}
+                                                style={{ flex: 1, border: option.isCorrect ? '1px solid #2563eb' : '1px solid #d1d5db', background: option.isCorrect ? '#eff6ff' : 'white' }}
+                                                required
+                                            />
+                                            {newQuestion.options.length > 2 && (
+                                                <button
+                                                    type="button"
+                                                    className="mq-delete-opt-btn"
+                                                    onClick={() => handleRemoveOption(option.id)}
+                                                    title="Remove option"
+                                                >
+                                                    <X size={18} />
+                                                </button>
+                                            )}
+                                        </motion.div>
+                                    ))}
                                 </div>
-                            ))}
+                            </div>
 
                             {newQuestion.options.length < 6 && (
                                 <button
                                     type="button"
-                                    className="btn btn-secondary"
+                                    className="mq-add-option-btn"
                                     onClick={handleAddOption}
-                                    style={{ marginTop: '10px' }}
+                                    style={{ marginTop: '12px' }}
                                 >
-                                    + Add Option
+                                    <Plus size={18} /> Add Another Option
                                 </button>
                             )}
-                        </div>
 
-                        <div className="form-actions">
-                            <button
-                                type="button"
-                                className="btn btn-secondary"
-                                onClick={() => {
-                                    setShowAddForm(false);
-                                    setError('');
-                                }}
-                            >
-                                Cancel
-                            </button>
-                            <button
-                                type="submit"
-                                className="btn btn-primary"
-                                disabled={loading}
-                            >
-                                {loading ? 'Adding...' : 'Add Question'}
-                            </button>
-                        </div>
-                    </form>
-                </div>
-            )}
+                            <div className="mq-form-actions">
+                                <button
+                                    type="button"
+                                    className="mq-btn mq-btn-secondary"
+                                    onClick={() => setShowAddForm(false)}
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    type="submit"
+                                    className="mq-btn mq-btn-primary"
+                                    disabled={loading}
+                                >
+                                    {loading ? 'Saving...' : <><Save size={18} /> Save Question</>}
+                                </button>
+                            </div>
+                        </form>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }

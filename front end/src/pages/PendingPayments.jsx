@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { enrollmentAPI, courseAPI } from '../services/api';
+import { enrollmentAPI, paymentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 import ConfirmationModal from '../components/ConfirmationModal';
@@ -12,6 +12,7 @@ const PendingPayments = () => {
 
     const [pendingRequests, setPendingRequests] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [paymentLoading, setPaymentLoading] = useState(false);
 
     const [confirmModal, setConfirmModal] = useState({
         isOpen: false,
@@ -23,6 +24,24 @@ const PendingPayments = () => {
 
     useEffect(() => {
         loadPendingPayments();
+
+        // Check for payment status in URL (returned from Paymob)
+        const urlParams = new URLSearchParams(window.location.search);
+        const paymentStatus = urlParams.get('payment');
+        const orderId = urlParams.get('order');
+
+        if (paymentStatus === 'success') {
+            showToast(`✅ تم الدفع بنجاح! جاري تفعيل الاشتراك...`, 'success');
+            // Refresh the list to remove the paid request
+            loadPendingPayments();
+        } else if (paymentStatus === 'failed') {
+            showToast(`❌ فشل الدفع. يرجى المحاولة مرة أخرى. (Order: ${orderId})`, 'error');
+        }
+
+        // Clean URL to remove query params
+        if (paymentStatus) {
+            window.history.replaceState({}, '', '/pending-payments');
+        }
     }, []);
 
     const loadPendingPayments = async () => {
@@ -40,26 +59,54 @@ const PendingPayments = () => {
         }
     };
 
-    const handlePayment = (courseId, courseName) => {
-        setConfirmModal({
-            isOpen: true,
-            title: 'تأكيد الدفع للدورة',
-            message: `حالياً نظام الدفع الإلكتروني قيد التطوير. 
-            هل قمت بدفع الرسوم للإدارة وتود تأكيد تفعيل اشتراكك يدوياً الآن؟`, // رسالة توضيحية مؤقتة
-            type: 'info',
-            confirmText: 'نعم، قمت بالدفع وتفعيل الاشتراك',
-            cancelText: 'إلغاء',
-            onConfirm: async () => {
-                try {
-                    await enrollmentAPI.confirmPayment(courseId);
-                    showToast('تم تفعيل الاشتراك بنجاح! 🎉', 'success');
-                    loadPendingPayments();
-                } catch (err) {
-                    showToast(err.response?.data?.message || 'فشل تأكيد الدفع', 'error');
-                }
-                setConfirmModal({ ...confirmModal, isOpen: false });
+    const [walletModal, setWalletModal] = useState({
+        isOpen: false,
+        request: null,
+        phoneNumber: ''
+    });
+
+    const handlePaymentClick = (request, type) => {
+        if (type === 'wallet') {
+            setWalletModal({
+                isOpen: true,
+                request: request,
+                phoneNumber: user?.phone || ''
+            });
+        } else {
+            processPayment(request, 'card');
+        }
+    };
+
+    const processPayment = async (request, type, walletPhoneNumber = null) => {
+        // Integration IDs
+        const INTEGRATION_IDS = {
+            CARD: Number(import.meta.env.VITE_PAYMOB_INTEGRATION_ID) || 5468545,
+            WALLET: 5470931
+        };
+
+        const integration_id = type === 'wallet' ? INTEGRATION_IDS.WALLET : INTEGRATION_IDS.CARD;
+
+        setPaymentLoading(true);
+        if (type === 'wallet') {
+            setWalletModal(prev => ({ ...prev, isOpen: false }));
+        }
+
+        try {
+            const response = await paymentAPI.initiatePayment(request.id, integration_id, walletPhoneNumber);
+            const { redirectUrl } = response.data;
+
+            // Redirect to Paymob payment page
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+            } else {
+                showToast('فشل في إنشاء رابط الدفع', 'error');
             }
-        });
+        } catch (err) {
+            console.error('Payment initiation failed:', err);
+            showToast(err.response?.data?.message || 'فشل بدء عملية الدفع', 'error');
+        } finally {
+            setPaymentLoading(false);
+        }
     };
 
     if (loading) {
@@ -78,6 +125,105 @@ const PendingPayments = () => {
                 cancelText={confirmModal.cancelText}
                 onConfirm={confirmModal.onConfirm}
             />
+
+            {/* Wallet Number Input Modal */}
+            {walletModal.isOpen && (
+                <div style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: 'rgba(0, 0, 0, 0.5)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    zIndex: 1000,
+                    backdropFilter: 'blur(5px)'
+                }} onClick={(e) => {
+                    if (e.target === e.currentTarget) setWalletModal({ ...walletModal, isOpen: false });
+                }}>
+                    <div style={{
+                        backgroundColor: 'white',
+                        padding: '30px',
+                        borderRadius: '20px',
+                        width: '90%',
+                        maxWidth: '400px',
+                        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                        animation: 'fadeIn 0.3s ease-out'
+                    }}>
+                        <h3 style={{ margin: '0 0 20px', color: '#1f2937', textAlign: 'center', fontSize: '1.5rem' }}>
+                            📱 رقم المحفظة الإلكترونية
+                        </h3>
+                        <p style={{ color: '#6b7280', marginBottom: '20px', textAlign: 'center' }}>
+                            من فضلك أدخل رقم الهاتف المرتبط بالمحفظة التي تريد الدفع منها.
+                        </p>
+
+                        <input
+                            type="tel"
+                            placeholder="01xxxxxxxxx"
+                            value={walletModal.phoneNumber}
+                            onChange={(e) => setWalletModal({ ...walletModal, phoneNumber: e.target.value })}
+                            autoFocus
+                            style={{
+                                width: '100%',
+                                padding: '12px 16px',
+                                border: '2px solid #e5e7eb',
+                                borderRadius: '10px',
+                                fontSize: '1.2rem',
+                                marginBottom: '24px',
+                                textAlign: 'center',
+                                outline: 'none',
+                                transition: 'border-color 0.2s'
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = '#4f46e5'}
+                            onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                        />
+
+                        <div style={{ display: 'flex', gap: '12px' }}>
+                            <button
+                                onClick={() => setWalletModal({ ...walletModal, isOpen: false })}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    backgroundColor: '#f3f4f6',
+                                    color: '#374151',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                إلغاء
+                            </button>
+                            <button
+                                onClick={() => {
+                                    if (!walletModal.phoneNumber || walletModal.phoneNumber.length < 11) {
+                                        showToast('يرجى إدخال رقم هاتف صحيح', 'error');
+                                        return;
+                                    }
+                                    processPayment(walletModal.request, 'wallet', walletModal.phoneNumber);
+                                }}
+                                style={{
+                                    flex: 1,
+                                    padding: '12px',
+                                    borderRadius: '10px',
+                                    border: 'none',
+                                    background: 'linear-gradient(135deg, #FF512F 0%, #DD2476 100%)',
+                                    color: 'white',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    boxShadow: '0 4px 6px -1px rgba(221, 36, 118, 0.3)'
+                                }}
+                            >
+                                متابعة للدفع
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <div className="card" style={{ border: 'none', background: 'transparent', boxShadow: 'none' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
@@ -190,21 +336,55 @@ const PendingPayments = () => {
                                         </div>
                                     </div>
 
-                                    <button
-                                        className="btn btn-primary"
-                                        style={{
-                                            width: '100%',
-                                            padding: '12px',
-                                            fontSize: '1em',
-                                            fontWeight: 'bold',
-                                            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                                            border: 'none',
-                                            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)'
-                                        }}
-                                        onClick={() => handlePayment(course.id, course.title)}
-                                    >
-                                        💳 الدفع الآن
-                                    </button>
+                                    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                        <button
+                                            className="btn"
+                                            style={{
+                                                width: '100%',
+                                                padding: '12px',
+                                                fontSize: '1em',
+                                                fontWeight: 'bold',
+                                                color: 'white',
+                                                background: paymentLoading ? '#999' : 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px rgba(102, 126, 234, 0.4)',
+                                                cursor: paymentLoading ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                            onClick={() => handlePaymentClick(request, 'card')}
+                                            disabled={paymentLoading}
+                                        >
+                                            {paymentLoading ? '⏳' : '💳'} الدفع بالبطاقة البنكية
+                                        </button>
+
+                                        <button
+                                            className="btn"
+                                            style={{
+                                                width: '100%',
+                                                padding: '12px',
+                                                fontSize: '1em',
+                                                fontWeight: 'bold',
+                                                color: 'white',
+                                                background: paymentLoading ? '#999' : 'linear-gradient(135deg, #FF512F 0%, #DD2476 100%)',
+                                                border: 'none',
+                                                borderRadius: '8px',
+                                                boxShadow: '0 4px 6px rgba(221, 36, 118, 0.4)',
+                                                cursor: paymentLoading ? 'not-allowed' : 'pointer',
+                                                display: 'flex',
+                                                justifyContent: 'center',
+                                                alignItems: 'center',
+                                                gap: '8px'
+                                            }}
+                                            onClick={() => handlePaymentClick(request, 'wallet')}
+                                            disabled={paymentLoading}
+                                        >
+                                            {paymentLoading ? '⏳' : '📱'} الدفع بالمحفظة الإلكترونية
+                                        </button>
+                                    </div>
                                 </div>
                             );
                         })}
@@ -213,6 +393,7 @@ const PendingPayments = () => {
             </div>
         </div>
     );
+
 };
 
 export default PendingPayments;

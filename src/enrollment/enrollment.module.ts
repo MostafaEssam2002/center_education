@@ -5,5 +5,6 @@ import { EnrollmentController } from './enrollment.controller';
 @Module({
   controllers: [EnrollmentController],
   providers: [EnrollmentService],
+  exports: [EnrollmentService], // Export to make it available to PaymentsModule
 })
-export class EnrollmentModule {}
+export class EnrollmentModule { }
