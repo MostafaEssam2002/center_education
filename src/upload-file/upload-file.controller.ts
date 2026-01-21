@@ -74,7 +74,7 @@ export class UploadFileController {
       return {
         url: `${folderPath}/index.m3u8`,
       };
-
+      
     }
     return {
       url: `/${folder}/${file.filename}`,
