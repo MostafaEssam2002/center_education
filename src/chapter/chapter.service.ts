@@ -7,7 +7,7 @@ import { join } from 'path';
 @Injectable()
 export class ChapterService {
   constructor(private prisma: PrismaService) { }
-  async create(createChapterDto: CreateChapterDto, user: { userId: number, role: string, email: string }) {
+  async create(createChapterDto: CreateChapterDto, user: { id: number, role: string, email: string }) {
     const course = await this.prisma.course.findUnique({
       where: { id: createChapterDto.courseId },
       select: { teacherId: true },
@@ -15,7 +15,7 @@ export class ChapterService {
     if (!course) {
       throw new NotFoundException('Course not found');
     }
-    if (user.role !== 'ADMIN' && course?.teacherId !== user.userId) {
+    if (user.role !== 'ADMIN' && course?.teacherId !== user.id) {
       throw new ForbiddenException('You cannot add chapter to this course');
     }
     const lastChapter = await this.prisma.chapter.findFirst({

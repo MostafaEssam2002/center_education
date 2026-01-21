@@ -6,7 +6,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 @Injectable()
 export class EnrollmentService {
   constructor(private prisma: PrismaService) { }
-  async enroll(dto: CreateEnrollmentDto, user: { userId: number; role: string }) {
+  async enroll(dto: CreateEnrollmentDto, user: { id: number; role: string }) {
     // هنا ممكن تعمل check على صلاحيات user قبل التسجيل
     // Check if already enrolled
     console.log("hello from enrollment service ")
@@ -127,7 +127,7 @@ export class EnrollmentService {
     return { message: 'Enrollment request withdrawn successfully.' };
   }
 
-  async unenroll(studentId: number, courseId: number, user: { userId: number; role: string }) {
+  async unenroll(studentId: number, courseId: number, user: { id: number; role: string }) {
     // هنا ممكن تعمل check على صلاحيات user قبل الحذف
     return this.prisma.enrollment.delete({
       where: {
@@ -136,7 +136,7 @@ export class EnrollmentService {
     });
   }
 
-  async coursesForStudent(studentId: number, user: { userId: number; role: string }) {
+  async coursesForStudent(studentId: number, user: { id: number; role: string }) {
     return this.prisma.enrollment.findMany({
       where: { studentId },
       include: {

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect, useMemo } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { chapterAPI, courseAPI, uploadAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,10 +26,18 @@ const Chapters = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Use memo to parse search params
+  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
+  const initialCourseId = queryParams.get('courseId');
 
   useEffect(() => {
     loadCourses();
-  }, []);
+    if (initialCourseId) {
+      setSelectedCourseId(initialCourseId);
+    }
+  }, [initialCourseId]);
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -61,7 +69,8 @@ const Chapters = () => {
     setError('');
     try {
       const response = await chapterAPI.findAllByCourse(courseId);
-      setChapters(response.data);
+      // Access .data.data because the backend returns { data: [...], total: X }
+      setChapters(Array.isArray(response.data.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []));
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'فشل تحميل الفصول');
     } finally {
@@ -194,7 +203,11 @@ const Chapters = () => {
               </button>
             )}
             {canManageChapters && selectedCourseId && (
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowCreateModal(true); formData.courseId = selectedCourseId; }}>
+              <button className="btn btn-primary" onClick={() => {
+                resetForm();
+                setFormData(prev => ({ ...prev, courseId: selectedCourseId }));
+                setShowCreateModal(true);
+              }}>
                 إضافة فصل جديد
               </button>
             )}
