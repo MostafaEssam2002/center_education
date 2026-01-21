@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Req, ParseIntPipe, Query, DefaultValuePipe } from '@nestjs/common';
 import { ChapterService } from './chapter.service';
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
@@ -22,9 +22,17 @@ export class ChapterController {
   }
   
   @Get('course/:courseId')
-  findAll(@Param('courseId', ParseIntPipe) courseId: number) {
+  findAll(
+    @Param('courseId',ParseIntPipe) courseId: number,
+    @Query('page', new DefaultValuePipe(1),ParseIntPipe) page: number,
+    @Query('chapterPerPage', new DefaultValuePipe(1),ParseIntPipe) chapterPerPage: number
+  ) {
     console.log(typeof +courseId)
-    return this.chapterService.findAll(+courseId);
+    console.log(typeof page)
+    console.log(typeof chapterPerPage)
+    console.log(page)
+    console.log(chapterPerPage)
+    return this.chapterService.findAll(+courseId,page,chapterPerPage);
   }
 
   @Roles(Role.ADMIN,Role.TEACHER,Role.STUDENT)

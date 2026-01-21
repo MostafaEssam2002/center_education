@@ -12,58 +12,80 @@ const CourseDetail = () => {
 
     const [course, setCourse] = useState(null);
     const [chapters, setChapters] = useState([]);
+    const [totalChapters, setTotalChapters] = useState(0);
+    const [chaptersLoading, setChaptersLoading] = useState(false);
+
+    // Missing state variables
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
-    const [enrollmentStatus, setEnrollmentStatus] = useState(null);
+    const [enrollmentStatus, setEnrollmentStatus] = useState('not_enrolled');
     const [enrolling, setEnrolling] = useState(false);
+    const [page, setPage] = useState(1);
+    const [chapterPerPage] = useState(1);
 
+    // Fetch Course Details & Enrollment Status
     useEffect(() => {
-        loadCourseData();
+        const fetchCourseDetails = async () => {
+            setLoading(true);
+            setError('');
+            try {
+                // Load course details
+                const courseResponse = await courseAPI.findAll();
+                const foundCourse = courseResponse.data.find(c => c.id === parseInt(id));
+
+                if (!foundCourse) {
+                    setError('الكورس غير موجود');
+                    setLoading(false);
+                    return;
+                }
+
+                setCourse(foundCourse);
+
+                // Check enrollment status for students
+                if (user?.role === 'STUDENT') {
+                    try {
+                        const enrollmentsResponse = await enrollmentAPI.getCoursesByStudent(user.id);
+                        const isEnrolled = enrollmentsResponse.data.some(
+                            enrollment => enrollment.courseId === parseInt(id)
+                        );
+                        setEnrollmentStatus(isEnrolled ? 'enrolled' : 'not_enrolled');
+                    } catch (err) {
+                        console.error('Error checking enrollment:', err);
+                        setEnrollmentStatus('not_enrolled');
+                    }
+                }
+            } catch (err) {
+                setError(err.response?.data?.message || 'فشل تحميل بيانات الكورس');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchCourseDetails();
+    }, [id, user]);
+
+    // Reset page when course ID changes
+    useEffect(() => {
+        setPage(1);
     }, [id]);
 
-    const loadCourseData = async () => {
-        setLoading(true);
-        setError('');
-        try {
-            // Load course details
-            const courseResponse = await courseAPI.findAll();
-            const foundCourse = courseResponse.data.find(c => c.id === parseInt(id));
-
-            if (!foundCourse) {
-                setError('الكورس غير موجود');
-                setLoading(false);
-                return;
-            }
-
-            setCourse(foundCourse);
-
-            // Load chapters
+    // Fetch Chapters (Pagination)
+    useEffect(() => {
+        const fetchChapters = async () => {
+            setChaptersLoading(true);
             try {
-                const chaptersResponse = await chapterAPI.findAllByCourse(id);
-                setChapters(chaptersResponse.data.sort((a, b) => a.order - b.order));
+                const chaptersResponse = await chapterAPI.findAllByCourse(id, page, chapterPerPage);
+                setChapters(chaptersResponse.data.data);
+                setTotalChapters(chaptersResponse.data.total);
             } catch (err) {
                 console.error('Error loading chapters:', err);
+            } finally {
+                setChaptersLoading(false);
             }
+        };
 
-            // Check enrollment status for students
-            if (user?.role === 'STUDENT') {
-                try {
-                    const enrollmentsResponse = await enrollmentAPI.getCoursesByStudent(user.id);
-                    const isEnrolled = enrollmentsResponse.data.some(
-                        enrollment => enrollment.courseId === parseInt(id)
-                    );
-                    setEnrollmentStatus(isEnrolled ? 'enrolled' : 'not_enrolled');
-                } catch (err) {
-                    console.error('Error checking enrollment:', err);
-                    setEnrollmentStatus('not_enrolled');
-                }
-            }
-        } catch (err) {
-            setError(err.response?.data?.message || 'فشل تحميل بيانات الكورس');
-        } finally {
-            setLoading(false);
-        }
-    };
+        fetchChapters();
+    }, [id, page, chapterPerPage]);
 
     const handleEnrollRequest = async () => {
         setEnrolling(true);
@@ -237,7 +259,14 @@ const CourseDetail = () => {
                     {chapters.length === 0 ? (
                         <div className="empty-state">لا توجد فصول في هذا الكورس</div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                            opacity: chaptersLoading ? 0.5 : 1,
+                            pointerEvents: chaptersLoading ? 'none' : 'auto',
+                            transition: 'opacity 0.2s ease'
+                        }}>
                             {chapters.map((chapter, index) => (
                                 <div
                                     key={chapter.id}
@@ -263,7 +292,8 @@ const CourseDetail = () => {
                                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                         <div>
                                             <h4 style={{ margin: '0 0 5px', color: '#667eea' }}>
-                                                {index + 1}. {chapter.title}
+                                                {/* Calculate absolute index: (page-1)*limit + index + 1 */}
+                                                {(page - 1) * chapterPerPage + index + 1}. {chapter.title}
                                             </h4>
                                             {chapter.content && (
                                                 <p style={{ margin: 0, color: '#999', fontSize: '14px' }}>
@@ -288,6 +318,48 @@ const CourseDetail = () => {
                                     </div>
                                 </div>
                             ))}
+                        </div>
+                    )}
+
+                    {/* Pagination Controls */}
+                    {totalChapters > chapterPerPage && (
+                        <div style={{ display: 'flex', justifyContent: 'center', gap: '10px', marginTop: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+                            <button
+                                className="btn btn-secondary"
+                                disabled={page <= 1}
+                                onClick={() => setPage(page - 1)}
+                                style={{ padding: '8px 16px' }}
+                            >
+                                السابق
+                            </button>
+
+                            {Array.from({ length: Math.ceil(totalChapters / chapterPerPage) }, (_, i) => i + 1).map((pageNum) => (
+                                <button
+                                    key={pageNum}
+                                    onClick={() => setPage(pageNum)}
+                                    style={{
+                                        padding: '8px 16px',
+                                        borderRadius: '6px',
+                                        border: '1px solid #667eea',
+                                        background: pageNum === page ? '#667eea' : 'white',
+                                        color: pageNum === page ? 'white' : '#667eea',
+                                        cursor: 'pointer',
+                                        fontWeight: 'bold',
+                                        transition: 'all 0.2s'
+                                    }}
+                                >
+                                    {pageNum}
+                                </button>
+                            ))}
+
+                            <button
+                                className="btn btn-secondary"
+                                disabled={page >= Math.ceil(totalChapters / chapterPerPage)}
+                                onClick={() => setPage(page + 1)}
+                                style={{ padding: '8px 16px' }}
+                            >
+                                التالي
+                            </button>
                         </div>
                     )}
                 </div>

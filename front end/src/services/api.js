@@ -90,8 +90,8 @@ export const chapterAPI = {
   create: (chapterData) =>
     api.post('/chapter', chapterData),
 
-  findAllByCourse: (courseId) =>
-    api.get(`/chapter/course/${courseId}`),
+  findAllByCourse: (courseId, page = 1, chapterPerPage = 10) =>
+    api.get(`/chapter/course/${courseId}`, { params: { page, chapterPerPage } }),
 
   findOne: (id) =>
     api.get(`/chapter/${id}`),

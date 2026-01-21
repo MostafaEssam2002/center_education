@@ -35,11 +35,15 @@ export class ChapterService {
       })
   }
 
-  findAll(courseId: number) {
-    return this.prisma.chapter.findMany({
+  async findAll(courseId: number, page: number, chapterPerPage: number) {
+    const total = await this.prisma.chapter.count({ where: { courseId } });
+    const data = await this.prisma.chapter.findMany({
       where: { courseId },
-      orderBy: { order: 'asc' }, // لو عايز ترتيبهم
+      skip: chapterPerPage * (page - 1),
+      take: chapterPerPage,
+      orderBy: { order: 'asc' },
     });
+    return { data, total };
   }
 
 
