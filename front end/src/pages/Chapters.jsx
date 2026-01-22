@@ -394,6 +394,7 @@ const Chapters = () => {
                   value={formData.courseId}
                   onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
                   required
+                  disabled={!!selectedCourseId}
                 >
                   <option value="">اختر الكورس</option>
                   {courses.map((course) => (
@@ -402,6 +403,11 @@ const Chapters = () => {
                     </option>
                   ))}
                 </select>
+                {selectedCourseId && (
+                  <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
+                    ✓ تم اختيار الكورس: {courses.find(c => c.id.toString() === selectedCourseId)?.title}
+                  </small>
+                )}
               </div>
               <div className="form-group">
                 <label>الفيديو</label>
@@ -490,6 +496,21 @@ const Chapters = () => {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 />
+              </div>
+              <div className="form-group">
+                <label>الكورس <span className="required">*</span></label>
+                <select
+                  value={formData.courseId}
+                  onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
+                  required
+                >
+                  <option value="">اختر الكورس</option>
+                  {courses.map((course) => (
+                    <option key={course.id} value={course.id}>
+                      {course.title}
+                    </option>
+                  ))}
+                </select>
               </div>
               <div className="form-group">
                 <label>الفيديو</label>
