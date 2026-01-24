@@ -127,6 +127,7 @@
    - للمساعدة في مشاكل اتصال قاعدة البيانات، راجع [fix-docker-connection.md](fix-docker-connection.md).
 4. **ايقاف السرفر**:
     ```bash
+docker-compose down
     docker-compose down
     ```
 
