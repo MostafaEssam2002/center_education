@@ -8,7 +8,7 @@ export class EnrollmentOwnershipGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
-    const user = request.user; // { id, role, email }
+    const user = request.user; // { userId, role, email }
     const courseId = Number(request.params.id);
 
     if (!courseId) {

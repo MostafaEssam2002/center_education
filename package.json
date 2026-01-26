@@ -38,7 +38,12 @@
     "class-validator": "^0.14.3",
     "dotenv": "^17.2.3",
     "express": "^5.2.1",
+<<<<<<< HEAD
     "fluent-ffmpeg": "^2.1.3",
+=======
+    "framer-motion": "^12.26.2",
+    "lucide-react": "^0.562.0",
+>>>>>>> 9c060cf60e9acd18d3d23c9678332fb88c97d218
     "multer": "^2.0.2",
     "passport": "^0.7.0",
     "passport-jwt": "^4.0.1",
@@ -55,7 +60,6 @@
     "@nestjs/testing": "^11.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/express": "^5.0.0",
-    "@types/fluent-ffmpeg": "^2.1.28",
     "@types/jest": "^30.0.0",
     "@types/multer": "^2.0.0",
     "@types/node": "^22.10.7",

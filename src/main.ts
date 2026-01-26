@@ -16,19 +16,6 @@ async function bootstrap() {
     }),
   );
 
-  // Enable CORS for static files (videos, images, etc.)
-  app.use('/videos', (req, res, next) => {
-    res.header('Access-Control-Allow-Origin', '*');
-    res.header('Access-Control-Allow-Methods', 'GET, HEAD, OPTIONS');
-    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept, Range');
-    res.header('Access-Control-Expose-Headers', 'Content-Length, Content-Range');
-    if (req.method === 'OPTIONS') {
-      res.sendStatus(200);
-    } else {
-      next();
-    }
-  });
-
   app.useStaticAssets(join(process.cwd(), 'public'));
   app.enableCors({
     origin: true,

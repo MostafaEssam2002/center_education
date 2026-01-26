@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { chapterAPI, courseAPI, uploadAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,18 +26,10 @@ const Chapters = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  // Use memo to parse search params
-  const queryParams = useMemo(() => new URLSearchParams(location.search), [location.search]);
-  const initialCourseId = queryParams.get('courseId');
 
   useEffect(() => {
     loadCourses();
-    if (initialCourseId) {
-      setSelectedCourseId(initialCourseId);
-    }
-  }, [initialCourseId]);
+  }, []);
 
   useEffect(() => {
     if (selectedCourseId) {
@@ -70,8 +62,7 @@ const Chapters = () => {
     setError('');
     try {
       const response = await chapterAPI.findAllByCourse(courseId);
-      // Access .data.data because the backend returns { data: [...], total: X }
-      setChapters(Array.isArray(response.data.data) ? response.data.data : (Array.isArray(response.data) ? response.data : []));
+      setChapters(response.data);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'فشل تحميل الفصول');
     } finally {
@@ -204,11 +195,7 @@ const Chapters = () => {
               </button>
             )}
             {canManageChapters && selectedCourseId && (
-              <button className="btn btn-primary" onClick={() => {
-                resetForm();
-                setFormData(prev => ({ ...prev, courseId: selectedCourseId }));
-                setShowCreateModal(true);
-              }}>
+              <button className="btn btn-primary" onClick={() => { resetForm(); setShowCreateModal(true); formData.courseId = selectedCourseId; }}>
                 إضافة فصل جديد
               </button>
             )}
@@ -395,7 +382,6 @@ const Chapters = () => {
                   value={formData.courseId}
                   onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
                   required
-                  disabled={!!selectedCourseId}
                 >
                   <option value="">اختر الكورس</option>
                   {courses.map((course) => (
@@ -404,11 +390,6 @@ const Chapters = () => {
                     </option>
                   ))}
                 </select>
-                {selectedCourseId && (
-                  <small style={{ color: '#666', marginTop: '5px', display: 'block' }}>
-                    ✓ تم اختيار الكورس: {courses.find(c => c.id.toString() === selectedCourseId)?.title}
-                  </small>
-                )}
               </div>
               <div className="form-group">
                 <label>الفيديو</label>
@@ -497,21 +478,6 @@ const Chapters = () => {
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
                 />
-              </div>
-              <div className="form-group">
-                <label>الكورس <span className="required">*</span></label>
-                <select
-                  value={formData.courseId}
-                  onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                  required
-                >
-                  <option value="">اختر الكورس</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.title}
-                    </option>
-                  ))}
-                </select>
               </div>
               <div className="form-group">
                 <label>الفيديو</label>

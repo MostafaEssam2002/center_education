@@ -7,7 +7,7 @@ import { join, dirname } from 'path';
 @Injectable()
 export class ChapterService {
   constructor(private prisma: PrismaService) { }
-  async create(createChapterDto: CreateChapterDto, user: { id: number, role: string, email: string }) {
+  async create(createChapterDto: CreateChapterDto, user: { userId: number, role: string, email: string }) {
     const course = await this.prisma.course.findUnique({
       where: { id: createChapterDto.courseId },
       select: { teacherId: true },
@@ -15,7 +15,7 @@ export class ChapterService {
     if (!course) {
       throw new NotFoundException('Course not found');
     }
-    if (user.role !== 'ADMIN' && course?.teacherId !== user.id) {
+    if (user.role !== 'ADMIN' && course?.teacherId !== user.userId) {
       throw new ForbiddenException('You cannot add chapter to this course');
     }
     const lastChapter = await this.prisma.chapter.findFirst({
@@ -35,15 +35,11 @@ export class ChapterService {
       })
   }
 
-  async findAll(courseId: number, page: number, chapterPerPage: number) {
-    const total = await this.prisma.chapter.count({ where: { courseId } });
-    const data = await this.prisma.chapter.findMany({
+  findAll(courseId: number) {
+    return this.prisma.chapter.findMany({
       where: { courseId },
-      skip: chapterPerPage * (page - 1),
-      take: chapterPerPage,
-      orderBy: { order: 'asc' },
+      orderBy: { order: 'asc' }, // لو عايز ترتيبهم
     });
-    return { data, total };
   }
 
 

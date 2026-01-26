@@ -1,10 +1,8 @@
 import { useRef, useEffect, useState } from 'react';
-import Hls from 'hls.js';
 import { chapterProgressAPI } from '../services/api';
 
 const VideoPlayer = ({ src, title, chapterId }) => {
     const videoRef = useRef(null);
-    const hlsRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
@@ -20,10 +18,8 @@ const VideoPlayer = ({ src, title, chapterId }) => {
                 const progress = Math.floor((video.currentTime / video.duration) * 100);
 
                 if (progress > 0 && progress <= 100) {
-                    console.log('💾 Saving progress:', progress, '%');
                     chapterProgressAPI.updateVideoProgress(chapterId, progress)
-                        .then(() => console.log('✅ Progress saved successfully'))
-                        .catch(err => console.error('❌ Error updating progress:', err));
+                        .catch(err => console.error('Error updating progress:', err));
                 }
             }
         };
@@ -40,106 +36,47 @@ const VideoPlayer = ({ src, title, chapterId }) => {
         };
 
         const handleLoadedMetadata = () => {
-            console.log('📹 Video metadata loaded, duration:', video.duration);
             setDuration(video.duration);
 
             // Resume from last position if chapterId is provided
             if (chapterId) {
-                console.log('🔍 Fetching progress for chapter:', chapterId);
+                console.log('Fetching progress for chapter:', chapterId);
                 chapterProgressAPI.getChapterProgress(chapterId)
                     .then(response => {
-                        console.log('📊 Progress API response:', response.data);
+                        console.log('Progress API response:', response.data);
                         const savedProgress = response.data?.progress;
-                        console.log('📈 Saved progress:', savedProgress, '%');
+                        console.log('Saved progress:', savedProgress);
                         if (savedProgress && savedProgress > 0 && savedProgress < 100) {
                             // Calculate time from progress percentage
                             const resumeTime = (savedProgress / 100) * video.duration;
-                            console.log(`⏭️ Setting video time to: ${resumeTime}s (${savedProgress}%)`);
+                            console.log(`Setting video time to: ${resumeTime}s (${savedProgress}%)`);
                             video.currentTime = resumeTime;
-                            console.log(`✅ Resumed video at ${savedProgress}% (${Math.floor(resumeTime)}s)`);
+                            console.log(`Resumed video at ${savedProgress}% (${Math.floor(resumeTime)}s)`);
                         } else {
-                            console.log('ℹ️ No valid progress to resume from:', savedProgress);
+                            console.log('No valid progress to resume from:', savedProgress);
                         }
                     })
                     .catch(err => {
-                        console.error('❌ Error loading progress:', err);
+                        console.error('Error loading progress:', err);
                         console.error('Error details:', err.response?.data);
                     });
             } else {
-                console.log('⚠️ No chapterId provided, cannot resume');
+                console.log('No chapterId provided, cannot resume');
             }
         };
 
         const handlePlay = () => setIsPlaying(true);
         const handlePause = () => {
             setIsPlaying(false);
-            console.log('⏸️ Video paused, saving progress...');
             updateProgress(); // Update immediately on pause
         };
         const handleEnded = () => {
             setIsPlaying(false);
-            console.log('🏁 Video ended, saving 100% progress...');
             if (chapterId) {
                 chapterProgressAPI.updateVideoProgress(chapterId, 100)
-                    .then(() => console.log('✅ Final progress saved'))
-                    .catch(err => console.error('❌ Error updating progress:', err));
+                    .catch(err => console.error('Error updating progress:', err));
             }
         };
-
-        // Setup HLS if needed
-        const isHLS = src && src.includes('.m3u8');
-
-        if (isHLS) {
-            console.log('🎬 HLS video detected:', src);
-
-            // Check if HLS is supported
-            if (Hls.isSupported()) {
-                console.log('✅ HLS.js is supported');
-                const hls = new Hls({
-                    enableWorker: true,
-                    lowLatencyMode: false,
-                    backBufferLength: 90
-                });
-
-                hlsRef.current = hls;
-                hls.loadSource(src);
-                hls.attachMedia(video);
-
-                hls.on(Hls.Events.MANIFEST_PARSED, () => {
-                    console.log('📋 HLS manifest parsed successfully');
-                });
-
-                hls.on(Hls.Events.ERROR, (event, data) => {
-                    console.error('❌ HLS Error:', data);
-                    if (data.fatal) {
-                        switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR:
-                                console.log('🔄 Fatal network error, trying to recover...');
-                                hls.startLoad();
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR:
-                                console.log('🔄 Fatal media error, trying to recover...');
-                                hls.recoverMediaError();
-                                break;
-                            default:
-                                console.log('💥 Cannot recover from error, destroying HLS');
-                                hls.destroy();
-                                break;
-                        }
-                    }
-                });
-            } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                // Native HLS support (Safari)
-                console.log('🍎 Using native HLS support (Safari)');
-                video.src = src;
-            } else {
-                console.error('❌ HLS is not supported in this browser');
-            }
-        } else {
-            // Regular video file
-            console.log('🎥 Regular video file:', src);
-            video.src = src;
-        }
 
         video.addEventListener('timeupdate', handleTimeUpdate);
         video.addEventListener('loadedmetadata', handleLoadedMetadata);
@@ -154,6 +91,7 @@ const VideoPlayer = ({ src, title, chapterId }) => {
             video.removeEventListener('pause', handlePause);
             video.removeEventListener('ended', handleEnded);
 
+<<<<<<< HEAD
 
 
             // Cleanup HLS
@@ -161,9 +99,13 @@ const VideoPlayer = ({ src, title, chapterId }) => {
                 console.log('🧹 Cleaning up HLS instance');
                 hlsRef.current.destroy();
                 hlsRef.current = null;
+=======
+            if (progressUpdateTimerRef.current) {
+                clearTimeout(progressUpdateTimerRef.current);
+>>>>>>> 9c060cf60e9acd18d3d23c9678332fb88c97d218
             }
         };
-    }, [chapterId, src]);
+    }, [chapterId]);
 
     const togglePlay = () => {
         if (videoRef.current) {

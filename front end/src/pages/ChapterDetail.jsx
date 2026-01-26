@@ -35,8 +35,7 @@ const ChapterDetail = () => {
 
             // Load all chapters for navigation
             const chaptersResponse = await chapterAPI.findAllByCourse(courseId);
-            const chaptersArray = Array.isArray(chaptersResponse.data.data) ? chaptersResponse.data.data : (Array.isArray(chaptersResponse.data) ? chaptersResponse.data : []);
-            setAllChapters(chaptersArray.sort((a, b) => a.order - b.order));
+            setAllChapters(chaptersResponse.data.sort((a, b) => a.order - b.order));
         } catch (err) {
             setError(err.response?.data?.message || 'فشل تحميل بيانات الفصل');
         } finally {
