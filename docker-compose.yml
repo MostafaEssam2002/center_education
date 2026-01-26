@@ -75,6 +75,7 @@ services:
     command: >
       sh -c "
         echo 'Waiting for MySQL to be ready...' &&
+        npx prisma migrate deploy &&
         npm run start:prod
       "
 

@@ -23,6 +23,7 @@ describe('AuthService', () => {
     user: {
       findMany: jest.fn(),
       findUnique: jest.fn(),
+      count: jest.fn(),
     },
   };
 
@@ -91,12 +92,29 @@ describe('AuthService', () => {
   });
 
   describe('findAll', () => {
-    it('should return array of users', async () => {
+    it('should return paginated users', async () => {
       const users = [{ id: 1, email: 'test@example.com' }];
-      mockPrismaService.user.findMany.mockResolvedValue(users);
+      const total = 1;
 
-      const result = await service.findAll();
-      expect(result).toEqual(users);
+      // Mock both findMany and count
+      (mockPrismaService.user.findMany as jest.Mock).mockResolvedValue(users);
+      // We need to add count mock to prisma service mock if it's not already there
+      if (!mockPrismaService.user['count']) {
+        mockPrismaService.user['count'] = jest.fn();
+      }
+      (mockPrismaService.user.count as jest.Mock).mockResolvedValue(total);
+
+      const result = await service.findAll(1, 10);
+
+      expect(result).toEqual({
+        data: users,
+        pagination: {
+          total,
+          page: 1,
+          limit: 10,
+          totalPages: 1
+        }
+      });
     });
   });
 

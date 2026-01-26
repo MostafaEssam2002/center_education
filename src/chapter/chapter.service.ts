@@ -2,8 +2,8 @@ import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/commo
 import { CreateChapterDto } from './dto/create-chapter.dto';
 import { UpdateChapterDto } from './dto/update-chapter.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { unlink } from 'fs/promises';
-import { join } from 'path';
+import { unlink, rm } from 'fs/promises';
+import { join, dirname } from 'path';
 @Injectable()
 export class ChapterService {
   constructor(private prisma: PrismaService) { }
@@ -78,10 +78,31 @@ export class ChapterService {
 
     // حذف ملفات الفيديو وPDF من السيرفر لو موجودة
     if (chapter.videoPath) {
-      await unlink(join(process.cwd(), 'public', 'videos', chapter.videoPath)).catch(() => { });
+      try {
+        const cleanPath = chapter.videoPath.startsWith('/') ? chapter.videoPath.substring(1) : chapter.videoPath;
+        const fullPath = join(process.cwd(), 'public', cleanPath);
+
+        if (fullPath.endsWith('index.m3u8')) {
+          // It's an HLS video folder, delete the entire folder
+          const videoDir = dirname(fullPath);
+          await rm(videoDir, { recursive: true, force: true });
+        } else {
+          // Regular file
+          await unlink(fullPath);
+        }
+      } catch (err) {
+        console.error(`Failed to delete video for chapter ${id}:`, err);
+      }
     }
+
     if (chapter.pdfPath) {
-      await unlink(join(process.cwd(), 'public', 'pdfs', chapter.pdfPath)).catch(() => { });
+      try {
+        const cleanPath = chapter.pdfPath.startsWith('/') ? chapter.pdfPath.substring(1) : chapter.pdfPath;
+        const fullPath = join(process.cwd(), 'public', cleanPath);
+        await unlink(fullPath);
+      } catch (err) {
+        console.error(`Failed to delete PDF for chapter ${id}:`, err);
+      }
     }
 
     await this.prisma.chapter.delete({ where: { id } });

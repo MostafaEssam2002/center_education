@@ -5,7 +5,7 @@ import { UpdateQuizOptionDto } from './dto/update-quiz-option.dto';
 
 @Injectable()
 export class QuizOptionService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
 
   async create(dto: CreateQuizOptionDto, teacherId: number) {
     const question = await this.prisma.quizQuestion.findUnique({
@@ -24,10 +24,27 @@ export class QuizOptionService {
     });
   }
 
-  async findAll(questionId: number) {
-    return this.prisma.quizOption.findMany({
-      where: { questionId },
-    });
+  async findAll(questionId: number, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [options, total] = await Promise.all([
+      this.prisma.quizOption.findMany({
+        where: { questionId },
+        skip,
+        take: limit,
+      }),
+      this.prisma.quizOption.count({ where: { questionId } }),
+    ]);
+
+    return {
+      data: options,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async update(id: number, dto: UpdateQuizOptionDto, teacherId: number) {

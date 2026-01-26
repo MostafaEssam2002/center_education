@@ -9,17 +9,27 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editForm, setEditForm] = useState({});
+  const [pagination, setPagination] = useState(null);
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     loadUsers();
   }, []);
 
-  const loadUsers = async () => {
+  const loadUsers = async (page = 1) => {
     setLoading(true);
     setError('');
     try {
-      const response = await userAPI.findAll();
-      setUsers(response.data);
+      const response = await userAPI.findAll(page);
+      if (response.data.data) {
+        setUsers(response.data.data);
+        setPagination(response.data.pagination);
+        setCurrentPage(page);
+      } else {
+        // Fallback in case backend structure is different
+        setUsers(response.data);
+      }
+
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'فشل تحميل المستخدمين');
     } finally {
@@ -97,7 +107,7 @@ const Users = () => {
       <div className="card">
         <div className="card-header">
           <h2>إدارة المستخدمين</h2>
-          <button className="btn btn-primary" onClick={loadUsers}>
+          <button className="btn btn-primary" onClick={() => loadUsers(currentPage)}>
             تحديث
           </button>
         </div>
@@ -197,6 +207,27 @@ const Users = () => {
                 ))}
               </tbody>
             </table>
+
+            {/* Pagination Controls */}
+            {pagination && (
+              <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
+                <button
+                  className="btn btn-secondary"
+                  disabled={currentPage === 1}
+                  onClick={() => loadUsers(currentPage - 1)}
+                >
+                  السابق
+                </button>
+                <span>صفحة {currentPage} من {pagination.totalPages}</span>
+                <button
+                  className="btn btn-secondary"
+                  disabled={currentPage === pagination.totalPages}
+                  onClick={() => loadUsers(currentPage + 1)}
+                >
+                  التالي
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>

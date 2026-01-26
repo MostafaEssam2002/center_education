@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body, Query, DefaultValuePipe } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -22,8 +22,8 @@ export class AuthController {
     const token = await this.authService.login(result.user);
     // console.log(result.user)
     return {
-      message:result.message,
-      data:{info:result.user, token:token.data.access_token},
+      message: result.message,
+      data: { info: result.user, token: token.data.access_token },
     };
   }
 
@@ -40,8 +40,11 @@ export class AuthController {
   @Get()
   @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  findAll() {
-    return this.authService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.authService.findAll(page, limit);
   }
 
   @Get(':id')

@@ -41,13 +41,12 @@ export default function CreateQuiz() {
     const fetchCourseAndChapters = async () => {
         try {
             const [courseRes, chaptersRes] = await Promise.all([
-                courseAPI.findAll(),
-                chapterAPI.findAllByCourse(courseId),
+                courseAPI.findOne(courseId),
+                chapterAPI.findAllByCourse(courseId, 1, 100),
             ]);
 
-            const foundCourse = courseRes.data.find(c => c.id === parseInt(courseId));
-            setCourse(foundCourse);
-            setChapters(chaptersRes.data);
+            setCourse(courseRes.data);
+            setChapters(chaptersRes.data.data || []);
 
             // Check if chapterId is provided in URL params
             const urlChapterId = searchParams.get('chapterId');

@@ -5,7 +5,7 @@ import { PrismaService } from "src/prisma/prisma.service";
 
 @Injectable()
 export class RoomService {
-  constructor(private prisma: PrismaService) {}
+  constructor(private prisma: PrismaService) { }
   private validateRoom(dto: Partial<CreateRoomDto>) {
     if (dto.type === 'ONLINE') {
       if (dto.capacity || dto.location) {
@@ -30,11 +30,28 @@ export class RoomService {
     });
   }
 
-  findAll() {
-    return this.prisma.room.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: 'desc' },
-    });
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [rooms, total] = await Promise.all([
+      this.prisma.room.findMany({
+        where: { isActive: true },
+        skip,
+        take: limit,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.room.count({ where: { isActive: true } }),
+    ]);
+
+    return {
+      data: rooms,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   findOne(id: number) {
@@ -67,5 +84,5 @@ export class RoomService {
     });
   }
 
-  
+
 }

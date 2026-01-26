@@ -22,11 +22,28 @@ export class QuizQuestionService {
     })
   }
 
-  async findAll(quizId: number) {
-    return this.prisma.quizQuestion.findMany({
-      where: { quizId },
-      include: { options: true },
-    })
+  async findAll(quizId: number, page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [questions, total] = await Promise.all([
+      this.prisma.quizQuestion.findMany({
+        where: { quizId },
+        skip,
+        take: limit,
+        include: { options: true },
+      }),
+      this.prisma.quizQuestion.count({ where: { quizId } }),
+    ]);
+
+    return {
+      data: questions,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async update(

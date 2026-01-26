@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
-  constructor(private prisma:PrismaService){}
+  constructor(private prisma: PrismaService) { }
   async register(createUserDto: CreateUserDto): Promise<object> {
     const existingUser = await this.prisma.user.findUnique({
       where: { email: createUserDto.email },
@@ -14,49 +14,63 @@ export class UserService {
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
-    if(createUserDto.role === "ADMIN"){
+    if (createUserDto.role === "ADMIN") {
       throw new BadRequestException('Cannot register user with ADMIN role');
     }
-    const hashedPassword = await bcrypt.hash(createUserDto.password,10);
-    try{
-      const user = await this.prisma.user.create({data: {...createUserDto, password:hashedPassword}});
-      const {password,...userWithoutPassword} =user ;
-      return {message:'This action adds a new user',user:userWithoutPassword};
-    }catch(error){
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+    try {
+      const user = await this.prisma.user.create({ data: { ...createUserDto, password: hashedPassword } });
+      const { password, ...userWithoutPassword } = user;
+      return { message: 'This action adds a new user', user: userWithoutPassword };
+    } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') { 
+        if (error.code === 'P2002') {
           throw new BadRequestException('Email already exists');
         }
-  }
-  throw new InternalServerErrorException(error.message);
+      }
+      throw new InternalServerErrorException(error.message);
     }
   }
 
-  async findAll() {
-    const users = await this.prisma.user.findMany(
-      {
-      select: {
-        id: true,
-        email: true,
-        first_name: true,
-        last_name: true,
-        age: true,
-        phone: true,
-        address: true,
-        role: true,
-        image_path: true,
-        createdAt: true,
-        updatedAt: true,
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          email: true,
+          first_name: true,
+          last_name: true,
+          age: true,
+          phone: true,
+          address: true,
+          role: true,
+          image_path: true,
+          createdAt: true,
+          updatedAt: true,
+        },
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      data: users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
       },
-    }
-  );
-    return users;
+    };
   }
-async findByEmail(email: string) {
-  return this.prisma.user.findUnique({
-    where: { email },
-  });
-}
+  async findByEmail(email: string) {
+    return this.prisma.user.findUnique({
+      where: { email },
+    });
+  }
 
   // async findByEmail(email: string) {
   //   const user =await this.prisma.user.findUnique({where:{email}});

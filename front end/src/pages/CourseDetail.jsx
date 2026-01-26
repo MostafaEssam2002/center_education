@@ -31,16 +31,8 @@ const CourseDetail = () => {
             setError('');
             try {
                 // Load course details
-                const courseResponse = await courseAPI.findAll();
-                const foundCourse = courseResponse.data.find(c => c.id === parseInt(id));
-
-                if (!foundCourse) {
-                    setError('الكورس غير موجود');
-                    setLoading(false);
-                    return;
-                }
-
-                setCourse(foundCourse);
+                const courseResponse = await courseAPI.findOne(id);
+                setCourse(courseResponse.data);
 
                 // Check enrollment status for students
                 if (user?.role === 'STUDENT') {

@@ -17,6 +17,8 @@ const RoomManagement = () => {
     const [editingRoom, setEditingRoom] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [roomToDelete, setRoomToDelete] = useState(null);
+    const [pagination, setPagination] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Form state
     const [formData, setFormData] = useState({
@@ -48,15 +50,20 @@ const RoomManagement = () => {
         fetchData();
     }, []);
 
-    const fetchData = async () => {
+    const fetchData = async (page = currentPage) => {
         try {
             const [roomsRes, scheduleRes] = await Promise.allSettled([
-                roomAPI.findAll(),
+                roomAPI.findAll(page),
                 courseScheduleAPI.findWeeklySchedule()
             ]);
 
             if (roomsRes.status === 'fulfilled') {
-                setRooms(roomsRes.value.data);
+                if (roomsRes.value.data.data) {
+                    setRooms(roomsRes.value.data.data);
+                    setPagination(roomsRes.value.data.pagination);
+                } else {
+                    setRooms(roomsRes.value.data);
+                }
             }
 
             if (scheduleRes.status === 'fulfilled') {
@@ -95,7 +102,8 @@ const RoomManagement = () => {
                 setEditingRoom(null);
             } else {
                 const response = await roomAPI.create(roomData);
-                setRooms(prev => [...prev, response.data]);
+                setRooms(prev => [response.data, ...prev]);
+                fetchData(currentPage); // Refresh to respect pagination limits if needed
             }
 
             setFormData({ name: '', type: 'OFFLINE', capacity: '', location: '', isActive: true });
@@ -402,101 +410,289 @@ const RoomManagement = () => {
                                 )}
                             </tbody>
                         </table>
+
+                        {/* Pagination Controls */}
+                        {pagination && (
+                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
+                                <button
+                                    className="btn btn-secondary"
+                                    disabled={currentPage === 1}
+                                    onClick={() => {
+                                        setCurrentPage(currentPage - 1);
+                                        fetchData(currentPage - 1);
+                                    }}
+                                    style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                >
+                                    السابق
+                                </button>
+                                <span>صفحة {currentPage} من {pagination.totalPages}</span>
+                                <button
+                                    className="btn btn-secondary"
+                                    disabled={currentPage === pagination.totalPages}
+                                    onClick={() => {
+                                        setCurrentPage(currentPage + 1);
+                                        fetchData(currentPage + 1);
+                                    }}
+                                    style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                >
+                                    التالي
+                                </button>
+                            </div>
+                        )}
                     </div>
                 </div>
             )}
 
+
             {/* Employee View: Room List with Individual Schedule */}
-            {!isAdmin && (
-                <div style={{
-                    background: 'white',
-                    borderRadius: '15px',
-                    padding: '25px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                    {!selectedRoom ? (
-                        <>
-                            <h2 style={{ marginBottom: '20px', color: '#4a5568' }}>قائمة الغرف</h2>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
-                                {rooms.map(room => (
-                                    <div
-                                        key={room.id}
-                                        onClick={() => setSelectedRoom(room)}
-                                        style={{
-                                            padding: '20px',
-                                            background: '#f7fafc',
-                                            borderRadius: '12px',
-                                            border: '2px solid #e2e8f0',
-                                            cursor: 'pointer',
-                                            transition: 'all 0.2s',
-                                        }}
-                                        onMouseEnter={(e) => {
-                                            e.currentTarget.style.borderColor = '#667eea';
-                                            e.currentTarget.style.transform = 'translateY(-2px)';
-                                            e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
-                                        }}
-                                        onMouseLeave={(e) => {
-                                            e.currentTarget.style.borderColor = '#e2e8f0';
-                                            e.currentTarget.style.transform = 'translateY(0)';
-                                            e.currentTarget.style.boxShadow = 'none';
-                                        }}
-                                    >
-                                        <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
-                                            {room.name}
-                                        </div>
-                                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-                                            <span style={{
-                                                padding: '4px 10px',
+            {
+                !isAdmin && (
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '15px',
+                        padding: '25px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}>
+                        {!selectedRoom ? (
+                            <>
+                                <h2 style={{ marginBottom: '20px', color: '#4a5568' }}>قائمة الغرف</h2>
+                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
+                                    {rooms.map(room => (
+                                        <div
+                                            key={room.id}
+                                            onClick={() => setSelectedRoom(room)}
+                                            style={{
+                                                padding: '20px',
+                                                background: '#f7fafc',
                                                 borderRadius: '12px',
-                                                background: room.type === 'ONLINE' ? '#ebf8ff' : '#f0fff4',
-                                                color: room.type === 'ONLINE' ? '#2c5282' : '#22543d',
-                                                fontSize: '0.85em'
-                                            }}>
-                                                {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
-                                            </span>
-                                            {room.capacity && (
+                                                border: '2px solid #e2e8f0',
+                                                cursor: 'pointer',
+                                                transition: 'all 0.2s',
+                                            }}
+                                            onMouseEnter={(e) => {
+                                                e.currentTarget.style.borderColor = '#667eea';
+                                                e.currentTarget.style.transform = 'translateY(-2px)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+                                            }}
+                                            onMouseLeave={(e) => {
+                                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                                e.currentTarget.style.transform = 'translateY(0)';
+                                                e.currentTarget.style.boxShadow = 'none';
+                                            }}
+                                        >
+                                            <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
+                                                {room.name}
+                                            </div>
+                                            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                                 <span style={{
                                                     padding: '4px 10px',
                                                     borderRadius: '12px',
-                                                    background: '#fef5e7',
-                                                    color: '#7c4a00',
+                                                    background: room.type === 'ONLINE' ? '#ebf8ff' : '#f0fff4',
+                                                    color: room.type === 'ONLINE' ? '#2c5282' : '#22543d',
                                                     fontSize: '0.85em'
                                                 }}>
-                                                    السعة: {room.capacity}
+                                                    {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
                                                 </span>
+                                                {room.capacity && (
+                                                    <span style={{
+                                                        padding: '4px 10px',
+                                                        borderRadius: '12px',
+                                                        background: '#fef5e7',
+                                                        color: '#7c4a00',
+                                                        fontSize: '0.85em'
+                                                    }}>
+                                                        السعة: {room.capacity}
+                                                    </span>
+                                                )}
+                                            </div>
+                                            {room.location && (
+                                                <div style={{ marginTop: '8px', color: '#718096', fontSize: '0.9em' }}>
+                                                    📍 {room.location}
+                                                </div>
                                             )}
                                         </div>
-                                        {room.location && (
-                                            <div style={{ marginTop: '8px', color: '#718096', fontSize: '0.9em' }}>
-                                                📍 {room.location}
-                                            </div>
-                                        )}
+                                    ))}
+                                </div>
+
+                                {/* Pagination Controls for Employee View */}
+                                {pagination && (
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
+                                        <button
+                                            className="btn btn-secondary"
+                                            disabled={currentPage === 1}
+                                            onClick={() => {
+                                                setCurrentPage(currentPage - 1);
+                                                fetchData(currentPage - 1);
+                                            }}
+                                            style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                        >
+                                            السابق
+                                        </button>
+                                        <span>صفحة {currentPage} من {pagination.totalPages}</span>
+                                        <button
+                                            className="btn btn-secondary"
+                                            disabled={currentPage === pagination.totalPages}
+                                            onClick={() => {
+                                                setCurrentPage(currentPage + 1);
+                                                fetchData(currentPage + 1);
+                                            }}
+                                            style={{ padding: '5px 10px', cursor: 'pointer' }}
+                                        >
+                                            التالي
+                                        </button>
                                     </div>
-                                ))}
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                <h2 style={{ margin: 0, color: '#4a5568' }}>جدول {selectedRoom.name}</h2>
-                                <button
-                                    onClick={() => setSelectedRoom(null)}
-                                    style={{
-                                        padding: '8px 16px',
-                                        background: '#e2e8f0',
-                                        color: '#4a5568',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold'
-                                    }}
-                                >
-                                    ← رجوع للقائمة
-                                </button>
-                            </div>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                                    <h2 style={{ margin: 0, color: '#4a5568' }}>جدول {selectedRoom.name}</h2>
+                                    <button
+                                        onClick={() => setSelectedRoom(null)}
+                                        style={{
+                                            padding: '8px 16px',
+                                            background: '#e2e8f0',
+                                            color: '#4a5568',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            fontWeight: 'bold'
+                                        }}
+                                    >
+                                        ← رجوع للقائمة
+                                    </button>
+                                </div>
+
+                                {/* Day Selection */}
+                                <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                                    {daysOrder.map(day => (
+                                        <button
+                                            key={day}
+                                            onClick={() => setSelectedDay(day)}
+                                            style={{
+                                                padding: '6px 12px',
+                                                borderRadius: '15px',
+                                                border: 'none',
+                                                background: selectedDay === day ? '#667eea' : '#edf2f7',
+                                                color: selectedDay === day ? 'white' : '#4a5568',
+                                                cursor: 'pointer',
+                                                fontWeight: 'bold',
+                                                fontSize: '14px'
+                                            }}
+                                        >
+                                            {dayNames[day]}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Single Room Schedule Grid */}
+                                <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                                    <div style={{
+                                        display: 'grid',
+                                        gridTemplateColumns: `repeat(${timeSlots.length * 2}, 80px)`,
+                                        gap: '1px',
+                                        background: '#e2e8f0'
+                                    }}>
+                                        {/* Time Headers */}
+                                        {timeSlots.map(time => (
+                                            <div key={time} style={{
+                                                background: '#f7fafc',
+                                                padding: '12px',
+                                                textAlign: 'center',
+                                                fontWeight: 'bold',
+                                                borderBottom: '2px solid #cbd5e0',
+                                                gridColumn: 'span 2'
+                                            }}>
+                                                {time}
+                                            </div>
+                                        ))}
+
+                                        {/* Time Slots for Selected Room */}
+                                        {(() => {
+                                            const rowSlots = [];
+                                            for (let i = 0; i < timeSlots.length; i++) {
+                                                const hour = parseInt(timeSlots[i].split(':')[0]);
+                                                rowSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+                                                rowSlots.push(`${hour.toString().padStart(2, '0')}:30`);
+                                            }
+
+                                            return rowSlots.map(time30 => {
+                                                const item = getScheduleItem(selectedRoom.id, selectedDay, time30);
+                                                const covered = isCovered(selectedRoom.id, selectedDay, time30);
+
+                                                if (covered) return null;
+
+                                                let span = 1;
+                                                if (item) {
+                                                    const startMinutes = parseInt(item.startTime.split(':')[0]) * 60 + parseInt(item.startTime.split(':')[1]);
+                                                    const endMinutes = parseInt(item.endTime.split(':')[0]) * 60 + parseInt(item.endTime.split(':')[1]);
+                                                    const durationMinutes = endMinutes - startMinutes;
+                                                    span = Math.ceil(durationMinutes / 30);
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={time30}
+                                                        style={{
+                                                            background: item ? '#ebf8ff' : '#fff',
+                                                            height: '80px',
+                                                            padding: '8px',
+                                                            gridColumn: `span ${span}`,
+                                                            border: item ? '2px solid #4299e1' : 'none',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            justifyContent: 'center'
+                                                        }}
+                                                    >
+                                                        {item ? (
+                                                            <div style={{
+                                                                background: '#4299e1',
+                                                                color: 'white',
+                                                                height: '100%',
+                                                                width: '100%',
+                                                                borderRadius: '6px',
+                                                                padding: '8px',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                justifyContent: 'center',
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                            }}>
+                                                                <div style={{ fontWeight: 'bold', fontSize: '0.9em', marginBottom: '4px' }}>
+                                                                    {item.course?.title || 'Unknown'}
+                                                                </div>
+                                                                <div style={{ opacity: 0.9, fontSize: '0.8em' }}>
+                                                                    {item.startTime} - {item.endTime}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            <span style={{ color: '#cbd5e0', fontSize: '0.8em' }}>فارغ</span>
+                                                        )}
+                                                    </div>
+                                                );
+                                            });
+                                        })()}
+                                    </div>
+                                </div>
+                            </>
+                        )}
+                    </div>
+                )
+            }
+
+            {/* Admin View: Full Schedule Grid */}
+            {
+                isAdmin && (
+                    <div style={{
+                        background: 'white',
+                        borderRadius: '15px',
+                        padding: '25px',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                    }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
+                            <h2 style={{ margin: 0, color: '#4a5568' }}>جدول الغرف</h2>
 
                             {/* Day Selection */}
-                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', marginBottom: '20px' }}>
+                            <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
                                 {daysOrder.map(day => (
                                     <button
                                         key={day}
@@ -516,259 +712,134 @@ const RoomManagement = () => {
                                     </button>
                                 ))}
                             </div>
-
-                            {/* Single Room Schedule Grid */}
-                            <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                                <div style={{
-                                    display: 'grid',
-                                    gridTemplateColumns: `repeat(${timeSlots.length * 2}, 80px)`,
-                                    gap: '1px',
-                                    background: '#e2e8f0'
-                                }}>
-                                    {/* Time Headers */}
-                                    {timeSlots.map(time => (
-                                        <div key={time} style={{
-                                            background: '#f7fafc',
-                                            padding: '12px',
-                                            textAlign: 'center',
-                                            fontWeight: 'bold',
-                                            borderBottom: '2px solid #cbd5e0',
-                                            gridColumn: 'span 2'
-                                        }}>
-                                            {time}
-                                        </div>
-                                    ))}
-
-                                    {/* Time Slots for Selected Room */}
-                                    {(() => {
-                                        const rowSlots = [];
-                                        for (let i = 0; i < timeSlots.length; i++) {
-                                            const hour = parseInt(timeSlots[i].split(':')[0]);
-                                            rowSlots.push(`${hour.toString().padStart(2, '0')}:00`);
-                                            rowSlots.push(`${hour.toString().padStart(2, '0')}:30`);
-                                        }
-
-                                        return rowSlots.map(time30 => {
-                                            const item = getScheduleItem(selectedRoom.id, selectedDay, time30);
-                                            const covered = isCovered(selectedRoom.id, selectedDay, time30);
-
-                                            if (covered) return null;
-
-                                            let span = 1;
-                                            if (item) {
-                                                const startMinutes = parseInt(item.startTime.split(':')[0]) * 60 + parseInt(item.startTime.split(':')[1]);
-                                                const endMinutes = parseInt(item.endTime.split(':')[0]) * 60 + parseInt(item.endTime.split(':')[1]);
-                                                const durationMinutes = endMinutes - startMinutes;
-                                                span = Math.ceil(durationMinutes / 30);
-                                            }
-
-                                            return (
-                                                <div
-                                                    key={time30}
-                                                    style={{
-                                                        background: item ? '#ebf8ff' : '#fff',
-                                                        height: '80px',
-                                                        padding: '8px',
-                                                        gridColumn: `span ${span}`,
-                                                        border: item ? '2px solid #4299e1' : 'none',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        justifyContent: 'center'
-                                                    }}
-                                                >
-                                                    {item ? (
-                                                        <div style={{
-                                                            background: '#4299e1',
-                                                            color: 'white',
-                                                            height: '100%',
-                                                            width: '100%',
-                                                            borderRadius: '6px',
-                                                            padding: '8px',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            justifyContent: 'center',
-                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                                        }}>
-                                                            <div style={{ fontWeight: 'bold', fontSize: '0.9em', marginBottom: '4px' }}>
-                                                                {item.course?.title || 'Unknown'}
-                                                            </div>
-                                                            <div style={{ opacity: 0.9, fontSize: '0.8em' }}>
-                                                                {item.startTime} - {item.endTime}
-                                                            </div>
-                                                        </div>
-                                                    ) : (
-                                                        <span style={{ color: '#cbd5e0', fontSize: '0.8em' }}>فارغ</span>
-                                                    )}
-                                                </div>
-                                            );
-                                        });
-                                    })()}
-                                </div>
-                            </div>
-                        </>
-                    )}
-                </div>
-            )}
-
-            {/* Admin View: Full Schedule Grid */}
-            {isAdmin && (
-                <div style={{
-                    background: 'white',
-                    borderRadius: '15px',
-                    padding: '25px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-                        <h2 style={{ margin: 0, color: '#4a5568' }}>جدول الغرف</h2>
-
-                        {/* Day Selection */}
-                        <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                            {daysOrder.map(day => (
-                                <button
-                                    key={day}
-                                    onClick={() => setSelectedDay(day)}
-                                    style={{
-                                        padding: '6px 12px',
-                                        borderRadius: '15px',
-                                        border: 'none',
-                                        background: selectedDay === day ? '#667eea' : '#edf2f7',
-                                        color: selectedDay === day ? 'white' : '#4a5568',
-                                        cursor: 'pointer',
-                                        fontWeight: 'bold',
-                                        fontSize: '14px'
-                                    }}
-                                >
-                                    {dayNames[day]}
-                                </button>
-                            ))}
                         </div>
-                    </div>
 
-                    <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
-                        <div style={{
-                            display: 'grid',
-                            gridTemplateColumns: `140px repeat(${timeSlots.length * 2}, 60px)`,
-                            gap: '1px',
-                            background: '#e2e8f0'
-                        }}>
-                            {/* Header */}
+                        <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
                             <div style={{
-                                fontWeight: 'bold',
-                                padding: '12px',
-                                background: '#f7fafc',
-                                position: 'sticky',
-                                top: 0,
-                                left: 0,
-                                zIndex: 10,
-                                borderBottom: '2px solid #cbd5e0'
+                                display: 'grid',
+                                gridTemplateColumns: `140px repeat(${timeSlots.length * 2}, 60px)`,
+                                gap: '1px',
+                                background: '#e2e8f0'
                             }}>
-                                الغرفة / الوقت
-                            </div>
-
-                            {timeSlots.map(time => (
-                                <div key={time} style={{
-                                    background: '#f7fafc',
-                                    padding: '12px',
-                                    textAlign: 'center',
+                                {/* Header */}
+                                <div style={{
                                     fontWeight: 'bold',
+                                    padding: '12px',
+                                    background: '#f7fafc',
                                     position: 'sticky',
                                     top: 0,
-                                    zIndex: 5,
-                                    borderBottom: '2px solid #cbd5e0',
-                                    gridColumn: 'span 2'
+                                    left: 0,
+                                    zIndex: 10,
+                                    borderBottom: '2px solid #cbd5e0'
                                 }}>
-                                    {time}
+                                    الغرفة / الوقت
                                 </div>
-                            ))}
 
-                            {/* Rows */}
-                            {rooms.map(room => {
-                                const rowSlots = [];
-                                for (let i = 0; i < timeSlots.length; i++) {
-                                    const hour = parseInt(timeSlots[i].split(':')[0]);
-                                    rowSlots.push(`${hour.toString().padStart(2, '0')}:00`);
-                                    rowSlots.push(`${hour.toString().padStart(2, '0')}:30`);
-                                }
+                                {timeSlots.map(time => (
+                                    <div key={time} style={{
+                                        background: '#f7fafc',
+                                        padding: '12px',
+                                        textAlign: 'center',
+                                        fontWeight: 'bold',
+                                        position: 'sticky',
+                                        top: 0,
+                                        zIndex: 5,
+                                        borderBottom: '2px solid #cbd5e0',
+                                        gridColumn: 'span 2'
+                                    }}>
+                                        {time}
+                                    </div>
+                                ))}
 
-                                return (
-                                    <>
-                                        <div key={room.id} style={{
-                                            fontWeight: 'bold',
-                                            display: 'flex',
-                                            flexDirection: 'column',
-                                            justifyContent: 'center',
-                                            padding: '10px',
-                                            background: '#fff',
-                                            position: 'sticky',
-                                            left: 0,
-                                            zIndex: 5,
-                                            borderRight: '2px solid #e2e8f0'
-                                        }}>
-                                            <span style={{ color: '#2d3748' }}>{room.name}</span>
-                                            <span style={{ fontSize: '0.7em', color: '#718096', marginTop: '2px' }}>
-                                                {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
-                                            </span>
-                                        </div>
+                                {/* Rows */}
+                                {rooms.map(room => {
+                                    const rowSlots = [];
+                                    for (let i = 0; i < timeSlots.length; i++) {
+                                        const hour = parseInt(timeSlots[i].split(':')[0]);
+                                        rowSlots.push(`${hour.toString().padStart(2, '0')}:00`);
+                                        rowSlots.push(`${hour.toString().padStart(2, '0')}:30`);
+                                    }
 
-                                        {rowSlots.map(time30 => {
-                                            const item = getScheduleItem(room.id, selectedDay, time30);
-                                            const covered = isCovered(room.id, selectedDay, time30);
+                                    return (
+                                        <>
+                                            <div key={room.id} style={{
+                                                fontWeight: 'bold',
+                                                display: 'flex',
+                                                flexDirection: 'column',
+                                                justifyContent: 'center',
+                                                padding: '10px',
+                                                background: '#fff',
+                                                position: 'sticky',
+                                                left: 0,
+                                                zIndex: 5,
+                                                borderRight: '2px solid #e2e8f0'
+                                            }}>
+                                                <span style={{ color: '#2d3748' }}>{room.name}</span>
+                                                <span style={{ fontSize: '0.7em', color: '#718096', marginTop: '2px' }}>
+                                                    {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
+                                                </span>
+                                            </div>
 
-                                            if (covered) return null;
+                                            {rowSlots.map(time30 => {
+                                                const item = getScheduleItem(room.id, selectedDay, time30);
+                                                const covered = isCovered(room.id, selectedDay, time30);
 
-                                            let span = 1;
-                                            if (item) {
-                                                const startMinutes = parseInt(item.startTime.split(':')[0]) * 60 + parseInt(item.startTime.split(':')[1]);
-                                                const endMinutes = parseInt(item.endTime.split(':')[0]) * 60 + parseInt(item.endTime.split(':')[1]);
-                                                const durationMinutes = endMinutes - startMinutes;
-                                                span = Math.ceil(durationMinutes / 30);
-                                            }
+                                                if (covered) return null;
 
-                                            return (
-                                                <div
-                                                    key={`${room.id}-${time30}`}
-                                                    style={{
-                                                        background: item ? '#ebf8ff' : '#fff',
-                                                        height: '70px',
-                                                        padding: '4px',
-                                                        position: 'relative',
-                                                        gridColumn: `span ${span}`,
-                                                        border: item ? '2px solid #4299e1' : 'none'
-                                                    }}
-                                                >
-                                                    {item && (
-                                                        <div style={{
-                                                            background: '#4299e1',
-                                                            color: 'white',
-                                                            height: '100%',
-                                                            width: '100%',
-                                                            borderRadius: '6px',
-                                                            padding: '4px 6px',
-                                                            fontSize: '0.75em',
-                                                            overflow: 'hidden',
-                                                            display: 'flex',
-                                                            flexDirection: 'column',
-                                                            justifyContent: 'center',
-                                                            boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-                                                        }}>
-                                                            <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                                                                {item.course?.title || 'Unknown'}
+                                                let span = 1;
+                                                if (item) {
+                                                    const startMinutes = parseInt(item.startTime.split(':')[0]) * 60 + parseInt(item.startTime.split(':')[1]);
+                                                    const endMinutes = parseInt(item.endTime.split(':')[0]) * 60 + parseInt(item.endTime.split(':')[1]);
+                                                    const durationMinutes = endMinutes - startMinutes;
+                                                    span = Math.ceil(durationMinutes / 30);
+                                                }
+
+                                                return (
+                                                    <div
+                                                        key={`${room.id}-${time30}`}
+                                                        style={{
+                                                            background: item ? '#ebf8ff' : '#fff',
+                                                            height: '70px',
+                                                            padding: '4px',
+                                                            position: 'relative',
+                                                            gridColumn: `span ${span}`,
+                                                            border: item ? '2px solid #4299e1' : 'none'
+                                                        }}
+                                                    >
+                                                        {item && (
+                                                            <div style={{
+                                                                background: '#4299e1',
+                                                                color: 'white',
+                                                                height: '100%',
+                                                                width: '100%',
+                                                                borderRadius: '6px',
+                                                                padding: '4px 6px',
+                                                                fontSize: '0.75em',
+                                                                overflow: 'hidden',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                justifyContent: 'center',
+                                                                boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+                                                            }}>
+                                                                <div style={{ fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                                                    {item.course?.title || 'Unknown'}
+                                                                </div>
+                                                                <div style={{ opacity: 0.9, fontSize: '0.9em' }}>
+                                                                    {item.startTime} - {item.endTime}
+                                                                </div>
                                                             </div>
-                                                            <div style={{ opacity: 0.9, fontSize: '0.9em' }}>
-                                                                {item.startTime} - {item.endTime}
-                                                            </div>
-                                                        </div>
-                                                    )}
-                                                </div>
-                                            );
-                                        })}
-                                    </>
-                                );
-                            })}
+                                                        )}
+                                                    </div>
+                                                );
+                                            })}
+                                        </>
+                                    );
+                                })}
+                            </div>
                         </div>
                     </div>
-                </div>
-            )}
+                )
+            }
 
             {/* Delete Confirmation Modal */}
             <ConfirmationModal
@@ -784,7 +855,7 @@ const RoomManagement = () => {
                 confirmText="حذف"
                 cancelText="إلغاء"
             />
-        </div>
+        </div >
     );
 };
 

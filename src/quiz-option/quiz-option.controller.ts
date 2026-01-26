@@ -1,4 +1,4 @@
-import { Controller, Post, Body, Patch, Param, Delete, Get, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, Patch, Param, Delete, Get, UseGuards, Query, ParseIntPipe, DefaultValuePipe } from '@nestjs/common';
 import { QuizOptionService } from './quiz-option.service';
 import { CreateQuizOptionDto } from './dto/create-quiz-option.dto';
 import { UpdateQuizOptionDto } from './dto/update-quiz-option.dto';
@@ -23,8 +23,12 @@ export class QuizOptionController {
   @Get(':questionId')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER, Role.ADMIN)
-  findAll(@Param('questionId') questionId: string) {
-    return this.service.findAll(+questionId);
+  findAll(
+    @Param('questionId') questionId: string,
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.service.findAll(+questionId, page, limit);
   }
 
   @Patch(':id')

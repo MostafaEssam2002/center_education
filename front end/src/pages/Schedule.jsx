@@ -64,13 +64,14 @@ const Schedule = () => {
     const fetchInitialData = async () => {
         try {
             const [coursesRes, scheduleRes, roomsRes] = await Promise.allSettled([
-                courseAPI.findAll(),
+                courseAPI.findAll(1, 1000),
                 courseScheduleAPI.findWeeklySchedule(),
-                roomAPI.findAll()
+                roomAPI.findAll(1, 1000)
             ]);
 
             if (coursesRes.status === 'fulfilled') {
-                setCourses(coursesRes.value.data);
+                const data = coursesRes.value.data.data || coursesRes.value.data;
+                setCourses(data);
             }
 
             if (scheduleRes.status === 'fulfilled') {
@@ -78,7 +79,8 @@ const Schedule = () => {
             }
 
             if (roomsRes.status === 'fulfilled') {
-                setRooms(roomsRes.value.data);
+                const data = roomsRes.value.data.data || roomsRes.value.data;
+                setRooms(data);
             } else {
                 setRooms([]);
             }

@@ -33,9 +33,10 @@ const EnrollmentRequests = () => {
 
     const loadCourses = async () => {
         try {
-            const response = await courseAPI.findAll();
+            const response = await courseAPI.findAll(1, 1000);
+            const allCourses = response.data.data || response.data;
             // Filter courses where user is teacher or admin
-            const userCourses = response.data.filter(course =>
+            const userCourses = allCourses.filter(course =>
                 user.role === 'ADMIN' || course.teacherId === user.id
             );
             setMyCourses(userCourses);

@@ -9,7 +9,7 @@ const VideoPlayer = ({ src, title, chapterId }) => {
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(1);
-    const progressUpdateTimerRef = useRef(null);
+    const lastUpdateRef = useRef(0);
 
     useEffect(() => {
         const video = videoRef.current;
@@ -31,12 +31,12 @@ const VideoPlayer = ({ src, title, chapterId }) => {
         const handleTimeUpdate = () => {
             setCurrentTime(video.currentTime);
 
-            if (progressUpdateTimerRef.current) {
-                clearTimeout(progressUpdateTimerRef.current);
+            // Throttle: Update progress every 3 seconds while watching
+            const now = Date.now();
+            if (now - lastUpdateRef.current >= 3000) {
+                updateProgress();
+                lastUpdateRef.current = now;
             }
-
-            // Update progress every 3 seconds while watching
-            progressUpdateTimerRef.current = setTimeout(updateProgress, 3000);
         };
 
         const handleLoadedMetadata = () => {
@@ -154,9 +154,7 @@ const VideoPlayer = ({ src, title, chapterId }) => {
             video.removeEventListener('pause', handlePause);
             video.removeEventListener('ended', handleEnded);
 
-            if (progressUpdateTimerRef.current) {
-                clearTimeout(progressUpdateTimerRef.current);
-            }
+
 
             // Cleanup HLS
             if (hlsRef.current) {

@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseIntPipe, Patch, Post, UseGuards, Query, DefaultValuePipe } from "@nestjs/common";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { RoomService } from "./room.service";
@@ -18,8 +18,11 @@ export class RoomController {
 
   @Get()
   @Roles('ADMIN', 'EMPLOYEE', 'TEACHER')
-  findAll() {
-    return this.roomService.findAll();
+  findAll(
+    @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
+  ) {
+    return this.roomService.findAll(page, limit);
   }
 
   @Get(':id')

@@ -83,7 +83,9 @@ services:
     command: >
       sh -c "
         echo 'Waiting for MySQL to be ready...' &&
-        sleep 10 &&
+        sleep 5 &&
+        echo 'Deploying Prisma migrations...' &&
+        npx prisma migrate deploy &&
         echo 'Generating Prisma Client...' &&
         npx prisma generate &&
         echo 'Starting development server with live reload...' &&

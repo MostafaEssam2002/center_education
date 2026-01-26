@@ -16,6 +16,8 @@ export default function ManageQuestions() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [showAddForm, setShowAddForm] = useState(false);
+    const [pagination, setPagination] = useState(null);
+    const [currentPage, setCurrentPage] = useState(1);
 
     // Initial state with stable IDs for the form
     const [newQuestion, setNewQuestion] = useState({
@@ -39,16 +41,23 @@ export default function ManageQuestions() {
         fetchQuizAndQuestions();
     }, [quizId]);
 
-    const fetchQuizAndQuestions = async () => {
+    const fetchQuizAndQuestions = async (page = currentPage) => {
         try {
             setLoading(true);
             setError('');
             const [quizRes, questionsRes] = await Promise.all([
                 quizAPI.findOne(quizId),
-                quizQuestionAPI.findAll(quizId),
+                quizQuestionAPI.findAll(quizId, page),
             ]);
             setQuiz(quizRes.data);
-            setQuestions(questionsRes.data);
+
+            if (questionsRes.data.data) {
+                setQuestions(questionsRes.data.data);
+                setPagination(questionsRes.data.pagination);
+                setCurrentPage(page);
+            } else {
+                setQuestions(questionsRes.data);
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to load quiz data');
             console.error(err);
@@ -147,7 +156,7 @@ export default function ManageQuestions() {
                     { id: `opt-${Date.now()}-2`, text: '', isCorrect: false },
                 ],
             });
-            fetchQuizAndQuestions();
+            fetchQuizAndQuestions(currentPage);
         } catch (err) {
             showToast(err.response?.data?.message || 'Failed to add question', 'error');
             console.error(err);
@@ -168,7 +177,7 @@ export default function ManageQuestions() {
                 try {
                     await quizQuestionAPI.remove(questionId);
                     showToast('Question deleted successfully!', 'success');
-                    fetchQuizAndQuestions();
+                    fetchQuizAndQuestions(currentPage);
                 } catch (err) {
                     showToast(err.response?.data?.message || 'Failed to delete question', 'error');
                     console.error(err);
@@ -341,6 +350,29 @@ export default function ManageQuestions() {
                         </motion.div>
                     ))}
                 </AnimatePresence>
+
+                {/* Pagination Controls */}
+                {pagination && (
+                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
+                        <button
+                            className="mq-btn mq-btn-secondary"
+                            disabled={currentPage === 1}
+                            onClick={() => fetchQuizAndQuestions(currentPage - 1)}
+                            style={{ padding: '8px 16px' }}
+                        >
+                            Previous
+                        </button>
+                        <span>Page {currentPage} of {pagination.totalPages}</span>
+                        <button
+                            className="mq-btn mq-btn-secondary"
+                            disabled={currentPage === pagination.totalPages}
+                            onClick={() => fetchQuizAndQuestions(currentPage + 1)}
+                            style={{ padding: '8px 16px' }}
+                        >
+                            Next
+                        </button>
+                    </div>
+                )}
 
                 {questions.length === 0 && !showAddForm && (
                     <div className="mq-empty-state">

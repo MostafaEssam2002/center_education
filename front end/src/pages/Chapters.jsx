@@ -53,10 +53,11 @@ const Chapters = () => {
         setCourses(enrolledCourses);
         // Don't auto-select for students, show cards first
       } else {
-        const response = await courseAPI.findAll();
-        setCourses(response.data);
-        if (response.data.length > 0 && !selectedCourseId) {
-          setSelectedCourseId(response.data[0].id.toString());
+        const response = await courseAPI.findAll(1, 1000);
+        const data = response.data.data || response.data;
+        setCourses(data);
+        if (data.length > 0 && !selectedCourseId) {
+          setSelectedCourseId(data[0].id.toString());
         }
       }
     } catch (err) {

@@ -11,7 +11,7 @@ import { PrismaService } from 'src/prisma/prisma.service';
 
 @Injectable()
 export class AuthService {
-  constructor(private userService: UserService,private jwtService: JwtService,private prisma: PrismaService) {}
+  constructor(private userService: UserService, private jwtService: JwtService, private prisma: PrismaService) { }
   async validateUser(email: string, pass: string) {
     // حاول تجيب المستخدم (من غير أي throw)
     const user = await this.userService.findByEmail(email);
@@ -31,23 +31,41 @@ export class AuthService {
     return result;
   }
 
-  async login(user:{id:number,email:string,role:string}) {
+  async login(user: { id: number, email: string, role: string }) {
     console.log('req.user = ', JSON.stringify(user, null, 2));
-    const payload = { email: user.email,role:user.role ,sub: user.id };
-        console.log(payload)
-        return {
-          message:"login successfully",
-          data:
-          {
-            user:user,
-            access_token: this.jwtService.sign(payload)
-          },
-        };
+    const payload = { email: user.email, role: user.role, sub: user.id };
+    console.log(payload)
+    return {
+      message: "login successfully",
+      data:
+      {
+        user: user,
+        access_token: this.jwtService.sign(payload)
+      },
+    };
   }
-  async findAll() {
-    const users = await this.prisma.user.findMany();
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
+      }),
+      this.prisma.user.count(),
+    ]);
+
     console.log("find all function in auth service called");
-    return users
+
+    return {
+      data: users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
   async findOne(id: number) {
     return this.prisma.user.findUnique({

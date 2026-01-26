@@ -13,8 +13,8 @@ const Attendance = () => {
     useEffect(() => {
         const fetchCourses = async () => {
             try {
-                const res = await courseAPI.findAll();
-                setCourses(res.data);
+                const res = await courseAPI.findAll(1, 1000);
+                setCourses(res.data.data || res.data);
             } catch (error) {
                 console.error('Failed to load courses:', error);
             } finally {

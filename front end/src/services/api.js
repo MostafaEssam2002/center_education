@@ -42,8 +42,8 @@ export const authAPI = {
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
 
-  findAll: () =>
-    api.get('/auth'),
+  findAll: (page = 1, limit = 10) =>
+    api.get('/auth', { params: { page, limit } }),
 
   findOne: (id) =>
     api.get(`/auth/${id}`),
@@ -54,8 +54,8 @@ export const userAPI = {
   register: (userData) =>
     api.post('/auth/register', userData),
 
-  findAll: () =>
-    api.get('/user'),
+  findAll: (page = 1, limit = 10) =>
+    api.get('/user', { params: { page, limit } }),
 
   findByEmail: (email) =>
     api.get(`/user/${email}`),
@@ -72,8 +72,11 @@ export const courseAPI = {
   create: (courseData) =>
     api.post('/course', courseData),
 
-  findAll: () =>
-    api.get('/course'),
+  findAll: (page = 1, limit = 10) =>
+    api.get('/course', { params: { page, limit } }),
+
+  findOne: (id) =>
+    api.get(`/course/${id}`),
 
   search: (title) =>
     api.get('/course/search', { params: { title } }),
@@ -189,8 +192,8 @@ export const courseScheduleAPI = {
 
 // Room API
 export const roomAPI = {
-  findAll: () =>
-    api.get('/room'),
+  findAll: (page = 1, limit = 10) =>
+    api.get('/room', { params: { page, limit } }),
 
   create: (roomData) =>
     api.post('/room', roomData),
@@ -255,8 +258,8 @@ export const quizQuestionAPI = {
   create: (questionData) =>
     api.post('/quiz-questions', questionData),
 
-  findAll: (quizId) =>
-    api.get(`/quiz-questions/${quizId}`),
+  findAll: (quizId, page = 1, limit = 10) =>
+    api.get(`/quiz-questions/${quizId}`, { params: { page, limit } }),
 
   update: (id, questionData) =>
     api.patch(`/quiz-questions/${id}`, questionData),
@@ -272,6 +275,9 @@ export const quizOptionAPI = {
 
   remove: (id) =>
     api.delete(`/quiz-options/${id}`),
+
+  findAll: (questionId, page = 1, limit = 10) =>
+    api.get(`/quiz-options/${questionId}`, { params: { page, limit } }),
 };
 
 // Quiz Attempt API

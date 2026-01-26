@@ -20,8 +20,9 @@ const CourseStudents = () => {
         setError('');
         try {
             // Load course details
-            const courseResponse = await courseAPI.findAll();
-            const foundCourse = courseResponse.data.find(c => c.id === parseInt(id));
+            const courseResponse = await courseAPI.findAll(1, 1000);
+            const courses = courseResponse.data.data || courseResponse.data;
+            const foundCourse = courses.find(c => c.id === parseInt(id));
             setCourse(foundCourse);
 
             // Load enrolled students

@@ -25,11 +25,48 @@ export class CourseService {
   }
 
   // ================= GET ALL COURSES =================
-  async findAll() {
-    return this.prisma.course.findMany({
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [courses, total] = await Promise.all([
+      this.prisma.course.findMany({
+        skip,
+        take: limit,
+        include: {
+          teacher: true,
+          chapters: true,
+          enrollments: true,
+          schedules: {
+            include: {
+              room: true
+            }
+          },
+          _count: {
+            select: { requests: true }
+          }
+        },
+      }),
+      this.prisma.course.count(),
+    ]);
+
+    return {
+      data: courses,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  }
+
+  // ================= FIND ONE COURSE =================
+  async findOne(id: number) {
+    const course = await this.prisma.course.findUnique({
+      where: { id },
       include: {
         teacher: true,
-        chapters: true, // اختياري
+        chapters: true,
         enrollments: true,
         schedules: {
           include: {
@@ -41,6 +78,12 @@ export class CourseService {
         }
       },
     });
+
+    if (!course) {
+      throw new NotFoundException(`Course with id ${id} not found`);
+    }
+
+    return course;
   }
 
   // ================= SEARCH BY TITLE =================

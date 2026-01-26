@@ -62,10 +62,11 @@ export default function EditQuiz() {
             const courseId = quiz.courseId || quiz.chapter?.courseId;
             if (courseId) {
                 const [courseRes, chaptersRes] = await Promise.all([
-                    courseAPI.findAll(), // Ideally fetchOne but findAll is cached/avail
+                    courseAPI.findAll(1, 1000), // Ideally fetchOne but findAll is cached/avail
                     chapterAPI.findAllByCourse(courseId),
                 ]);
-                const foundCourse = courseRes.data.find(c => c.id === courseId);
+                const courses = courseRes.data.data || courseRes.data;
+                const foundCourse = courses.find(c => c.id === courseId);
                 setCourse(foundCourse);
                 setChapters(chaptersRes.data);
             }

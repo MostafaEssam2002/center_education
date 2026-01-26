@@ -1,0 +1,1162 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="مركز تعليمي متطور يوفر دورات تعليمية عالية الجودة مع مدربين خبراء وشهادات معتمدة">
+    <meta name="keywords" content="تعليم, دورات تدريبية, تعلم اونلاين, شهادات معتمدة">
+    <title>مركز التعليم المتطور - ابدأ رحلتك التعليمية اليوم</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&family=Tajawal:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            /* Modern Color Palette */
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --accent-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --success-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            
+            --primary-color: #667eea;
+            --secondary-color: #764ba2;
+            --accent-color: #4facfe;
+            --text-dark: #2d3748;
+            --text-light: #718096;
+            --bg-light: #f7fafc;
+            --white: #ffffff;
+            
+            /* Glassmorphism */
+            --glass-bg: rgba(255, 255, 255, 0.1);
+            --glass-border: rgba(255, 255, 255, 0.2);
+            
+            /* Shadows */
+            --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.15);
+            --shadow-glow: 0 0 30px rgba(102, 126, 234, 0.3);
+            
+            /* Spacing */
+            --section-padding: 100px 0;
+        }
+
+        body {
+            font-family: 'Cairo', 'Tajawal', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            background-attachment: fixed;
+            color: var(--text-dark);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Animated Background Particles */
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            animation: float 20s infinite;
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 1;
+            }
+            90% {
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+
+        /* Header */
+        header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            padding: 20px 0;
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        header.scrolled {
+            padding: 15px 0;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: var(--shadow-md);
+        }
+
+        header.scrolled nav a {
+            color: var(--text-dark);
+        }
+
+        header.scrolled .logo {
+            color: var(--primary-color);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #fff 0%, rgba(255, 255, 255, 0.8) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            transition: all 0.3s ease;
+        }
+
+        nav {
+            display: flex;
+            gap: 40px;
+            align-items: center;
+        }
+
+        nav a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        nav a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--accent-gradient);
+            transition: width 0.3s ease;
+        }
+
+        nav a:hover::after {
+            width: 100%;
+        }
+
+        nav a:hover {
+            transform: translateY(-2px);
+        }
+
+        .cta-button {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 12px 32px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            padding-top: 80px;
+            z-index: 2;
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 56px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            animation: fadeInUp 1s ease;
+        }
+
+        .hero-text h1 .highlight {
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-text p {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            line-height: 1.8;
+            animation: fadeInUp 1s ease 0.2s both;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            animation: fadeInUp 1s ease 0.4s both;
+        }
+
+        .btn-primary {
+            background: var(--accent-gradient);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(79, 172, 254, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(79, 172, 254, 0.5);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-3px);
+        }
+
+        .hero-image {
+            position: relative;
+            animation: fadeInRight 1s ease 0.3s both;
+        }
+
+        .hero-image img {
+            width: 100%;
+            border-radius: 30px;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .hero-image:hover img {
+            transform: scale(1.02);
+            box-shadow: 0 35px 70px rgba(0, 0, 0, 0.4);
+        }
+
+        /* Floating cards decoration */
+        .floating-card {
+            position: absolute;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            box-shadow: var(--shadow-xl);
+            animation: float-card 3s ease-in-out infinite;
+        }
+
+        .floating-card-1 {
+            top: 20%;
+            right: -50px;
+            animation-delay: 0s;
+        }
+
+        .floating-card-2 {
+            bottom: 20%;
+            left: -50px;
+            animation-delay: 1s;
+        }
+
+        @keyframes float-card {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        /* Stats Section */
+        .stats {
+            padding: 80px 0;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 40px;
+            text-align: center;
+        }
+
+        .stat-item {
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .stat-item:hover {
+            transform: translateY(-10px);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 900;
+            background: var(--success-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 10px;
+        }
+
+        .stat-label {
+            font-size: 18px;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 600;
+        }
+
+        /* Features Section */
+        .features {
+            padding: var(--section-padding);
+            background: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+
+        .section-title {
+            font-size: 48px;
+            font-weight: 900;
+            color: var(--text-dark);
+            margin-bottom: 20px;
+        }
+
+        .section-subtitle {
+            font-size: 20px;
+            color: var(--text-light);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-md);
+            transition: all 0.3s ease;
+            border: 1px solid #f0f0f0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: var(--primary-gradient);
+            transform: scaleX(0);
+            transform-origin: left;
+            transition: transform 0.3s ease;
+        }
+
+        .feature-card:hover::before {
+            transform: scaleX(1);
+        }
+
+        .feature-card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .feature-icon {
+            width: 80px;
+            height: 80px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover .feature-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+
+        .feature-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--text-dark);
+            margin-bottom: 15px;
+        }
+
+        .feature-description {
+            font-size: 16px;
+            color: var(--text-light);
+            line-height: 1.8;
+        }
+
+        /* Courses Section */
+        .courses {
+            padding: var(--section-padding);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            position: relative;
+            z-index: 2;
+        }
+
+        .courses .section-title,
+        .courses .section-subtitle {
+            color: white;
+        }
+
+        .courses-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+        }
+
+        .course-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .course-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .course-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(135deg, rgba(79, 172, 254, 0.3), rgba(0, 242, 254, 0.3));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 64px;
+        }
+
+        .course-content {
+            padding: 30px;
+        }
+
+        .course-badge {
+            display: inline-block;
+            background: var(--success-gradient);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .course-title {
+            font-size: 22px;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 15px;
+        }
+
+        .course-description {
+            font-size: 15px;
+            color: rgba(255, 255, 255, 0.8);
+            margin-bottom: 20px;
+            line-height: 1.6;
+        }
+
+        .course-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .course-price {
+            font-size: 24px;
+            font-weight: 900;
+            color: white;
+        }
+
+        .course-students {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        /* CTA Section */
+        .cta-section {
+            padding: var(--section-padding);
+            background: white;
+            position: relative;
+            z-index: 2;
+        }
+
+        .cta-container {
+            background: var(--primary-gradient);
+            padding: 80px 60px;
+            border-radius: 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-container::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+            animation: rotate 20s linear infinite;
+        }
+
+        @keyframes rotate {
+            0% {
+                transform: rotate(0deg);
+            }
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .cta-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .cta-title {
+            font-size: 42px;
+            font-weight: 900;
+            color: white;
+            margin-bottom: 20px;
+        }
+
+        .cta-text {
+            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
+            margin-bottom: 40px;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+        }
+
+        .btn-white {
+            background: white;
+            color: var(--primary-color);
+            padding: 16px 40px;
+            border-radius: 50px;
+            border: none;
+            font-weight: 700;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-white:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        /* Footer */
+        footer {
+            background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%);
+            color: white;
+            padding: 60px 0 20px;
+            position: relative;
+            z-index: 2;
+        }
+
+        .footer-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px;
+            margin-bottom: 40px;
+        }
+
+        .footer-about h3 {
+            font-size: 24px;
+            font-weight: 900;
+            margin-bottom: 20px;
+        }
+
+        .footer-about p {
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.8;
+            margin-bottom: 20px;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 15px;
+        }
+
+        .social-link {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .social-link:hover {
+            background: var(--accent-gradient);
+            transform: translateY(-3px);
+        }
+
+        .footer-section h4 {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 20px;
+        }
+
+        .footer-links {
+            list-style: none;
+        }
+
+        .footer-links li {
+            margin-bottom: 12px;
+        }
+
+        .footer-links a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+        }
+
+        .footer-links a:hover {
+            color: white;
+            padding-right: 10px;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 30px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 968px) {
+            .hero-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-text h1 {
+                font-size: 42px;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .features-grid,
+            .courses-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .footer-content {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-buttons {
+                flex-direction: column;
+            }
+
+            nav {
+                display: none;
+            }
+        }
+
+        /* Scroll reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(50px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+    </style>
+</head>
+<body>
+    <!-- Animated Background Particles -->
+    <div class="particles" id="particles"></div>
+
+    <!-- Header -->
+    <header id="header">
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">🎓 مركز التعليم</div>
+                <nav>
+                    <a href="#home">الرئيسية</a>
+                    <a href="#features">المميزات</a>
+                    <a href="#courses">الدورات</a>
+                    <a href="#about">من نحن</a>
+                    <a href="#contact" class="cta-button">ابدأ الآن</a>
+                </nav>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="home">
+        <div class="container">
+            <div class="hero-content">
+                <div class="hero-text">
+                    <h1>ابدأ رحلتك التعليمية <span class="highlight">معنا</span></h1>
+                    <p>استمتع بتجربة تعليمية فريدة مع أفضل المدربين والدورات المتخصصة. طور مهاراتك واحصل على شهادات معتمدة تفتح لك آفاق جديدة في مسيرتك المهنية.</p>
+                    <div class="hero-buttons">
+                        <button class="btn-primary">استكشف الدورات</button>
+                        <button class="btn-secondary">تعرف علينا</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <img src="C:/Users/mws83/.gemini/antigravity/brain/3fb1ee67-ad3a-46ea-b709-a526989eff84/education_hero_image_1769091145869.png" alt="التعليم الحديث">
+                    <div class="floating-card floating-card-1">
+                        <div style="color: white; font-weight: 700;">✨ تعلم تفاعلي</div>
+                    </div>
+                    <div class="floating-card floating-card-2">
+                        <div style="color: white; font-weight: 700;">🎯 نتائج مضمونة</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-item reveal">
+                    <div class="stat-number">12,500+</div>
+                    <div class="stat-label">طالب نشط</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">450+</div>
+                    <div class="stat-label">دورة تدريبية</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">98%</div>
+                    <div class="stat-label">نسبة الرضا</div>
+                </div>
+                <div class="stat-item reveal">
+                    <div class="stat-number">150+</div>
+                    <div class="stat-label">مدرب خبير</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features" id="features">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">لماذا تختارنا؟</h2>
+                <p class="section-subtitle">نقدم لك تجربة تعليمية متكاملة مع أحدث التقنيات وأفضل المدربين</p>
+            </div>
+            <div class="features-grid">
+                <div class="feature-card reveal">
+                    <img src="C:/Users/mws83/.gemini/antigravity/brain/3fb1ee67-ad3a-46ea-b709-a526989eff84/feature_icon_1_1769091181636.png" alt="تعلم أونلاين" class="feature-icon">
+                    <h3 class="feature-title">تعلم من أي مكان</h3>
+                    <p class="feature-description">استمتع بالتعلم في أي وقت ومن أي مكان عبر منصتنا التفاعلية المتوافقة مع جميع الأجهزة</p>
+                </div>
+                <div class="feature-card reveal">
+                    <img src="C:/Users/mws83/.gemini/antigravity/brain/3fb1ee67-ad3a-46ea-b709-a526989eff84/feature_icon_2_1769091281117.png" alt="مدربون خبراء" class="feature-icon">
+                    <h3 class="feature-title">مدربون محترفون</h3>
+                    <p class="feature-description">تعلم من نخبة من المدربين ذوي الخبرة الواسعة والكفاءة العالية في مجالاتهم</p>
+                </div>
+                <div class="feature-card reveal">
+                    <img src="C:/Users/mws83/.gemini/antigravity/brain/3fb1ee67-ad3a-46ea-b709-a526989eff84/feature_icon_3_1769091343222.png" alt="شهادات معتمدة" class="feature-icon">
+                    <h3 class="feature-title">شهادات معتمدة</h3>
+                    <p class="feature-description">احصل على شهادات معترف بها دولياً تعزز من فرصك المهنية والوظيفية</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div style="font-size: 60px; margin-bottom: 20px;">⚡</div>
+                    <h3 class="feature-title">محتوى محدث</h3>
+                    <p class="feature-description">نحرص على تحديث المحتوى باستمرار ليواكب أحدث التطورات والتقنيات</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div style="font-size: 60px; margin-bottom: 20px;">💬</div>
+                    <h3 class="feature-title">دعم مستمر</h3>
+                    <p class="feature-description">فريق دعم متاح على مدار الساعة للإجابة على استفساراتك ومساعدتك</p>
+                </div>
+                <div class="feature-card reveal">
+                    <div style="font-size: 60px; margin-bottom: 20px;">🎯</div>
+                    <h3 class="feature-title">مسار تعليمي مخصص</h3>
+                    <p class="feature-description">نوفر خطط تعليمية مخصصة تناسب مستواك وأهدافك المهنية</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Courses Section -->
+    <section class="courses" id="courses">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">الدورات الأكثر شعبية</h2>
+                <p class="section-subtitle">اختر من بين مجموعة واسعة من الدورات المتخصصة</p>
+            </div>
+            <div class="courses-grid">
+                <div class="course-card reveal">
+                    <div class="course-image">💻</div>
+                    <div class="course-content">
+                        <span class="course-badge">التقنية</span>
+                        <h3 class="course-title">تطوير الويب الكامل</h3>
+                        <p class="course-description">تعلم تطوير تطبيقات الويب من الصفر باستخدام أحدث التقنيات والأدوات</p>
+                        <div class="course-meta">
+                            <div class="course-price">2,499 ج.م</div>
+                            <div class="course-students">👥 3,200 طالب</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card reveal">
+                    <div class="course-image">🎨</div>
+                    <div class="course-content">
+                        <span class="course-badge">التصميم</span>
+                        <h3 class="course-title">تصميم واجهات المستخدم</h3>
+                        <p class="course-description">أتقن فن تصميم واجهات المستخدم الحديثة والجذابة</p>
+                        <div class="course-meta">
+                            <div class="course-price">1,999 ج.م</div>
+                            <div class="course-students">👥 2,800 طالب</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card reveal">
+                    <div class="course-image">📊</div>
+                    <div class="course-content">
+                        <span class="course-badge">البيانات</span>
+                        <h3 class="course-title">علم البيانات والذكاء الاصطناعي</h3>
+                        <p class="course-description">استكشف عالم البيانات والتعلم الآلي من الأساسيات إلى الاحتراف</p>
+                        <div class="course-meta">
+                            <div class="course-price">3,499 ج.م</div>
+                            <div class="course-students">👥 4,100 طالب</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card reveal">
+                    <div class="course-image">📱</div>
+                    <div class="course-content">
+                        <span class="course-badge">تطبيقات الموبايل</span>
+                        <h3 class="course-title">تطوير تطبيقات الجوال</h3>
+                        <p class="course-description">ابني تطبيقات موبايل احترافية لنظامي iOS و Android</p>
+                        <div class="course-meta">
+                            <div class="course-price">2,799 ج.م</div>
+                            <div class="course-students">👥 2,400 طالب</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card reveal">
+                    <div class="course-image">🚀</div>
+                    <div class="course-content">
+                        <span class="course-badge">ريادة الأعمال</span>
+                        <h3 class="course-title">إدارة المشاريع التقنية</h3>
+                        <p class="course-description">تعلم كيفية إدارة المشاريع التقنية بكفاءة واحترافية</p>
+                        <div class="course-meta">
+                            <div class="course-price">1,799 ج.م</div>
+                            <div class="course-students">👥 1,900 طالب</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="course-card reveal">
+                    <div class="course-image">🔒</div>
+                    <div class="course-content">
+                        <span class="course-badge">الأمن السيبراني</span>
+                        <h3 class="course-title">أمن المعلومات والحماية</h3>
+                        <p class="course-description">احمي البيانات والأنظمة من التهديدات الإلكترونية</p>
+                        <div class="course-meta">
+                            <div class="course-price">2,999 ج.م</div>
+                            <div class="course-students">👥 1,600 طالب</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="cta-section" id="contact">
+        <div class="container">
+            <div class="cta-container">
+                <div class="cta-content">
+                    <h2 class="cta-title">هل أنت مستعد لبدء رحلتك التعليمية؟</h2>
+                    <p class="cta-text">انضم إلى آلاف الطلاب الذين حققوا أهدافهم معنا واحصل على شهادة معتمدة في مجالك</p>
+                    <div class="cta-buttons">
+                        <button class="btn-white">سجل الآن مجاناً</button>
+                        <button class="btn-secondary">تصفح الدورات</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer id="about">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-about">
+                    <h3>🎓 مركز التعليم</h3>
+                    <p>نحن منصة تعليمية رائدة نسعى لتقديم أفضل تجربة تعليمية من خلال دورات متخصصة ومدربين محترفين. هدفنا تمكين المتعلمين من تطوير مهاراتهم وتحقيق أهدافهم المهنية.</p>
+                    <div class="social-links">
+                        <a href="#" class="social-link">📘</a>
+                        <a href="#" class="social-link">🐦</a>
+                        <a href="#" class="social-link">📷</a>
+                        <a href="#" class="social-link">💼</a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h4>روابط سريعة</h4>
+                    <ul class="footer-links">
+                        <li><a href="#home">الرئيسية</a></li>
+                        <li><a href="#features">المميزات</a></li>
+                        <li><a href="#courses">الدورات</a></li>
+                        <li><a href="#about">من نحن</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>الدعم</h4>
+                    <ul class="footer-links">
+                        <li><a href="#">مركز المساعدة</a></li>
+                        <li><a href="#">الأسئلة الشائعة</a></li>
+                        <li><a href="#">اتصل بنا</a></li>
+                        <li><a href="#">سياسة الخصوصية</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>تواصل معنا</h4>
+                    <ul class="footer-links">
+                        <li>📧 info@education.com</li>
+                        <li>📞 +20 123 456 7890</li>
+                        <li>📍 القاهرة، مصر</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>© 2026 مركز التعليم. جميع الحقوق محفوظة | صمم بكل ❤️</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Particle Animation
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const particleCount = 50;
+
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const size = Math.random() * 5 + 2;
+                particle.style.width = size + 'px';
+                particle.style.height = size + 'px';
+                particle.style.left = Math.random() * 100 + '%';
+                particle.style.animationDelay = Math.random() * 20 + 's';
+                particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Header scroll effect
+        window.addEventListener('scroll', function() {
+            const header = document.getElementById('header');
+            if (window.scrollY > 100) {
+                header.classList.add('scrolled');
+            } else {
+                header.classList.remove('scrolled');
+            }
+        });
+
+        // Scroll reveal animation
+        function reveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            
+            for (let i = 0; i < reveals.length; i++) {
+                const windowHeight = window.innerHeight;
+                const elementTop = reveals[i].getBoundingClientRect().top;
+                const elementVisible = 150;
+                
+                if (elementTop < windowHeight - elementVisible) {
+                    reveals[i].classList.add('active');
+                }
+            }
+        }
+
+        window.addEventListener('scroll', reveal);
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Initialize
+        createParticles();
+        reveal();
+
+        // Add hover effect to buttons
+        const buttons = document.querySelectorAll('button, .cta-button');
+        buttons.forEach(button => {
+            button.addEventListener('mouseenter', function() {
+                this.style.transform = 'scale(1.05)';
+            });
+            button.addEventListener('mouseleave', function() {
+                this.style.transform = 'scale(1)';
+            });
+        });
+
+        // Counter animation for stats
+        function animateCounter(element, target) {
+            let current = 0;
+            const increment = target / 100;
+            const timer = setInterval(() => {
+                current += increment;
+                if (current >= target) {
+                    element.textContent = target.toLocaleString() + (element.textContent.includes('%') ? '%' : '+');
+                    clearInterval(timer);
+                } else {
+                    element.textContent = Math.floor(current).toLocaleString() + (target.toString().includes('%') ? '%' : '+');
+                }
+            }, 20);
+        }
+
+        // Trigger counter animation when stats section is visible
+        let statsAnimated = false;
+        window.addEventListener('scroll', function() {
+            const statsSection = document.querySelector('.stats');
+            const statsPosition = statsSection.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.3;
+
+            if (statsPosition < screenPosition && !statsAnimated) {
+                statsAnimated = true;
+                document.querySelectorAll('.stat-number').forEach(stat => {
+                    const text = stat.textContent;
+                    const number = parseInt(text.replace(/[^0-9]/g, ''));
+                    animateCounter(stat, number);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
