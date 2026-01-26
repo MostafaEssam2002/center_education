@@ -8,7 +8,7 @@
 افتح Terminal في مجلد المشروع واكتب:
 
 ```bash
-docker-compose up -d --build
+docker-compose up -d --build -d
 ```
 
 انتظر حتى ينتهي البناء (قد يستغرق 5-10 دقائق في المرة الأولى).
