@@ -18,61 +18,16 @@ const CourseDetail = () => {
     const [enrolling, setEnrolling] = useState(false);
 
     useEffect(() => {
-<<<<<<< HEAD
-        const fetchCourseDetails = async () => {
-            setLoading(true);
-            setError('');
-            try {
-                // Load course details
-                const courseResponse = await courseAPI.findOne(id);
-                setCourse(courseResponse.data);
-
-                // Check enrollment status for students
-                if (user?.role === 'STUDENT') {
-                    try {
-                        const enrollmentsResponse = await enrollmentAPI.getCoursesByStudent(user.id);
-                        const isEnrolled = enrollmentsResponse.data.some(
-                            enrollment => enrollment.courseId === parseInt(id)
-                        );
-                        setEnrollmentStatus(isEnrolled ? 'enrolled' : 'not_enrolled');
-                    } catch (err) {
-                        console.error('Error checking enrollment:', err);
-                        setEnrollmentStatus('not_enrolled');
-                    }
-                }
-            } catch (err) {
-                setError(err.response?.data?.message || 'فشل تحميل بيانات الكورس');
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchCourseDetails();
-    }, [id, user]);
-
-    // Reset page when course ID changes
-    useEffect(() => {
-        setPage(1);
-=======
         loadCourseData();
->>>>>>> 9c060cf60e9acd18d3d23c9678332fb88c97d218
-    }, [id]);
+    }, [id, user]);
 
     const loadCourseData = async () => {
         setLoading(true);
         setError('');
         try {
             // Load course details
-            const courseResponse = await courseAPI.findAll();
-            const foundCourse = courseResponse.data.find(c => c.id === parseInt(id));
-
-            if (!foundCourse) {
-                setError('الكورس غير موجود');
-                setLoading(false);
-                return;
-            }
-
-            setCourse(foundCourse);
+            const courseResponse = await courseAPI.findOne(id);
+            setCourse(courseResponse.data);
 
             // Load chapters
             try {

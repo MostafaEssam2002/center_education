@@ -90,22 +90,8 @@ const VideoPlayer = ({ src, title, chapterId }) => {
             video.removeEventListener('play', handlePlay);
             video.removeEventListener('pause', handlePause);
             video.removeEventListener('ended', handleEnded);
-
-<<<<<<< HEAD
-
-
-            // Cleanup HLS
-            if (hlsRef.current) {
-                console.log('🧹 Cleaning up HLS instance');
-                hlsRef.current.destroy();
-                hlsRef.current = null;
-=======
-            if (progressUpdateTimerRef.current) {
-                clearTimeout(progressUpdateTimerRef.current);
->>>>>>> 9c060cf60e9acd18d3d23c9678332fb88c97d218
-            }
         };
-    }, [chapterId]);
+    }, [chapterId, src]);
 
     const togglePlay = () => {
         if (videoRef.current) {
