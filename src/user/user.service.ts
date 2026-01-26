@@ -3,34 +3,72 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma } from '@prisma/client';
+import { Prisma, Role } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) { }
-  async register(createUserDto: CreateUserDto): Promise<object> {
-    const existingUser = await this.prisma.user.findUnique({
-      where: { email: createUserDto.email },
-    });
-    if (existingUser) {
-      throw new BadRequestException('Email already exists');
-    }
-    if (createUserDto.role === "ADMIN") {
-      throw new BadRequestException('Cannot register user with ADMIN role');
-    }
-    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-    try {
-      const user = await this.prisma.user.create({ data: { ...createUserDto, password: hashedPassword } });
-      const { password, ...userWithoutPassword } = user;
-      return { message: 'This action adds a new user', user: userWithoutPassword };
-    } catch (error) {
-      if (error instanceof Prisma.PrismaClientKnownRequestError) {
-        if (error.code === 'P2002') {
-          throw new BadRequestException('Email already exists');
-        }
-      }
-      throw new InternalServerErrorException(error.message);
-    }
+  async register(createUserDto: CreateUserDto): Promise<any> {
+  const existingUser = await this.prisma.user.findUnique({
+    where: { email: createUserDto.email },
+  });
+
+  if (existingUser) {
+    return {
+      success: false,
+      message: 'Email already exists',
+    };
   }
+
+  if (createUserDto.role === 'ADMIN') {
+    return {
+      success: false,
+      message: 'Cannot register user with ADMIN role',
+    };
+  }
+
+  const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+  try {
+    const user = await this.prisma.user.create({
+      data: {
+        email: createUserDto.email,
+        password: hashedPassword,
+        first_name: createUserDto.first_name,
+        last_name: createUserDto.last_name,
+        age: createUserDto.age,
+        phone: createUserDto.phone,
+        address: createUserDto.address,
+        image_path: createUserDto.image_path,
+        role: Role.USER,
+      },
+    });
+
+    const { password, ...userWithoutPassword } = user;
+
+    return {
+      success: true,
+      message: 'User registered successfully',
+      user: userWithoutPassword,
+    };
+  } catch (error) {
+    // حتى هنا ما نرميش Exception
+    if (
+      error instanceof Prisma.PrismaClientKnownRequestError &&
+      error.code === 'P2002'
+    ) {
+      return {
+        success: false,
+        message: 'Email already exists',
+      };
+    }
+
+    return {
+      success: false,
+      message: 'Something went wrong',
+    };
+  }
+}
+
 
   async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;

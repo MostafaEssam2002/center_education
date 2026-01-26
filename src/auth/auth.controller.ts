@@ -18,14 +18,28 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    const result: any = await this.userService.register(createUserDto);
+    const result = await this.userService.register(createUserDto);
+
+    // ⛔ لو فشل، رجّع على طول
+    if (!result.success) {
+      return {
+        message: result.message,
+        data: null,
+      };
+    }
+
+    // ✅ هنا بس user موجود
     const token = await this.authService.login(result.user);
-    // console.log(result.user)
+
     return {
       message: result.message,
-      data: { info: result.user, token: token.data.access_token },
+      data: {
+        user: result.user,
+        access_token: token.data.access_token,
+      },
     };
   }
+
 
   @Post("login")
   @UseGuards(LocalAuthGuard)
