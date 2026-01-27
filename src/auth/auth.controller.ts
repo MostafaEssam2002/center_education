@@ -23,7 +23,7 @@ export class AuthController {
     // ⛔ لو فشل، رجّع على طول
     if (!result.success) {
       return {
-        status:0,
+        status: 0,
         message: result.message,
         data: null,
       };
@@ -38,19 +38,22 @@ export class AuthController {
         user: result.user,
         access_token: token.data.access_token,
       },
-      status:1
+      status: 1
     };
   }
 
 
   @Post("login")
-  @UseGuards(LocalAuthGuard)
   @HttpCode(200)
-  async login(@Request() req) {
-    // console.log('req.user = ', JSON.stringify(req.user, null, 2));
-
-    // console.log(`req.user = ${req.user.password}`)
-    return this.authService.login(req.user);
+  async login(@Body() body: any) {
+    const user = await this.authService.validateUser(body.email, body.password);
+    if (!user) {
+      return {
+        status: 200,
+        message: "invalid credentials",
+      };
+    }
+    return this.authService.login(user as any);
   }
 
   @Get("users")

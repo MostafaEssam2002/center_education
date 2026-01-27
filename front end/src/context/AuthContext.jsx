@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
       if (!token) {
         return {
           success: false,
-          error: 'لم يتم استلام token',
+          error: response.data?.message || 'لم يتم استلام token',
         };
       }
 
