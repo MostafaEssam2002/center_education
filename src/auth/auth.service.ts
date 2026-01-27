@@ -23,7 +23,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(pass, passwordHash);
     // أي فشل → null (من غير كشف السبب)
     if (!user || !isPasswordValid) {
-      return null;
+      return 0;
     }
     // شيل الباسورد قبل الإرجاع
     const { password, ...result } = user;
@@ -32,9 +32,13 @@ export class AuthService {
   }
 
   async login(user: { id: number, email: string, role: string }) {
-    console.log('req.user = ', JSON.stringify(user, null, 2));
+    // console.log('req.user = ', JSON.stringify(user, null, 2));
     const payload = { email: user.email, role: user.role, sub: user.id };
-    console.log(payload)
+    // console.log(payload)
+    // if(!payload){
+    //   console.log("user not found here ")
+    //   return {null:null}
+    // }
     return {
       message: "login successfully",
       data:
@@ -42,6 +46,7 @@ export class AuthService {
         user: user,
         access_token: this.jwtService.sign(payload)
       },
+      status:1
     };
   }
   async findAll(page: number = 1, limit: number = 10) {

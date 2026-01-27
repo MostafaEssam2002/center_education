@@ -23,6 +23,7 @@ export class AuthController {
     // ⛔ لو فشل، رجّع على طول
     if (!result.success) {
       return {
+        status:0,
         message: result.message,
         data: null,
       };
@@ -37,6 +38,7 @@ export class AuthController {
         user: result.user,
         access_token: token.data.access_token,
       },
+      status:1
     };
   }
 
@@ -51,7 +53,7 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  @Get()
+  @Get("users")
   @Roles(Role.ADMIN, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   findAll(
@@ -61,17 +63,12 @@ export class AuthController {
     return this.authService.findAll(page, limit);
   }
 
-  @Get(':id')
-  // @Roles(Role.ADMIN, Role.TEACHER)
-  @UseGuards(JwtAuthGuard, OwnershipGuard)
-  findOne(@Param('id', ParseIntPipe) id: number) {
+  @Get()
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard)
+  findOne(@Query('id', ParseIntPipe) id: number) {
+    console.log("this is id number fron query")
     return this.authService.findOne(id);
   }
-  // @Get(':id')
-  // @UseGuards(JwtAuthGuard, PoliciesGuard)
-  // @CheckPolicies((ability) => ability.can('read', 'User'))
-  // findOne(@Param('id') id: number) {
-  //   return this.authService.findOne(id);
-  // }
 
 }
