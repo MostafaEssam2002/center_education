@@ -119,8 +119,30 @@ export class UserService {
   //   // return `This action returns a #${id} user`;
   // }
 
-  update(id: number, updateUserDto: UpdateUserDto) {
-    return `This action updates a #${id} user`;
+  async update(id: number, updateUserDto: UpdateUserDto) {
+    if (updateUserDto.password) {
+      updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
+    }
+
+    
+    try {
+      const user = await this.prisma.user.update({
+        where: { id },
+        data: updateUserDto,
+      });
+      const { password, ...userWithoutPassword } = user;
+      return userWithoutPassword;
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Email already exists');
+        }
+        if (error.code === 'P2025') {
+          throw new BadRequestException('User not found');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
 
   remove(id: number) {
