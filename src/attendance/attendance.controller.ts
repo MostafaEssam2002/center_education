@@ -98,7 +98,7 @@ export class AttendanceController {
     @Param('courseId', ParseIntPipe) courseId: number,
     @Req() req: any,
   ) {
-    const studentId = req.user.userId;
+    const studentId = req.user.id;
     return this.attendanceService.getStudentAttendanceInCourse(
       studentId,
       courseId,

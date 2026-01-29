@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { chapterAPI, courseAPI, uploadAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
@@ -26,6 +26,14 @@ const Chapters = () => {
 
   const { user } = useAuth();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    const courseIdParam = searchParams.get('courseId');
+    if (courseIdParam) {
+      setSelectedCourseId(courseIdParam);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     loadCourses();
@@ -48,7 +56,11 @@ const Chapters = () => {
         const response = await courseAPI.findAll(1, 1000);
         const data = response.data.data || response.data;
         setCourses(data);
-        if (data.length > 0 && !selectedCourseId) {
+
+        const courseIdParam = searchParams.get('courseId');
+        if (courseIdParam) {
+          setSelectedCourseId(courseIdParam);
+        } else if (data.length > 0 && !selectedCourseId) {
           setSelectedCourseId(data[0].id.toString());
         }
       }
@@ -104,7 +116,7 @@ const Chapters = () => {
 
       const chapterData = {
         ...formData,
-        courseId: parseInt(formData.courseId),
+        courseId: parseInt(selectedCourseId),
         order: parseInt(formData.order),
         videoPath: videoUrl,
         pdfPath: pdfUrl,
@@ -190,7 +202,10 @@ const Chapters = () => {
           <h2>{selectedCourseId ? `فصول: ${courses.find(c => c.id.toString() === selectedCourseId)?.title}` : 'إدارة الفصول'}</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
             {selectedCourseId && (
-              <button className="btn btn-secondary" onClick={() => setSelectedCourseId('')}>
+              <button className="btn btn-secondary" onClick={() => {
+                setSelectedCourseId('');
+                setSearchParams({});
+              }}>
                 العودة للكورسات
               </button>
             )}
@@ -236,7 +251,10 @@ const Chapters = () => {
                     flexDirection: 'column',
                     justifyContent: 'space-between'
                   }}
-                  onClick={() => setSelectedCourseId(course.id.toString())}
+                  onClick={() => {
+                    setSelectedCourseId(course.id.toString());
+                    setSearchParams({ courseId: course.id.toString() });
+                  }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-5px)';
                     e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';

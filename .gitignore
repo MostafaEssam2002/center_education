@@ -57,3 +57,11 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 .env.example
 *.example
 src/upload-file/ffmpeg.exe
+
+# ignore uploaded files
+/public/videos/*
+!/public/videos/.gitkeep
+/public/images/*
+!/public/images/.gitkeep
+/public/pdfs/*
+!/public/pdfs/.gitkeep
