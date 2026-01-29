@@ -1,5 +1,5 @@
 import { Role } from '@prisma/client';
-import { IsEmail, IsEmpty, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, MaxLength, MinLength } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsNumber, IsOptional, IsPhoneNumber, IsString, MaxLength, MinLength } from 'class-validator';
 
 export class CreateUserDto {
     @IsOptional()
@@ -11,19 +11,29 @@ export class CreateUserDto {
     first_name: string;
     @IsNotEmpty()
     last_name: string
-    @IsEmpty()
-    // @IsNumber() 
-    age?: number;
+    @IsNotEmpty()
+    @IsNumber()
+    age: number;
     @IsNotEmpty()
     @MinLength(6)
     @MaxLength(15)
     password: string;
     @IsPhoneNumber()
     phone?: string;
-    @IsEmpty()
+    @IsNotEmpty()
     address?: string;
     @IsNotEmpty()
-    @IsEnum( Role)
+    @IsEnum(Role)
     role: Role;
+
+    @IsOptional()
+    @IsString()
+    country?: string;
+
+    @IsOptional()
+    city?: string | number;
+
+    @IsOptional()
+    region?: string | number;
 }
 

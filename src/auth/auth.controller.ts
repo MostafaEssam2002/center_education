@@ -18,28 +18,27 @@ export class AuthController {
 
   @Post('register')
   async register(@Body() createUserDto: CreateUserDto) {
-    const result = await this.userService.register(createUserDto);
+    try {
+      const result = await this.userService.register(createUserDto);
 
-    // ⛔ لو فشل، رجّع على طول
-    if (!result.success) {
+      // ✅ هنا بس user موجود
+      const token = await this.authService.login(result.user);
+
+      return {
+        message: result.message,
+        data: {
+          user: result.user,
+          access_token: token.data.access_token,
+        },
+        status: 1
+      };
+    } catch (e) {
       return {
         status: 0,
-        message: result.message,
+        message: e.message,
         data: null,
       };
     }
-
-    // ✅ هنا بس user موجود
-    const token = await this.authService.login(result.user);
-
-    return {
-      message: result.message,
-      data: {
-        user: result.user,
-        access_token: token.data.access_token,
-      },
-      status: 1
-    };
   }
 
 
@@ -49,7 +48,7 @@ export class AuthController {
     const user = await this.authService.validateUser(body.email, body.password);
     if (!user) {
       return {
-        status: 200,
+        status: 0,
         message: "invalid credentials",
       };
     }

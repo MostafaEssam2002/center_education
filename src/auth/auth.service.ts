@@ -23,7 +23,7 @@ export class AuthService {
     const isPasswordValid = await bcrypt.compare(pass, passwordHash);
     // أي فشل → null (من غير كشف السبب)
     if (!user || !isPasswordValid) {
-      return 0;
+      return null;
     }
     // شيل الباسورد قبل الإرجاع
     const { password, ...result } = user;
@@ -32,44 +32,33 @@ export class AuthService {
   }
 
   async login(user: { id: number, email: string, role: string }) {
-    // console.log('req.user = ', JSON.stringify(user, null, 2));
+    console.log('req.user = ', JSON.stringify(user, null, 2));
     const payload = { email: user.email, role: user.role, sub: user.id };
-    // console.log(payload)
-    // if(!payload){
-    //   console.log("user not found here ")
-    //   return {null:null}
-    // }
+    console.log(payload)
     return {
       message: "login successfully",
+      status: 1,
       data:
       {
         user: user,
         access_token: this.jwtService.sign(payload)
       },
-      status:1
     };
   }
-  async findAll(page: number = 1, limit: number = 10) {
+  async findAll(page: number, limit: number) {
     const skip = (page - 1) * limit;
-
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        skip,
-        take: limit,
-      }),
-      this.prisma.user.count(),
-    ]);
-
+    const users = await this.prisma.user.findMany({
+      skip,
+      take: limit,
+    });
     console.log("find all function in auth service called");
-
     return {
       data: users,
-      pagination: {
-        total,
+      meta: {
         page,
         limit,
-        totalPages: Math.ceil(total / limit),
-      },
+        total: await this.prisma.user.count(),
+      }
     };
   }
   async findOne(id: number) {

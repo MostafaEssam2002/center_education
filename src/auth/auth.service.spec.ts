@@ -85,7 +85,11 @@ describe('AuthService', () => {
       const result = await service.login(user);
       expect(result).toEqual({
         message: 'login successfully',
-        access_token: token,
+        status: 1,
+        data: {
+          user: user,
+          access_token: token,
+        },
       });
       expect(mockJwtService.sign).toHaveBeenCalledWith({ email: user.email, role: user.role, sub: user.id });
     });
@@ -95,25 +99,24 @@ describe('AuthService', () => {
     it('should return paginated users', async () => {
       const users = [{ id: 1, email: 'test@example.com' }];
       const total = 1;
+      mockPrismaService.user.findMany.mockResolvedValue(users);
+      mockPrismaService.user.count.mockResolvedValue(total);
 
-      // Mock both findMany and count
-      (mockPrismaService.user.findMany as jest.Mock).mockResolvedValue(users);
-      // We need to add count mock to prisma service mock if it's not already there
-      if (!mockPrismaService.user['count']) {
-        mockPrismaService.user['count'] = jest.fn();
-      }
-      (mockPrismaService.user.count as jest.Mock).mockResolvedValue(total);
-
-      const result = await service.findAll(1, 10);
+      const page = 1;
+      const limit = 10;
+      const result = await service.findAll(page, limit);
 
       expect(result).toEqual({
         data: users,
-        pagination: {
-          total,
-          page: 1,
-          limit: 10,
-          totalPages: 1
+        meta: {
+          page,
+          limit,
+          total
         }
+      });
+      expect(mockPrismaService.user.findMany).toHaveBeenCalledWith({
+        skip: 0,
+        take: 10,
       });
     });
   });

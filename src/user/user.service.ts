@@ -3,80 +3,50 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import * as bcrypt from 'bcrypt';
 import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, Role } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 @Injectable()
 export class UserService {
   constructor(private prisma: PrismaService) { }
-  async register(createUserDto: CreateUserDto): Promise<any> {
-  const existingUser = await this.prisma.user.findUnique({
-    where: { email: createUserDto.email },
-  });
-
-  if (existingUser) {
-    return {
-      success: false,
-      message: 'Email already exists',
-    };
-  }
-
-  if (createUserDto.role === 'ADMIN') {
-    return {
-      success: false,
-      message: 'Cannot register user with ADMIN role',
-    };
-  }
-
-  const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
-
-  try {
-    const user = await this.prisma.user.create({
-      data: {
-        email: createUserDto.email,
-        password: hashedPassword,
-        first_name: createUserDto.first_name,
-        last_name: createUserDto.last_name,
-        age: createUserDto.age,
-        phone: createUserDto.phone,
-        address: createUserDto.address,
-        image_path: createUserDto.image_path,
-        role: Role.USER,
-      },
+  async register(createUserDto: CreateUserDto) {
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: createUserDto.email },
     });
-
-    const { password, ...userWithoutPassword } = user;
-
-    return {
-      success: true,
-      message: 'User registered successfully',
-      user: userWithoutPassword,
-    };
-  } catch (error) {
-    // حتى هنا ما نرميش Exception
-    if (
-      error instanceof Prisma.PrismaClientKnownRequestError &&
-      error.code === 'P2002'
-    ) {
-      return {
-        success: false,
-        message: 'Email already exists',
-      };
+    if (existingUser) {
+      throw new BadRequestException('Email already exists');
     }
+    if (createUserDto.role === "ADMIN") {
+      throw new BadRequestException('Cannot register user with ADMIN role');
+    }
+    const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
 
-    return {
-      success: false,
-      message: 'Something went wrong',
-    };
+    // Map DTO fields to Database fields
+    const { country, city, region, ...userData } = createUserDto;
+    const dbData: any = { ...userData, password: hashedPassword };
+
+    if (country) dbData.countryCode = country;
+    if (city) dbData.cityCode = String(city);
+    if (region) dbData.regionId = Number(region);
+
+    try {
+      const user = await this.prisma.user.create({ data: dbData });
+      const { password, ...userWithoutPassword } = user;
+      return { message: 'This action adds a new user', user: userWithoutPassword };
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError) {
+        if (error.code === 'P2002') {
+          throw new BadRequestException('Email already exists');
+        }
+        if (error.code === 'P2003') {
+          throw new BadRequestException('Invalid country, city, or region');
+        }
+      }
+      throw new InternalServerErrorException(error.message);
+    }
   }
-}
 
-
-  async findAll(page: number = 1, limit: number = 10) {
-    const skip = (page - 1) * limit;
-
-    const [users, total] = await Promise.all([
-      this.prisma.user.findMany({
-        skip,
-        take: limit,
+  async findAll() {
+    const users = await this.prisma.user.findMany(
+      {
         select: {
           id: true,
           email: true,
@@ -87,26 +57,24 @@ export class UserService {
           address: true,
           role: true,
           image_path: true,
+          country: true,
+          city: true,
+          region: true,
           createdAt: true,
           updatedAt: true,
         },
-      }),
-      this.prisma.user.count(),
-    ]);
-
-    return {
-      data: users,
-      pagination: {
-        total,
-        page,
-        limit,
-        totalPages: Math.ceil(total / limit),
-      },
-    };
+      }
+    );
+    return users;
   }
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({
       where: { email },
+      include: {
+        country: true,
+        city: true,
+        region: true,
+      }
     });
   }
 
@@ -124,11 +92,18 @@ export class UserService {
       updateUserDto.password = await bcrypt.hash(updateUserDto.password, 10);
     }
 
-    
+    // Map DTO fields to Database fields
+    const { country, city, region, ...updateData } = updateUserDto;
+    const dbData: any = { ...updateData };
+
+    if (country) dbData.countryCode = country;
+    if (city) dbData.cityCode = String(city);
+    if (region) dbData.regionId = Number(region);
+
     try {
       const user = await this.prisma.user.update({
         where: { id },
-        data: updateUserDto,
+        data: dbData,
       });
       const { password, ...userWithoutPassword } = user;
       return userWithoutPassword;
@@ -139,6 +114,9 @@ export class UserService {
         }
         if (error.code === 'P2025') {
           throw new BadRequestException('User not found');
+        }
+        if (error.code === 'P2003') {
+          throw new BadRequestException('Invalid country, city, or region');
         }
       }
       throw new InternalServerErrorException(error.message);
