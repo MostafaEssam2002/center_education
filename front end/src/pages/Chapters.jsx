@@ -195,7 +195,12 @@ const Chapters = () => {
               </button>
             )}
             {canManageChapters && selectedCourseId && (
-              <button className="btn btn-primary" onClick={() => { resetForm(); setShowCreateModal(true); formData.courseId = selectedCourseId; }}>
+              <button className="btn btn-primary" onClick={() => {
+                setFormData({ title: '', content: '', courseId: selectedCourseId, videoPath: '', pdfPath: '', order: '' });
+                setVideoFile(null);
+                setPdfFile(null);
+                setShowCreateModal(true);
+              }}>
                 إضافة فصل جديد
               </button>
             )}
@@ -377,19 +382,7 @@ const Chapters = () => {
                 />
               </div>
               <div className="form-group">
-                <label>الكورس <span className="required">*</span></label>
-                <select
-                  value={formData.courseId}
-                  onChange={(e) => setFormData({ ...formData, courseId: e.target.value })}
-                  required
-                >
-                  <option value="">اختر الكورس</option>
-                  {courses.map((course) => (
-                    <option key={course.id} value={course.id}>
-                      {course.title}
-                    </option>
-                  ))}
-                </select>
+                {/* Course is already selected from context */}
               </div>
               <div className="form-group">
                 <label>الفيديو</label>
