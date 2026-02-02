@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jan 28, 2026 at 12:58 PM
+-- Generation Time: Jan 30, 2026 at 01:48 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -71,6 +71,15 @@ CREATE TABLE `attendance` (
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+--
+-- Dumping data for table `attendance`
+--
+
+INSERT INTO `attendance` (`id`, `sessionId`, `studentId`, `status`, `createdAt`) VALUES
+(1, 1, 16, 'ABSENT', '2026-01-29 12:27:02.352'),
+(2, 1, 15, 'PRESENT', '2026-01-29 12:27:02.352'),
+(3, 1, 12, 'ABSENT', '2026-01-29 12:27:02.352');
+
 -- --------------------------------------------------------
 
 --
@@ -106,7 +115,10 @@ INSERT INTO `chapter` (`id`, `title`, `content`, `videoPath`, `pdfPath`, `order`
 (14, 'ch1', 'sadsadsadasdasdas', '/videos/1769008672044-813972103/index.m3u8', NULL, 1, 2, '2026-01-21 15:18:15.892', '2026-01-21 15:18:15.892'),
 (15, 'ubujbuj', 'okml;;', '/videos/1769073007798-949034324/index.m3u8', NULL, 2, 2, '2026-01-22 09:10:08.042', '2026-01-22 09:10:08.042'),
 (16, 'chapter', 'sadsadsadsadsd', '/videos/1769074538494-294250814/index.m3u8', NULL, 5, 1, '2026-01-22 09:36:22.827', '2026-01-22 09:36:22.827'),
-(17, 'chg', 'cgf', '/videos/1769081019497-649323968/index.m3u8', NULL, 3, 2, '2026-01-22 11:24:17.403', '2026-01-22 11:24:17.403');
+(17, 'chg', 'cgf', '/videos/1769081019497-649323968/index.m3u8', NULL, 3, 2, '2026-01-22 11:24:17.403', '2026-01-22 11:24:17.403'),
+(22, 'ahmed mohsen', 'ahmed mohsen', '/videos/1769678743180-735602052/index.m3u8', '/pdfs/1769678782355-844496328.pdf', 22, 1, '2026-01-29 09:26:22.393', '2026-01-29 09:26:22.393'),
+(23, 'asdasd', 'sadsadsadsad', '/videos/1769678885904-111113052/index.m3u8', NULL, 213, 1, '2026-01-29 09:28:06.628', '2026-01-29 09:28:06.628'),
+(24, 'تلاىتمنلاىتىت', 'تعاهعاعاا', '/videos/1769679217597-777679152/index.m3u8', NULL, 55, 3, '2026-01-29 09:34:12.996', '2026-01-29 09:34:12.996');
 
 -- --------------------------------------------------------
 
@@ -136,7 +148,89 @@ INSERT INTO `chapterprogress` (`id`, `studentId`, `chapterId`, `progress`, `crea
 (6, 12, 4, 77, '2026-01-20 11:51:27.959', '2026-01-20 11:51:34.385'),
 (7, 12, 7, 100, '2026-01-20 11:52:04.344', '2026-01-20 11:52:23.263'),
 (8, 16, 14, 54, '2026-01-21 16:29:17.305', '2026-01-21 16:34:17.295'),
-(9, 16, 17, 55, '2026-01-22 11:28:07.257', '2026-01-22 11:35:09.239');
+(9, 16, 17, 55, '2026-01-22 11:28:07.257', '2026-01-22 11:35:09.239'),
+(11, 16, 24, 39, '2026-01-29 09:34:54.280', '2026-01-29 09:46:25.668');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `cities`
+--
+
+CREATE TABLE `cities` (
+  `code` varchar(191) NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `countryCode` varchar(191) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `cities`
+--
+
+INSERT INTO `cities` (`code`, `name`, `countryCode`) VALUES
+('ALX', 'Alexandria', 'EG'),
+('ARS', 'Arish', 'EG'),
+('ASN', 'Aswan', 'EG'),
+('AST', 'Asyut', 'EG'),
+('BHR', 'Beheira', 'EG'),
+('BNS', 'Beni Suef', 'EG'),
+('CAI', 'Cairo', 'EG'),
+('DMT', 'Damietta', 'EG'),
+('FYM', 'Fayoum', 'EG'),
+('GIZ', 'Giza', 'EG'),
+('HRG', 'Hurghada', 'EG'),
+('ISG', 'Ismailia', 'EG'),
+('KFS', 'Kafr El Sheikh', 'EG'),
+('LUX', 'Luxor', 'EG'),
+('MNS', 'Mansoura', 'EG'),
+('MNY', 'Minya', 'EG'),
+('MTR', 'Marsa Matruh', 'EG'),
+('PTS', 'Port Said', 'EG'),
+('QNA', 'Qena', 'EG'),
+('SHR', 'Shubra El Kheima', 'EG'),
+('SOH', 'Sohag', 'EG'),
+('SSH', 'Sharm El Sheikh', 'EG'),
+('SUE', 'Suez', 'EG'),
+('TNT', 'Tanta', 'EG'),
+('ZAG', 'Zagazig', 'EG');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `countries`
+--
+
+CREATE TABLE `countries` (
+  `code` varchar(191) NOT NULL,
+  `name` varchar(191) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `countries`
+--
+
+INSERT INTO `countries` (`code`, `name`) VALUES
+('AE', 'United Arab Emirates'),
+('DE', 'Germany'),
+('DZ', 'Algeria'),
+('EG', 'Egypt'),
+('ES', 'Spain'),
+('FR', 'France'),
+('GB', 'United Kingdom'),
+('IQ', 'Iraq'),
+('IT', 'Italy'),
+('JO', 'Jordan'),
+('KW', 'Kuwait'),
+('LB', 'Lebanon'),
+('LY', 'Libya'),
+('MA', 'Morocco'),
+('OM', 'Oman'),
+('QA', 'Qatar'),
+('SA', 'Saudi Arabia'),
+('SD', 'Sudan'),
+('TN', 'Tunisia'),
+('TR', 'Turkey'),
+('US', 'United States');
 
 -- --------------------------------------------------------
 
@@ -239,10 +333,10 @@ INSERT INTO `courseschedule` (`id`, `courseId`, `roomId`, `day`, `startTime`, `e
 (112, 20, 2, 'SAT', '08:00', '09:00'),
 (114, 6, 9, 'SAT', '08:00', '08:30'),
 (115, 6, 9, 'SAT', '08:30', '09:00'),
-(117, 6, 4, 'SAT', '08:30', '09:00'),
 (118, 5, 5, 'SAT', '08:00', '09:30'),
 (119, 3, 1, 'SAT', '10:00', '13:30'),
-(120, 1, 29, 'SAT', '08:00', '09:30');
+(120, 1, 29, 'SAT', '08:00', '10:30'),
+(121, 14, 7, 'SAT', '08:00', '10:00');
 
 -- --------------------------------------------------------
 
@@ -259,6 +353,13 @@ CREATE TABLE `course_sessions` (
   `roomId` int(11) NOT NULL,
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `course_sessions`
+--
+
+INSERT INTO `course_sessions` (`id`, `courseId`, `date`, `startTime`, `endTime`, `roomId`, `createdAt`) VALUES
+(1, 2, '2026-01-29 00:00:00.000', '13:50', '13:52', 29, '2026-01-29 11:50:15.396');
 
 -- --------------------------------------------------------
 
@@ -287,7 +388,9 @@ INSERT INTO `enrollment` (`id`, `studentId`, `courseId`, `createdAt`) VALUES
 (7, 15, 4, '2026-01-20 10:01:11.889'),
 (8, 15, 5, '2026-01-20 11:44:53.438'),
 (9, 12, 3, '2026-01-20 11:49:37.852'),
-(10, 12, 2, '2026-01-20 11:50:39.677');
+(10, 12, 2, '2026-01-20 11:50:39.677'),
+(11, 38, 2, '2026-01-29 12:41:21.065'),
+(12, 38, 3, '2026-01-29 12:45:41.393');
 
 -- --------------------------------------------------------
 
@@ -353,7 +456,8 @@ INSERT INTO `quiz` (`id`, `title`, `description`, `type`, `courseId`, `chapterId
 (5, 'q1', 'q1', 'CHAPTER', 3, 4, '2026-01-03 19:22:00.000', '2026-01-03 20:22:00.000', 30, 10, 0, 1, 17, '2026-01-03 19:22:25.000', '2026-01-03 19:25:44.949'),
 (6, 'q2', 'q2', 'CHAPTER', 3, 5, '2026-01-03 16:12:00.000', '2026-01-04 11:05:00.000', 1, 4, 0, 1, 17, '2026-01-03 20:12:57.241', '2026-01-04 11:01:20.970'),
 (7, 'سيبيسش', 'سيسشيؤر', 'CHAPTER', 3, 6, '2026-01-18 11:11:00.000', '2026-01-19 11:11:00.000', 10, 1, 0, 1, 17, '2026-01-18 11:11:51.053', '2026-01-18 12:54:00.553'),
-(8, 'مصطفي عصام', 'مصطفي عصام الدين عبدالحليم عباس علي ', 'CHAPTER', 3, 5, '2026-01-26 11:50:00.000', '2026-01-26 13:51:00.000', 1, 10, 0, 1, 17, '2026-01-26 11:51:17.370', '2026-01-26 11:52:32.447');
+(8, 'مصطفي عصام', 'مصطفي عصام الدين عبدالحليم عباس علي ', 'CHAPTER', 3, 5, '2026-01-26 11:50:00.000', '2026-01-26 13:51:00.000', 1, 10, 0, 1, 17, '2026-01-26 11:51:17.370', '2026-01-26 11:52:32.447'),
+(9, 'quiz test ', 'quiz test', 'CHAPTER', 3, 24, '2026-01-29 13:10:00.000', '2026-01-30 13:10:00.000', 1, 10, 0, 1, 17, '2026-01-29 13:10:28.545', '2026-01-29 13:11:48.944');
 
 -- --------------------------------------------------------
 
@@ -380,7 +484,8 @@ INSERT INTO `quizattempt` (`id`, `quizId`, `studentId`, `score`, `status`, `star
 (11, 5, 16, 2, 'SUBMITTED', '2026-01-03 19:54:06.948', '2026-01-03 19:54:16.546'),
 (13, 6, 16, 0, 'SUBMITTED', '2026-01-04 11:02:39.936', '2026-01-04 11:03:39.092'),
 (14, 6, 15, 1, 'SUBMITTED', '2026-01-04 11:04:59.541', '2026-01-04 11:05:13.074'),
-(15, 8, 16, 9, 'SUBMITTED', '2026-01-26 11:53:43.151', '2026-01-26 11:54:42.819');
+(15, 8, 16, 9, 'SUBMITTED', '2026-01-26 11:53:43.151', '2026-01-26 11:54:42.819'),
+(17, 9, 16, 9, 'SUBMITTED', '2026-01-29 13:12:05.727', '2026-01-29 13:12:14.494');
 
 -- --------------------------------------------------------
 
@@ -410,7 +515,10 @@ INSERT INTO `quizattemptanswer` (`id`, `attemptId`, `questionId`, `optionId`, `i
 (11, 14, 8, 18, 1),
 (12, 14, 10, 22, 0),
 (13, 15, 12, 27, 0),
-(14, 15, 13, 30, 1);
+(14, 15, 13, 30, 1),
+(15, 17, 14, 31, 1),
+(16, 17, 15, 34, 0),
+(17, 17, 17, 38, 1);
 
 -- --------------------------------------------------------
 
@@ -448,7 +556,14 @@ INSERT INTO `quizoption` (`id`, `questionId`, `text`, `isCorrect`) VALUES
 (27, 12, 'عباس علي ', 0),
 (28, 12, 'احمد محمد', 0),
 (29, 13, '10', 0),
-(30, 13, '20', 1);
+(30, 13, '20', 1),
+(31, 14, 'مصطفي ', 1),
+(32, 14, 'عصام', 0),
+(33, 14, 'علي', 0),
+(34, 15, '10', 0),
+(35, 15, '20', 1),
+(38, 17, 'سيش', 1),
+(39, 17, 'سشي', 0);
 
 -- --------------------------------------------------------
 
@@ -476,7 +591,44 @@ INSERT INTO `quizquestion` (`id`, `quizId`, `question`, `marks`, `createdAt`) VA
 (10, 6, 'how are ypu ', 3, '2026-01-04 11:01:12.841'),
 (11, 7, 'ثؤءئسؤء', 1, '2026-01-18 11:32:35.808'),
 (12, 8, 'اسمك ايه ؟', 1, '2026-01-26 11:51:56.476'),
-(13, 8, 'سنك اي ؟', 9, '2026-01-26 11:52:27.883');
+(13, 8, 'سنك اي ؟', 9, '2026-01-26 11:52:27.883'),
+(14, 9, 'اسمك اي ', 1, '2026-01-29 13:10:50.854'),
+(15, 9, 'سنك اي ؟', 1, '2026-01-29 13:11:09.905'),
+(17, 9, 'ةسىشيةوشسيسش', 8, '2026-01-29 13:11:45.364');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `regions`
+--
+
+CREATE TABLE `regions` (
+  `id` int(11) NOT NULL,
+  `name` varchar(191) NOT NULL,
+  `cityCode` varchar(191) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `regions`
+--
+
+INSERT INTO `regions` (`id`, `name`, `cityCode`) VALUES
+(1, 'Nasr City', 'CAI'),
+(2, 'Heliopolis', 'CAI'),
+(3, 'Maadi', 'CAI'),
+(4, 'Zamalek', 'CAI'),
+(5, 'Dokki', 'CAI'),
+(6, 'Mohandessin', 'CAI'),
+(7, 'New Cairo', 'CAI'),
+(8, 'Shubra', 'CAI'),
+(9, 'Ain Shams', 'CAI'),
+(10, 'Helwan', 'CAI'),
+(11, 'Dokki', 'GIZ'),
+(12, 'Mohandessin', 'GIZ'),
+(13, 'Haram', 'GIZ'),
+(14, 'Faisal', 'GIZ'),
+(15, 'Sheikh Zayed', 'GIZ'),
+(16, '6th of October', 'GIZ');
 
 -- --------------------------------------------------------
 
@@ -532,39 +684,46 @@ CREATE TABLE `user` (
   `address` varchar(191) DEFAULT NULL,
   `role` enum('USER','STUDENT','ADMIN','TEACHER','ASSISTANT','EMPLOYEE') NOT NULL DEFAULT 'USER',
   `createdAt` datetime(3) NOT NULL DEFAULT current_timestamp(3),
-  `updatedAt` datetime(3) NOT NULL
+  `updatedAt` datetime(3) NOT NULL,
+  `countryCode` varchar(191) DEFAULT NULL,
+  `cityCode` varchar(191) DEFAULT NULL,
+  `regionId` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `user`
 --
 
-INSERT INTO `user` (`id`, `email`, `first_name`, `last_name`, `image_path`, `age`, `password`, `phone`, `address`, `role`, `createdAt`, `updatedAt`) VALUES
-(10, 'amerwqb@gmail.com', 'عامر', 'منيب', NULL, NULL, '$2b$10$JoOyS.hZncnkNKTV5yjjCONkTDeU0l7WDli6YCGO2vwa7GYklW0Tq', NULL, NULL, 'TEACHER', '2025-12-26 12:02:57.143', '2025-12-26 12:02:57.143'),
-(11, 'amerwqbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$JDxlIZcMpGnSxg0aaxxnWOljmWtcCtS1m0rbiFZtCYWzDbfaA/8aK', NULL, NULL, 'STUDENT', '2025-12-26 12:06:49.887', '2025-12-26 12:06:49.887'),
-(12, 'mofbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$pbRNQIf0Q3hDIL8EdUTO7efqjlK3Qyuyvw5Zw9Y580j9dlpMXmm1G', NULL, NULL, 'STUDENT', '2025-12-26 12:07:04.798', '2025-12-26 12:07:04.798'),
-(13, 'mofرbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$DFzqP/gFT.cGjRVIm4vyqOxodR0kF5qVQs./K6S2PyOgjD4GITTXa', NULL, NULL, 'STUDENT', '2025-12-26 12:19:24.172', '2025-12-26 12:19:24.172'),
-(14, 'nader@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$xZwzNabR7TwbyaePaVBGkuU3oUbCAMyPmptdlSgennbD1tNOH5kFy', NULL, NULL, 'ADMIN', '2025-12-26 13:54:48.172', '2025-12-26 13:54:48.172'),
-(15, 'aa@gmail.com', 'ali', 'alaa', NULL, NULL, '$2b$10$/VhMSFBhj8LLv3PjO0ctHuSdHtiRxV8hjblNVwtomrqgQE0E5aS8O', NULL, NULL, 'STUDENT', '2025-12-26 14:52:15.529', '2025-12-26 14:52:15.529'),
-(16, 'ramez@gmail.com', 'ramez', 'galal', NULL, NULL, '$2b$10$KkxlADTndQ/RkQbEvbmjn.sc24jsYTGG9BV0y2vWvrPNoh.KvBHqa', NULL, NULL, 'STUDENT', '2025-12-26 21:24:54.904', '2025-12-26 21:24:54.904'),
-(17, 'amira@gmail.com', 'amira', 'ali', NULL, NULL, '$2b$10$amlAwnHN1ro4b/emajnLouF1iNV7fKxhjHwwFso8TTReSGnc6X6EO', NULL, NULL, 'TEACHER', '2025-12-27 14:19:04.750', '2025-12-27 14:19:04.750'),
-(18, 'sayed@gmail.com', 'sayed', 'gmail', NULL, 22, '$2b$10$K3r58U/BWdxy9izMOKx8TeDuhxK.0hqu60CQXt30wDqkdW2s4yj2i', '(+20)01118606952', 'menofia', 'EMPLOYEE', '2025-12-31 09:41:43.719', '2025-12-31 09:41:43.719'),
-(19, 'mostafaessam9511@gmail.com', 'mostafa', 'essam', NULL, 21, '$2b$10$LeS77Ei3Tuu2/qgrBkVn1O3WUrhEzQNSmTFi9lRm9SN9tz.cHms9a', '(+20)01118606952', 'egypt', 'STUDENT', '2026-01-04 11:06:49.428', '2026-01-04 11:06:49.428'),
-(20, 'amerwqab@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$d21H4SKI6acen4YOgzHlqe5sBpxRv4L0vx/hd.QWO4vjUSJcxyM2e', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:20:04.217', '2026-01-04 12:20:04.217'),
-(21, 'amerwqasb@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$IzOxviUstft9Tf5Y4GUcbu4zup/K4t8E.fTQN1rCDorZcFRX6jigq', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:21:03.781', '2026-01-04 12:21:03.781'),
-(22, 'company66@example.com', 'Ahmed', 'khaled', 'null', 99, '$2b$10$bTenGavRLhDD/XWqr/1Vgelcl9tuZOmURYS2SYprJx8yiXbTRqOnC', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-26 19:06:04.967', '2026-01-26 19:06:04.967'),
-(23, 'company668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$v.Ld2683hjqjwucvJ5V5hOBQIoIFa/KsGglsMcCdoVrl0CHkm/8SS', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-26 19:34:09.757', '2026-01-26 19:34:09.757'),
-(24, 'companىىy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$BFxgFYCCiQHjh1RUBeXnzexBqBsC4cRgIVpoasCZPbS3PGO8LTQYK', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:22:42.475', '2026-01-26 20:22:42.475'),
-(25, 'companccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$aa/1.fugE/Rf34hMnoorxuPupbENCF.JMvpFRjfDxaeLG1Ech6uGu', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:29:21.957', '2026-01-26 20:29:21.957'),
-(26, 'companccccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$KBaGwNRw6EHtRya9.hj9DuI1EZ1n8xDwCO4nTWHKSI23kQbgRV5Qm', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:30:19.174', '2026-01-26 20:30:19.174'),
-(27, 'companccccccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$0.SvmEsOWjEYzoJIKC9leOuas8DUwTLmPDBeWqerRAPwKC9WBD292', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:32:41.011', '2026-01-26 20:32:41.011'),
-(28, 'companccddccccy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$2ZsEh3A05TWA.n.I0wQ0Cuzd6ayVXihdptqD6F5TDRq0r9I5tIAP2', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:47:51.050', '2026-01-26 20:47:51.050'),
-(29, 'companddccddccccy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$n8ayo1HCsIpihgW2b4INrOEK4SyhlTzc7p/Q.1ImxWNr3cRjBpjty', '(+20)01144271924', NULL, 'USER', '2026-01-26 20:48:28.648', '2026-01-26 20:48:28.648'),
-(30, 'companddccddcccdcy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$fbbxk/abb3yvrcd7yJf2IOPif.cZ9w24G8SQd8iOQN2vGFSe4hrHe', '(+20)01144271924', NULL, 'USER', '2026-01-26 20:56:31.459', '2026-01-26 20:56:31.459'),
-(31, 'companddccddcccdcy66d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$vs3NUQWBSeP9gjVVdIo.R.fU3RFdPol4pbsOZVrUyLtrpTM8QJJ16', '(+20)01144271924', NULL, 'USER', '2026-01-26 21:28:25.074', '2026-01-26 21:28:25.074'),
-(32, 'companddccddcccdcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$pbiYhwZRvtSVPvZRliMhL.NNB560yeGk7jphuA0U09D4cxWZ/oLja', '(+20)01144271924', NULL, 'USER', '2026-01-26 21:29:24.793', '2026-01-26 21:29:24.793'),
-(33, 'cccddcccdcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$SnTLzfDCeML/7xPDVmiUf.eV6/3ys6X8LtDoxmuccw/FvOVhQPAeW', '(+20)01144271924', NULL, 'USER', '2026-01-27 11:36:25.737', '2026-01-27 11:36:25.737'),
-(34, 'cccddcccdfcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$fpn.CYokm58Ym2.PcYFazOdZkvOiymC1fZzlfjfGzEs/F9Inxm5ae', '(+20)01144271924', NULL, 'USER', '2026-01-27 11:37:04.715', '2026-01-27 11:37:04.715');
+INSERT INTO `user` (`id`, `email`, `first_name`, `last_name`, `image_path`, `age`, `password`, `phone`, `address`, `role`, `createdAt`, `updatedAt`, `countryCode`, `cityCode`, `regionId`) VALUES
+(10, 'company66@dexample.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$JoOyS.hZncnkNKTV5yjjCONkTDeU0l7WDli6YCGO2vwa7GYklW0Tq', '(+20)01144271924', 'menofiasc', 'ADMIN', '2025-12-26 12:02:57.143', '2026-01-29 08:08:04.660', 'ES', 'ALX', 1),
+(11, 'amerwqbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$JDxlIZcMpGnSxg0aaxxnWOljmWtcCtS1m0rbiFZtCYWzDbfaA/8aK', NULL, NULL, 'STUDENT', '2025-12-26 12:06:49.887', '2025-12-26 12:06:49.887', 'EG', NULL, NULL),
+(12, 'mofbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$pbRNQIf0Q3hDIL8EdUTO7efqjlK3Qyuyvw5Zw9Y580j9dlpMXmm1G', NULL, NULL, 'STUDENT', '2025-12-26 12:07:04.798', '2025-12-26 12:07:04.798', 'EG', NULL, NULL),
+(13, 'mofرbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$DFzqP/gFT.cGjRVIm4vyqOxodR0kF5qVQs./K6S2PyOgjD4GITTXa', NULL, NULL, 'STUDENT', '2025-12-26 12:19:24.172', '2025-12-26 12:19:24.172', 'EG', NULL, NULL),
+(14, 'nader@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$xZwzNabR7TwbyaePaVBGkuU3oUbCAMyPmptdlSgennbD1tNOH5kFy', NULL, NULL, 'ADMIN', '2025-12-26 13:54:48.172', '2025-12-26 13:54:48.172', 'EG', NULL, NULL),
+(15, 'aa@gmail.com', 'ali', 'alaa', NULL, NULL, '$2b$10$/VhMSFBhj8LLv3PjO0ctHuSdHtiRxV8hjblNVwtomrqgQE0E5aS8O', NULL, NULL, 'STUDENT', '2025-12-26 14:52:15.529', '2025-12-26 14:52:15.529', 'EG', NULL, NULL),
+(16, 'ramez@gmail.com', 'ramez', 'galal', NULL, NULL, '$2b$10$KkxlADTndQ/RkQbEvbmjn.sc24jsYTGG9BV0y2vWvrPNoh.KvBHqa', NULL, NULL, 'STUDENT', '2025-12-26 21:24:54.904', '2025-12-26 21:24:54.904', 'EG', NULL, NULL),
+(17, 'amira@gmail.com', 'amira', 'ali', NULL, NULL, '$2b$10$amlAwnHN1ro4b/emajnLouF1iNV7fKxhjHwwFso8TTReSGnc6X6EO', NULL, NULL, 'TEACHER', '2025-12-27 14:19:04.750', '2025-12-27 14:19:04.750', 'EG', NULL, NULL),
+(18, 'sayed@gmail.com', 'sayed', 'gmail', NULL, 22, '$2b$10$K3r58U/BWdxy9izMOKx8TeDuhxK.0hqu60CQXt30wDqkdW2s4yj2i', '(+20)01118606952', 'menofia', 'EMPLOYEE', '2025-12-31 09:41:43.719', '2025-12-31 09:41:43.719', 'EG', NULL, NULL),
+(19, 'mostafaessam9511@gmail.com', 'mostafa', 'essam', NULL, 21, '$2b$10$LeS77Ei3Tuu2/qgrBkVn1O3WUrhEzQNSmTFi9lRm9SN9tz.cHms9a', '(+20)01118606952', 'egypt', 'STUDENT', '2026-01-04 11:06:49.428', '2026-01-04 11:06:49.428', 'EG', NULL, NULL),
+(20, 'amerwqab@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$d21H4SKI6acen4YOgzHlqe5sBpxRv4L0vx/hd.QWO4vjUSJcxyM2e', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:20:04.217', '2026-01-04 12:20:04.217', 'EG', NULL, NULL),
+(21, 'amerwqasb@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$IzOxviUstft9Tf5Y4GUcbu4zup/K4t8E.fTQN1rCDorZcFRX6jigq', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:21:03.781', '2026-01-04 12:21:03.781', 'EG', NULL, NULL),
+(22, 'company66@example.com', 'Ahmed', 'khaled', 'null', 99, '$2b$10$bTenGavRLhDD/XWqr/1Vgelcl9tuZOmURYS2SYprJx8yiXbTRqOnC', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-26 19:06:04.967', '2026-01-26 19:06:04.967', 'EG', NULL, NULL),
+(23, 'company668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$v.Ld2683hjqjwucvJ5V5hOBQIoIFa/KsGglsMcCdoVrl0CHkm/8SS', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-26 19:34:09.757', '2026-01-26 19:34:09.757', 'EG', NULL, NULL),
+(24, 'companىىy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$BFxgFYCCiQHjh1RUBeXnzexBqBsC4cRgIVpoasCZPbS3PGO8LTQYK', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:22:42.475', '2026-01-26 20:22:42.475', 'EG', NULL, NULL),
+(25, 'companccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$aa/1.fugE/Rf34hMnoorxuPupbENCF.JMvpFRjfDxaeLG1Ech6uGu', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:29:21.957', '2026-01-26 20:29:21.957', 'EG', NULL, NULL),
+(26, 'companccccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$KBaGwNRw6EHtRya9.hj9DuI1EZ1n8xDwCO4nTWHKSI23kQbgRV5Qm', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:30:19.174', '2026-01-26 20:30:19.174', 'EG', NULL, NULL),
+(27, 'companccccccy668@example.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$0.SvmEsOWjEYzoJIKC9leOuas8DUwTLmPDBeWqerRAPwKC9WBD292', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:32:41.011', '2026-01-26 20:32:41.011', 'EG', NULL, NULL),
+(28, 'companccddccccy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$2ZsEh3A05TWA.n.I0wQ0Cuzd6ayVXihdptqD6F5TDRq0r9I5tIAP2', '(+20)01144271924', 'menofia', 'USER', '2026-01-26 20:47:51.050', '2026-01-26 20:47:51.050', 'EG', NULL, NULL),
+(29, 'companddccddccccy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$n8ayo1HCsIpihgW2b4INrOEK4SyhlTzc7p/Q.1ImxWNr3cRjBpjty', '(+20)01144271924', NULL, 'USER', '2026-01-26 20:48:28.648', '2026-01-26 20:48:28.648', 'EG', NULL, NULL),
+(30, 'companddccddcccdcy668@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$fbbxk/abb3yvrcd7yJf2IOPif.cZ9w24G8SQd8iOQN2vGFSe4hrHe', '(+20)01144271924', NULL, 'USER', '2026-01-26 20:56:31.459', '2026-01-26 20:56:31.459', 'EG', NULL, NULL),
+(31, 'companddccddcccdcy66d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$vs3NUQWBSeP9gjVVdIo.R.fU3RFdPol4pbsOZVrUyLtrpTM8QJJ16', '(+20)01144271924', NULL, 'USER', '2026-01-26 21:28:25.074', '2026-01-26 21:28:25.074', 'EG', NULL, NULL),
+(32, 'companddccddcccdcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$pbiYhwZRvtSVPvZRliMhL.NNB560yeGk7jphuA0U09D4cxWZ/oLja', '(+20)01144271924', NULL, 'USER', '2026-01-26 21:29:24.793', '2026-01-26 21:29:24.793', 'EG', NULL, NULL),
+(33, 'cccddcccdcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$SnTLzfDCeML/7xPDVmiUf.eV6/3ys6X8LtDoxmuccw/FvOVhQPAeW', '(+20)01144271924', NULL, 'USER', '2026-01-27 11:36:25.737', '2026-01-27 11:36:25.737', 'EG', NULL, NULL),
+(34, 'cccddcccdfcy6c6d8@example.com', 'Ahmed', 'Khaled', NULL, NULL, '$2b$10$fpn.CYokm58Ym2.PcYFazOdZkvOiymC1fZzlfjfGzEs/F9Inxm5ae', '(+20)01144271924', NULL, 'USER', '2026-01-27 11:37:04.715', '2026-01-27 11:37:04.715', 'EG', NULL, NULL),
+(35, 'naderc@gmail.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$oH9ZijJGxN2zLOnnx3r9kOa5Ny6Q1bHLo9iapbFMcyhqystjlPxva', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-29 08:23:40.253', '2026-01-29 08:23:40.253', NULL, NULL, NULL),
+(36, 'naderv@gmail.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$iCmVA7Pl10lSQ5BMYRgGre3IRzQAZRv4Z//IzYFth.LiBVfpnr4uu', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-29 08:24:36.112', '2026-01-29 08:24:36.112', 'AE', NULL, NULL),
+(37, 'nadervc@gmail.com', 'Ahmed', 'Khaled', NULL, 99, '$2b$10$kabS8RJMVQ5jIlLzD8ZK9e2v2S2LzLBW5HMQfMcAwDXQcltbj4fiO', '(+20)01144271924', 'menofia', 'TEACHER', '2026-01-29 08:26:29.610', '2026-01-29 08:26:29.610', 'AE', 'ALX', 1),
+(38, 'hh@hh.hh', 'hh', 'hh', NULL, 19, '$2b$10$IDER1Ue9dcNrw8NwktWr.OGM.lL6to6BFvHf9mOTwqXdguB.oMzUq', '(+20)01118606952', 'Menof, Almazah, Heliopolis, Egypt', 'STUDENT', '2026-01-29 12:31:26.096', '2026-01-29 12:31:26.096', NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -588,9 +747,12 @@ CREATE TABLE `_prisma_migrations` (
 --
 
 INSERT INTO `_prisma_migrations` (`id`, `checksum`, `finished_at`, `migration_name`, `logs`, `rolled_back_at`, `started_at`, `applied_steps_count`) VALUES
+('1546eef4-e078-4138-95e7-8ead98f06f4c', 'ca3d5d47fb10645e70150421e89ed1dfe2775e8925a14eb65533d227778245ff', '2026-01-28 19:04:39.634', '20260128190439_add_city_table', NULL, NULL, '2026-01-28 19:04:39.508', 1),
+('709f79ca-5625-497b-a45c-4913bff4a589', '706a713d52cd19f0cc6a23cc0f3b39061d4edcddd0e947102d4c4333124bffeb', '2026-01-28 18:52:29.992', '20260128185229_add_country_model', NULL, NULL, '2026-01-28 18:52:29.918', 1),
 ('828fd9ae-85a9-4d6d-a250-f18b386b81e9', '87c17b3cc385b70da7f48a2dd92a1d143c7492109a8717c411f9e762e77e7e5d', '2026-01-10 06:54:48.074', '20260110065440_add_all_tables', NULL, NULL, '2026-01-10 06:54:40.952', 1),
 ('ed560b34-8b78-462c-8b49-8a63421171d1', '94bdc539127d3319aeaf2987b96609c3e1c3361ab998e0faa591c5a8e64ec348', '2026-01-18 11:16:47.652', '20260118111647_finalize_payment_schema', NULL, NULL, '2026-01-18 11:16:47.496', 1),
 ('f26faecf-ae5c-41c2-97a5-9b2ff824fab7', '2a3379c47ba7f7d2811e352052514880d725a6708ac42055f034e7a62ca25e4a', '2026-01-17 18:23:02.566', '20260117182302_update_enrollment_request_status', NULL, NULL, '2026-01-17 18:23:02.515', 1),
+('f512106e-d45b-40bf-81ad-1046c95ae0be', '66c27c744e22b0f17c1cd7d5bec6904973b02f2a66894e8aedfa6984553a98b9', '2026-01-28 19:15:29.544', '20260128191529_add_city_and_region', NULL, NULL, '2026-01-28 19:15:29.417', 1),
 ('ff77881c-c51e-40c8-bf7a-f01a0eb9ce61', '3e7687b4288d56cc559c7efdc82b8fff1eb86d7ab63ba76180f66ab1e979d6fa', '2026-01-17 16:44:28.440', '20260117164428_add_price_to_course', NULL, NULL, '2026-01-17 16:44:28.430', 1);
 
 --
@@ -639,6 +801,19 @@ ALTER TABLE `chapterprogress`
   ADD UNIQUE KEY `idx_chapter_progress_student_chapter` (`studentId`,`chapterId`),
   ADD KEY `idx_chapter_progress_student_id` (`studentId`),
   ADD KEY `idx_chapter_progress_chapter_id` (`chapterId`);
+
+--
+-- Indexes for table `cities`
+--
+ALTER TABLE `cities`
+  ADD PRIMARY KEY (`code`),
+  ADD KEY `idx_city_country_code` (`countryCode`);
+
+--
+-- Indexes for table `countries`
+--
+ALTER TABLE `countries`
+  ADD PRIMARY KEY (`code`);
 
 --
 -- Indexes for table `course`
@@ -735,6 +910,13 @@ ALTER TABLE `quizquestion`
   ADD KEY `QuizQuestion_quizId_idx` (`quizId`);
 
 --
+-- Indexes for table `regions`
+--
+ALTER TABLE `regions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_region_city_code` (`cityCode`);
+
+--
 -- Indexes for table `room`
 --
 ALTER TABLE `room`
@@ -747,7 +929,10 @@ ALTER TABLE `room`
 ALTER TABLE `user`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_user_email` (`email`),
-  ADD KEY `idx_user_email` (`email`);
+  ADD KEY `idx_user_email` (`email`),
+  ADD KEY `idx_user_country_code` (`countryCode`),
+  ADD KEY `idx_user_city_code` (`cityCode`),
+  ADD KEY `idx_user_region_id` (`regionId`);
 
 --
 -- Indexes for table `_prisma_migrations`
@@ -775,19 +960,19 @@ ALTER TABLE `assignmentsubmission`
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `chapter`
 --
 ALTER TABLE `chapter`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=21;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
 
 --
 -- AUTO_INCREMENT for table `chapterprogress`
 --
 ALTER TABLE `chapterprogress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `course`
@@ -799,61 +984,67 @@ ALTER TABLE `course`
 -- AUTO_INCREMENT for table `courseschedule`
 --
 ALTER TABLE `courseschedule`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT for table `course_sessions`
 --
 ALTER TABLE `course_sessions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `enrollment`
 --
 ALTER TABLE `enrollment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `enrollmentrequest`
 --
 ALTER TABLE `enrollmentrequest`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `payment`
 --
 ALTER TABLE `payment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=13;
 
 --
 -- AUTO_INCREMENT for table `quiz`
 --
 ALTER TABLE `quiz`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=10;
 
 --
 -- AUTO_INCREMENT for table `quizattempt`
 --
 ALTER TABLE `quizattempt`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT for table `quizattemptanswer`
 --
 ALTER TABLE `quizattemptanswer`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `quizoption`
 --
 ALTER TABLE `quizoption`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=40;
 
 --
 -- AUTO_INCREMENT for table `quizquestion`
 --
 ALTER TABLE `quizquestion`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT for table `regions`
+--
+ALTER TABLE `regions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `room`
@@ -865,7 +1056,7 @@ ALTER TABLE `room`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=35;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- Constraints for dumped tables
@@ -904,6 +1095,12 @@ ALTER TABLE `chapter`
 ALTER TABLE `chapterprogress`
   ADD CONSTRAINT `fk_chapter_progress_chapter` FOREIGN KEY (`chapterId`) REFERENCES `chapter` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   ADD CONSTRAINT `fk_chapter_progress_user` FOREIGN KEY (`studentId`) REFERENCES `user` (`id`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `cities`
+--
+ALTER TABLE `cities`
+  ADD CONSTRAINT `cities_countryCode_fkey` FOREIGN KEY (`countryCode`) REFERENCES `countries` (`code`) ON UPDATE CASCADE;
 
 --
 -- Constraints for table `course`
@@ -981,6 +1178,20 @@ ALTER TABLE `quizoption`
 --
 ALTER TABLE `quizquestion`
   ADD CONSTRAINT `quizquestion_quizId_fkey` FOREIGN KEY (`quizId`) REFERENCES `quiz` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `regions`
+--
+ALTER TABLE `regions`
+  ADD CONSTRAINT `regions_cityCode_fkey` FOREIGN KEY (`cityCode`) REFERENCES `cities` (`code`) ON UPDATE CASCADE;
+
+--
+-- Constraints for table `user`
+--
+ALTER TABLE `user`
+  ADD CONSTRAINT `user_cityCode_fkey` FOREIGN KEY (`cityCode`) REFERENCES `cities` (`code`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_countryCode_fkey` FOREIGN KEY (`countryCode`) REFERENCES `countries` (`code`) ON DELETE SET NULL ON UPDATE CASCADE,
+  ADD CONSTRAINT `user_regionId_fkey` FOREIGN KEY (`regionId`) REFERENCES `regions` (`id`) ON DELETE SET NULL ON UPDATE CASCADE;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

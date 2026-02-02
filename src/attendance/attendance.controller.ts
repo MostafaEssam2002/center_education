@@ -4,6 +4,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { Role, AttendanceStatus } from '@prisma/client';
+import { MarkBulkAttendanceDto } from './dto/mark-attendance.dto';
 
 @Controller('attendance')
 export class AttendanceController {
@@ -56,22 +57,17 @@ export class AttendanceController {
   /**
    * تسجيل حضور مجموعة طلاب (مرة واحدة)
    */
+
   @Post('mark-bulk/:sessionId')
   @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
   markAttendanceBulk(
     @Param('sessionId', ParseIntPipe) sessionId: number,
-    @Body()
-    body: {
-      students: {
-        studentId: number;
-        status?: AttendanceStatus;
-      }[];
-    },
+    @Body() body: MarkBulkAttendanceDto,
   ) {
     return this.attendanceService.markBulkAttendance(
       sessionId,
-      body.students, // هنا بعتنا الـ students للـ service مباشرة
+      body.students,
     );
   }
 

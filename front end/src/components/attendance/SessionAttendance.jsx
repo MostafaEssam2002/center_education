@@ -14,12 +14,16 @@ const SessionAttendance = ({ session, onBack }) => {
             const enrolledRes = await enrollmentAPI.getStudentsByCourse(session.courseId);
             const enrolledStudents = enrolledRes.data.map(item => item.user);
 
+            console.log('Fetching Data...', { session, enrolledStudents });
             // 2. Get existing attendance for this session
             const attendanceRes = await attendanceAPI.getSessionAttendance(session.id);
+            console.log('Attendance Response:', attendanceRes.data);
+
             const existingAttendance = {};
             attendanceRes.data.forEach(record => {
                 existingAttendance[record.studentId] = record.status;
             });
+            console.log('Existing Attendance Map:', existingAttendance);
 
             // 3. Merge data
             const mergedData = enrolledStudents.map(student => ({
@@ -28,6 +32,7 @@ const SessionAttendance = ({ session, onBack }) => {
                 // Let's use existing status OR 'ABSENT' as default VISUAL state if nothing exists.
                 status: existingAttendance[student.id] || 'ABSENT'
             }));
+            console.log('Merged Data:', mergedData);
 
             setStudents(mergedData);
         } catch (error) {
@@ -105,6 +110,8 @@ const SessionAttendance = ({ session, onBack }) => {
                 studentId: s.id,
                 status: s.status
             }));
+
+            console.log('Saving attendance for students:', studentsToSave);
 
             await attendanceAPI.markBulkAttendance(session.id, studentsToSave);
             alert('تم حفظ الحضور بنجاح');

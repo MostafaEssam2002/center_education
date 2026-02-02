@@ -57,9 +57,9 @@ export class UserService {
           address: true,
           role: true,
           image_path: true,
-          country: true,
-          city: true,
-          region: true,
+          // country: true,
+          // city: true,
+          // region: true,
           createdAt: true,
           updatedAt: true,
         },
@@ -71,9 +71,9 @@ export class UserService {
     return this.prisma.user.findUnique({
       where: { email },
       include: {
-        country: true,
-        city: true,
-        region: true,
+        // country: true,
+        // city: true,
+        // region: true,
       }
     });
   }

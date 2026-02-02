@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
-import { attendanceAPI, courseAPI } from '../../services/api';
+import { attendanceAPI, courseAPI, roomAPI } from '../../services/api';
 
 const CourseSessions = ({ courseId, onSelectSession }) => {
     const [sessions, setSessions] = useState([]);
     const [loading, setLoading] = useState(false);
     const [showCreateForm, setShowCreateForm] = useState(false);
+    const [rooms, setRooms] = useState([]);
     const [newSessionData, setNewSessionData] = useState({
         date: '',
         startTime: '',
         endTime: '',
-        room: '',
+        roomId: '',
     });
 
     const fetchSessions = async () => {
@@ -25,8 +26,18 @@ const CourseSessions = ({ courseId, onSelectSession }) => {
         }
     };
 
+    const fetchRooms = async () => {
+        try {
+            const res = await roomAPI.findAll(1, 100);
+            setRooms(res.data.data || res.data);
+        } catch (error) {
+            console.error('Failed to fetch rooms:', error);
+        }
+    };
+
     useEffect(() => {
         fetchSessions();
+        fetchRooms();
     }, [courseId]);
 
     const handleCreateSession = async (e) => {
@@ -35,9 +46,10 @@ const CourseSessions = ({ courseId, onSelectSession }) => {
             await attendanceAPI.createSession({
                 ...newSessionData,
                 courseId: parseInt(courseId),
+                roomId: parseInt(newSessionData.roomId)
             });
             setShowCreateForm(false);
-            setNewSessionData({ date: '', startTime: '', endTime: '', room: '' });
+            setNewSessionData({ date: '', startTime: '', endTime: '', roomId: '' });
             fetchSessions(); // Refresh list
         } catch (error) {
             console.error('Failed to create session:', error);
@@ -73,13 +85,20 @@ const CourseSessions = ({ courseId, onSelectSession }) => {
                             />
                         </div>
                         <div>
-                            <label>القاعة (اختياري)</label>
-                            <input
-                                type="text"
+                            <label>القاعة <span className="text-danger">*</span></label>
+                            <select
+                                required
                                 className="form-control"
-                                value={newSessionData.room}
-                                onChange={(e) => setNewSessionData({ ...newSessionData, room: e.target.value })}
-                            />
+                                value={newSessionData.roomId}
+                                onChange={(e) => setNewSessionData({ ...newSessionData, roomId: e.target.value })}
+                            >
+                                <option value="">-- اختر القاعة --</option>
+                                {rooms.map(room => (
+                                    <option key={room.id} value={room.id}>
+                                        {room.name} ({room.type})
+                                    </option>
+                                ))}
+                            </select>
                         </div>
                         <div>
                             <label>وقت البدء</label>
@@ -124,7 +143,7 @@ const CourseSessions = ({ courseId, onSelectSession }) => {
                             <div>
                                 <h5 style={{ margin: 0 }}>{new Date(session.date).toLocaleDateString('ar-EG')}</h5>
                                 <small className="text-muted">
-                                    {session.startTime} - {session.endTime} {session.room && `| ${session.room}`}
+                                    {session.startTime} - {session.endTime} {session.room?.name && `| ${session.room.name}`}
                                 </small>
                             </div>
                             <span className="badge bg-info rounded-pill">

@@ -5,19 +5,20 @@ import { RoomService } from "./room.service";
 import { Roles } from "src/auth/decorators/roles.decorator";
 import { JwtAuthGuard } from "src/auth/guards/jwt-auth.guard";
 import { RolesGuard } from "src/auth/guards/roles/roles.guard";
+import { Role } from "@prisma/client";
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Controller('room')
 export class RoomController {
   constructor(private readonly roomService: RoomService) { }
   @Post()
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   create(@Body() dto: CreateRoomDto) {
     return this.roomService.create(dto);
   }
 
   @Get()
-  @Roles('ADMIN', 'EMPLOYEE', 'TEACHER')
+  @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   findAll(
     @Query('page', new DefaultValuePipe(1), ParseIntPipe) page: number,
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
@@ -26,13 +27,13 @@ export class RoomController {
   }
 
   @Get(':id')
-  @Roles('ADMIN', 'EMPLOYEE', 'TEACHER')
+  @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.roomService.findOne(id);
   }
 
   @Patch(':id')
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateRoomDto,
@@ -41,7 +42,7 @@ export class RoomController {
   }
 
   @Delete(':id')
-  @Roles('ADMIN')
+  @Roles(Role.ADMIN)
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.roomService.remove(id);
   }

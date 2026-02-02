@@ -46,7 +46,7 @@ export default function CreateQuiz() {
             ]);
 
             setCourse(courseRes.data);
-            setChapters(chaptersRes.data.data || []);
+            setChapters(chaptersRes.data || []);
 
             // Check if chapterId is provided in URL params
             const urlChapterId = searchParams.get('chapterId');
