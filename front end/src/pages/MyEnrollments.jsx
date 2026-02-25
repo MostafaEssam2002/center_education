@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { enrollmentAPI, chapterProgressAPI, API_BASE_URL } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import Swal from 'sweetalert2';
 
 const MyEnrollments = () => {
     const navigate = useNavigate();
@@ -70,14 +71,35 @@ const MyEnrollments = () => {
     };
 
     const handleWithdrawRequest = async (courseId) => {
-        if (!window.confirm('هل أنت متأكد من سحب طلب الالتحاق؟')) return;
+        const result = await Swal.fire({
+            title: 'هل أنت متأكد من سحب طلب الالتحاق؟',
+            text: "لن تتمكن من الوصول للكورس حتى يتم قبول طلب جديد!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'نعم، سحب الطلب',
+            cancelButtonText: 'إلغاء'
+        });
+
+        if (!result.isConfirmed) return;
 
         try {
             await enrollmentAPI.withdrawRequest(courseId);
-            alert('تم سحب الطلب بنجاح');
+            Swal.fire({
+                icon: 'success',
+                title: 'تم السحب',
+                text: 'تم سحب طلب الالتحاق بنجاح',
+                timer: 1500,
+                showConfirmButton: false
+            });
             loadEnrollments();
         } catch (err) {
-            alert(err.response?.data?.message || 'فشل سحب الطلب');
+            Swal.fire({
+                icon: 'error',
+                title: 'خطأ',
+                text: err.response?.data?.message || 'فشل سحب الطلب'
+            });
         }
     };
 

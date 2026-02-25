@@ -30,6 +30,7 @@ async function bootstrap() {
     .setTitle('Center Education API')
     .setDescription('API documentation for available endpoints')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
 
   const document = SwaggerModule.createDocument(app, swaggerConfig);

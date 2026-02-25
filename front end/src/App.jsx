@@ -8,7 +8,6 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
-import Chapters from './pages/Chapters';
 import ChapterDetail from './pages/ChapterDetail';
 import EnrollmentRequests from './pages/EnrollmentRequests';
 import MyEnrollments from './pages/MyEnrollments';
@@ -29,6 +28,7 @@ import QuizStatistics from './pages/QuizStatistics';
 import ManageAssignments from './pages/ManageAssignments';
 import AssignmentSubmissions from './pages/AssignmentSubmissions';
 import StudentAssignments from './pages/StudentAssignments';
+import Chat from './pages/Chat';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -89,14 +89,7 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route
-                path="/chapters"
-                element={
-                  <ProtectedRoute>
-                    <Chapters />
-                  </ProtectedRoute>
-                }
-              />
+
               <Route
                 path="/enrollment-requests"
                 element={
@@ -238,6 +231,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StudentAssignments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chat"
+                element={
+                  <ProtectedRoute>
+                    <Chat />
                   </ProtectedRoute>
                 }
               />

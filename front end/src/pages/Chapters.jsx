@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { chapterAPI, courseAPI, uploadAPI, enrollmentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import Swal from 'sweetalert2';
 
 const Chapters = () => {
   const [chapters, setChapters] = useState([]);
@@ -128,7 +129,11 @@ const Chapters = () => {
         loadChapters(selectedCourseId);
       }
     } catch (err) {
-      alert('فشل الإنشاء: ' + (err.response?.data?.message || err.message));
+      Swal.fire({
+        icon: 'error',
+        title: 'فشل الإنشاء',
+        text: err.response?.data?.message || err.message
+      });
     } finally {
       setUploading(false);
     }
@@ -168,22 +173,48 @@ const Chapters = () => {
         loadChapters(selectedCourseId);
       }
     } catch (err) {
-      alert('فشل التحديث: ' + (err.response?.data?.message || err.message));
+      Swal.fire({
+        icon: 'error',
+        title: 'فشل التحديث',
+        text: err.response?.data?.message || err.message
+      });
     } finally {
       setUploading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('هل أنت متأكد من حذف هذا الفصل؟')) return;
+    const result = await Swal.fire({
+      title: 'هل أنت متأكد من حذف هذا الفصل؟',
+      text: "لن تتمكن من التراجع عن هذا الإجراء!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'نعم، حذف',
+      cancelButtonText: 'إلغاء'
+    });
+
+    if (!result.isConfirmed) return;
 
     try {
       await chapterAPI.remove(id);
+      Swal.fire({
+        icon: 'success',
+        title: 'تم الحذف',
+        text: 'تم حذف الفصل بنجاح',
+        timer: 1500,
+        showConfirmButton: false
+      });
       if (selectedCourseId) {
         loadChapters(selectedCourseId);
       }
     } catch (err) {
-      alert('فشل الحذف: ' + (err.response?.data?.message || err.message));
+      Swal.fire({
+        icon: 'error',
+        title: 'فشل الحذف',
+        text: err.response?.data?.message || err.message
+      });
     }
   };
 

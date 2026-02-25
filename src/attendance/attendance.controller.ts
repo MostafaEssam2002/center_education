@@ -5,62 +5,48 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { Role, AttendanceStatus } from '@prisma/client';
 import { MarkBulkAttendanceDto } from './dto/mark-attendance.dto';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
+import { CreateSessionDto } from './dto/create-session.dto';
+import { MarkSingleAttendanceDto } from './dto/mark-single-attendance.dto';
 
+@ApiTags('Attendance')
 @Controller('attendance')
 export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) { }
 
   @Post('session')
-  @Roles(Role.ADMIN, Role.EMPLOYEE) // مين اللي يقدر ينشئ جلسة
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  createSession(
-    @Body()
-    body: {
-      courseId: number;
-      date: string; // تاريخ الحصة
-      startTime: string; // "08:00"
-      endTime: string;   // "09:00"
-      roomId: number;
-    },
-  ) {
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new attendance session (Admin/Employee only)' })
+  createSession(@Body() dto: CreateSessionDto) {
     return this.attendanceService.createSession(
-      body.courseId,
-      new Date(body.date),
-      body.startTime,
-      body.endTime,
-      body.roomId,
+      dto.courseId,
+      new Date(dto.date),
+      dto.startTime,
+      dto.endTime,
+      dto.roomId,
     );
   }
 
-  /**
-   * تسجيل حضور طالب في Session
-   * ADMIN / EMPLOYEE / TEACHER
-   */
   @Post('mark')
   @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
-  markAttendance(
-    @Body()
-    body: {
-      sessionId: number;
-      studentId: number;
-      status?: AttendanceStatus;
-    },
-  ) {
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mark student attendance for a session' })
+  markAttendance(@Body() dto: MarkSingleAttendanceDto) {
     return this.attendanceService.markAttendance(
-      body.sessionId,
-      body.studentId,
-      // body.status,
+      dto.sessionId,
+      dto.studentId,
     );
   }
-
-  /**
-   * تسجيل حضور مجموعة طلاب (مرة واحدة)
-   */
 
   @Post('mark-bulk/:sessionId')
   @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Mark bulk attendance for a session' })
+  @ApiParam({ name: 'sessionId', type: Number })
   markAttendanceBulk(
     @Param('sessionId', ParseIntPipe) sessionId: number,
     @Body() body: MarkBulkAttendanceDto,
@@ -71,25 +57,24 @@ export class AttendanceController {
     );
   }
 
-
-  /**
-   * عرض حضور Session معينة (كشف الحضور)
-   */
   @Get('session/:sessionId')
   @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get attendance list for a specific session' })
+  @ApiParam({ name: 'sessionId', type: Number })
   getSessionAttendance(
     @Param('sessionId', ParseIntPipe) sessionId: number,
   ) {
     return this.attendanceService.getSessionAttendance(sessionId);
   }
 
-  /**
-   * الطالب يشوف حضوره في كورس
-   */
   @Get('my/course/:courseId')
   @Roles(Role.STUDENT)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get current student attendance in a specific course' })
+  @ApiParam({ name: 'courseId', type: Number })
   getMyAttendanceInCourse(
     @Param('courseId', ParseIntPipe) courseId: number,
     @Req() req: any,
@@ -101,12 +86,12 @@ export class AttendanceController {
     );
   }
 
-  /**
-   * عرض كل الـ Sessions الخاصة بكورس معين
-   */
   @Get('course/:courseId')
   @Roles(Role.ADMIN, Role.EMPLOYEE, Role.TEACHER)
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all sessions for a course' })
+  @ApiParam({ name: 'courseId', type: Number })
   getCourseSessions(@Param('courseId', ParseIntPipe) courseId: number) {
     return this.attendanceService.getCourseSessions(courseId);
   }

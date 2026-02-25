@@ -2,17 +2,22 @@ import { Body, Controller, Post, Headers, Req, Get, Query, Res } from '@nestjs/c
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import type { Response } from 'express';
+import { ApiTags, ApiOperation, ApiResponse, ApiQuery } from '@nestjs/swagger';
 
+@ApiTags('Payments')
 @Controller('payments')
 export class PaymentsController {
   constructor(private readonly paymentsService: PaymentsService) { }
 
   @Post('initiate')
+  @ApiOperation({ summary: 'Initiate a payment' })
+  @ApiResponse({ status: 201, description: 'Payment initiated successfully.' })
   initiate(@Body() dto: CreatePaymentDto) {
     return this.paymentsService.initiatePayment(dto);
   }
 
   @Post('webhook')
+  @ApiOperation({ summary: 'Paymob Webhook endpoint' })
   handleWebhook(
     @Body() body: any,
     @Headers() headers: any,
@@ -22,6 +27,9 @@ export class PaymentsController {
   }
 
   @Get('success')
+  @ApiOperation({ summary: 'Payment success callback' })
+  @ApiQuery({ name: 'success', type: String })
+  @ApiQuery({ name: 'order', type: String })
   paymentSuccess(@Query() query: any, @Res() res: Response) {
     // Get payment status from query parameters
     const success = query.success === 'true';

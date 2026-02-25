@@ -6,14 +6,20 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam } from '@nestjs/swagger';
 
+@ApiTags('Assignments')
 @Controller('assignments')
 export class AssignmentController {
   constructor(private readonly assignmentService: AssignmentService) { }
+
   // ------------------- TEACHER -------------------
   @Post()
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Create a new assignment (Teacher only)' })
+  @ApiResponse({ status: 201, description: 'Assignment successfully created.' })
   create(@Body() dto: CreateAssignmentDto, @Req() req) {
     return this.assignmentService.create(dto, req.user.id);
   }
@@ -21,6 +27,9 @@ export class AssignmentController {
   @Patch(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update an assignment (Teacher only)' })
+  @ApiParam({ name: 'id', type: Number })
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateAssignmentDto,
@@ -32,6 +41,9 @@ export class AssignmentController {
   @Delete(':id')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Delete an assignment (Teacher only)' })
+  @ApiParam({ name: 'id', type: Number })
   remove(
     @Param('id', ParseIntPipe) id: number,
     @Req() req,
@@ -39,10 +51,12 @@ export class AssignmentController {
     return this.assignmentService.remove(id, req.user.id);
   }
 
-  // جدول التسليمات لكل assignment
   @Get(':id/submissions')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all submissions for an assignment (Teacher only)' })
+  @ApiParam({ name: 'id', type: Number })
   getSubmissions(
     @Param('id', ParseIntPipe) assignmentId: number,
     @Req() req,
@@ -51,10 +65,12 @@ export class AssignmentController {
     return this.assignmentService.getSubmissions(assignmentId, req.user.id);
   }
 
-  // مراجعة تسليم طالب
   @Patch('submissions/:id/review')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Review a student submission (Teacher only)' })
+  @ApiParam({ name: 'id', type: Number, description: 'Submission ID' })
   reviewSubmission(
     @Param('id', ParseIntPipe) submissionId: number,
     @Body() dto: ReviewSubmissionDto,
@@ -69,18 +85,21 @@ export class AssignmentController {
 
   // ------------------- STUDENT -------------------
 
-  // كل الواجبات للـ student
   @Get('my')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get assignments for current student' })
   getMyAssignments(@Req() req) {
     return this.assignmentService.getMyAssignments(req.user.id);
   }
 
-  // submit assignment
   @Post(':id/submit')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.STUDENT)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Submit an assignment (Student only)' })
+  @ApiParam({ name: 'id', type: Number })
   submitAssignment(
     @Param('id', ParseIntPipe) id: number,
     @Req() req,
@@ -89,9 +108,11 @@ export class AssignmentController {
     return this.assignmentService.submit(id, req.user.id, dto.filePath);
   }
 
-  // اختياري: واجب حسب Chapter
   @Get('chapter/:chapterId')
   @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get assignments by chapter ID' })
+  @ApiParam({ name: 'chapterId', type: Number })
   getAssignmentsByChapter(
     @Param('chapterId', ParseIntPipe) chapterId: number,
   ) {

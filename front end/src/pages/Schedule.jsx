@@ -3,6 +3,7 @@ import { useNavigate, Navigate } from 'react-router-dom';
 import { courseAPI, courseScheduleAPI, roomAPI } from '../services/api';
 import ConfirmationModal from '../components/ConfirmationModal';
 import { useAuth } from '../context/AuthContext';
+import Swal from 'sweetalert2';
 
 const Schedule = () => {
     const { user } = useAuth();
@@ -112,7 +113,13 @@ const Schedule = () => {
             const courseId = parseInt(e.dataTransfer.getData('courseId'));
 
             if (isOverlapping(selectedDay, time, roomId, null)) {
-                alert('يوجد تعارض في هذا الموعد!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'تعارض في الموعد',
+                    text: 'يوجد تعارض في هذا الموعد!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
@@ -129,7 +136,11 @@ const Schedule = () => {
                 setScheduleItems(prev => [...prev, response.data]);
             } catch (error) {
                 console.error("Failed to add schedule:", error);
-                alert("فشل إضافة الموعد. تأكد من عدم وجود تعارض.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'فشل الإضافة',
+                    text: "فشل إضافة الموعد. تأكد من عدم وجود تعارض."
+                });
             }
 
         } else if (type === 'move') {
@@ -138,7 +149,13 @@ const Schedule = () => {
             if (!item) return;
 
             if (isOverlapping(selectedDay, time, roomId, item)) {
-                alert('يوجد تعارض في هذا الموعد!');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'تعارض في الموعد',
+                    text: 'يوجد تعارض في هذا الموعد!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 return;
             }
 
@@ -166,7 +183,11 @@ const Schedule = () => {
                 setScheduleItems(prev => prev.map(i => i.id === itemId ? response.data : i));
             } catch (error) {
                 console.error("Failed to update schedule:", error);
-                alert("فشل تعديل الموعد. تأكد من عدم وجود تعارض.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'فشل التعديل',
+                    text: "فشل تعديل الموعد. تأكد من عدم وجود تعارض."
+                });
             }
         }
     };
@@ -285,7 +306,11 @@ const Schedule = () => {
                     });
                 } catch (error) {
                     console.error("Resize save failed", error);
-                    alert("فشل حفظ التعديل");
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'فشل الحفظ',
+                        text: "فشل حفظ التعديل"
+                    });
                     // We should probably revert? fetchInitialData();
                 }
                 resizingItemRef.current = null;
@@ -358,7 +383,11 @@ const Schedule = () => {
             setItemToDelete(null);
         } catch (error) {
             console.error("Failed to delete schedule:", error);
-            alert("فشل حذف الموعد.");
+            Swal.fire({
+                icon: 'error',
+                title: 'فشل الحذف',
+                text: "فشل حذف الموعد."
+            });
             setShowDeleteModal(false);
         }
     };
@@ -378,7 +407,11 @@ const Schedule = () => {
             setPendingSchedule(null);
         } catch (error) {
             console.error("Failed to add schedule:", error);
-            alert("فشل إضافة الموعد. تأكد من عدم وجود تعارض.");
+            Swal.fire({
+                icon: 'error',
+                title: 'فشل الإضافة',
+                text: "فشل إضافة الموعد. تأكد من عدم وجود تعارض."
+            });
         }
     };
 

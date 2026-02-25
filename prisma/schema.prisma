@@ -74,6 +74,12 @@ enum EnrollmentRequestStatus {
   REJECTED
 }
 
+enum MessageType {
+  COURSE_BROADCAST // مدرس يبعت لكل طلاب الكورس
+  TO_TEACHER // طالب يبعت للمدرس
+  TO_EMPLOYEE // طالب يبعت للموظف
+}
+
 model Chapter {
   id              Int               @id @default(autoincrement())
   title           String
@@ -140,9 +146,31 @@ model User {
   Quiz                  Quiz[]
   assignmentSubmissions AssignmentSubmission[]
   assignmentsCreated    Assignment[]
+  sentMessages          Message[]              @relation("SentMessages")
+  receivedMessages      Message[]              @relation("ReceivedMessages")
 
   @@index([email], map: "idx_user_email")
   @@map("user")
+}
+
+model Message {
+  id         Int         @id @default(autoincrement())
+  content    String      @db.Text
+  type       MessageType
+  senderId   Int
+  receiverId Int? // null = broadcast to all course students
+  courseId   Int? // for COURSE_BROADCAST and TO_TEACHER messages
+  imageUrl   String?     @db.Text
+  isRead     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+
+  sender   User  @relation("SentMessages", fields: [senderId], references: [id])
+  receiver User? @relation("ReceivedMessages", fields: [receiverId], references: [id])
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([courseId])
+  @@map("message")
 }
 
 model Enrollment {

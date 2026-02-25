@@ -1,0 +1,93 @@
+/* ============================================
+   RESPONSIVE FIXES FOR SIDEBAR AND LAYOUT
+   ============================================ */
+
+/* Extra small screens - Additional navbar fixes */
+@media (max-width: 480px) {
+  .navbar-header {
+    padding: 10px 12px;
+    margin: 6px;
+    gap: 8px;
+  }
+
+  .navbar-brand h1 {
+    font-size: 16px;
+  }
+
+  .navbar-menu {
+    gap: 3px;
+  }
+
+  .navbar-link {
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .user-menu-avatar {
+    width: 24px;
+    height: 24px;
+    font-size: 11px;
+  }
+
+  .user-menu-button {
+    gap: 0;
+    padding: 6px;
+  }
+}
+
+/* Ensure layout content doesn't overflow with sidebar */
+main {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Prevent horizontal scroll on all screens */
+.navbar-header,
+.layout-content {
+  max-width: none;
+  width: auto;
+}
+
+/* Fix table overflow on small screens */
+@media (max-width: 1024px) {
+  table {
+    width: 100%;
+    table-layout: auto;
+  }
+
+  th,
+  td {
+    padding: 8px 4px;
+    font-size: 12px;
+  }
+}
+
+/* Optimize layout for mobile */
+@media (max-width: 768px) {
+  body {
+    overflow-x: hidden;
+  }
+
+  .layout-container {
+    overflow-x: hidden;
+  }
+
+  .layout-content {
+    max-width: 100%;
+  }
+
+  main {
+    padding: 0;
+  }
+}
+
+/* Extra safe fixes */
+/* Removed restrictive global max-width */
+
+html,
+body,
+#root {
+  overflow-x: hidden;
+  width: 100%;
+}

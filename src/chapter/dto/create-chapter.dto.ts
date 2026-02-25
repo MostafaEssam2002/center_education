@@ -1,26 +1,32 @@
+import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { IsString, IsOptional, IsInt, Min } from 'class-validator';
 
 export class CreateChapterDto {
+    @ApiProperty({ description: 'The title of the chapter' })
     @IsString()
     title: string;
 
+    @ApiPropertyOptional({ description: 'The content/description of the chapter' })
     @IsOptional()
     @IsString()
     content?: string;
 
+    @ApiProperty({ description: 'The ID of the course this chapter belongs to' })
     @IsInt()
     @Min(1)
     courseId: number;
 
-    @IsOptional() // دلوقتي متوافق مع Prisma
-    @IsString()
-    videoPath?: string; // اختياري
-
+    @ApiPropertyOptional({ description: 'Path to the chapter video file' })
     @IsOptional()
     @IsString()
-    pdfPath?: string;   // اختياري
+    videoPath?: string;
 
-    // @IsOptional()
+    @ApiPropertyOptional({ description: 'Path to the chapter PDF file' })
+    @IsOptional()
+    @IsString()
+    pdfPath?: string;
+
+    @ApiProperty({ description: 'The order of the chapter within the course' })
     @IsInt()
-    order: number; // ترتيب الفصل في الكورس
+    order: number;
 }

@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { roomAPI, courseScheduleAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ConfirmationModal from '../components/ConfirmationModal';
+import Swal from 'sweetalert2';
 
 const RoomManagement = () => {
     const { user } = useAuth();
@@ -80,7 +81,11 @@ const RoomManagement = () => {
         e.preventDefault();
 
         if (!formData.name.trim()) {
-            alert('الرجاء إدخال اسم الغرفة');
+            Swal.fire({
+                icon: 'warning',
+                title: 'بيانات ناقصة',
+                text: 'الرجاء إدخال اسم الغرفة'
+            });
             return;
         }
 
@@ -109,8 +114,12 @@ const RoomManagement = () => {
             setFormData({ name: '', type: 'OFFLINE', capacity: '', location: '', isActive: true });
         } catch (error) {
             console.error("Error saving room:", error);
-            console.error("Error details:", error.response?.data); // More detailed error
-            alert(`فشل حفظ الغرفة: ${error.response?.data?.message || error.message}`);
+            console.error("Error details:", error.response?.data);
+            Swal.fire({
+                icon: 'error',
+                title: 'فشل الحفظ',
+                text: error.response?.data?.message || error.message
+            });
         }
     };
 
@@ -145,7 +154,11 @@ const RoomManagement = () => {
             setRoomToDelete(null);
         } catch (error) {
             console.error("Error deleting room:", error);
-            alert('فشل حذف الغرفة. قد تكون مرتبطة بجداول موجودة.');
+            Swal.fire({
+                icon: 'error',
+                title: 'فشل الحذف',
+                text: 'فشل حذف الغرفة. قد تكون مرتبطة بجداول موجودة.'
+            });
         }
     };
 

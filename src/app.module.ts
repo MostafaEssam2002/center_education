@@ -21,9 +21,10 @@ import { QuizAttemptModule } from './quiz-attempt/quiz-attempt.module';
 import { AssignmentModule } from './assignment/assignment.module';
 import { RoomModule } from './room/room.module';
 import { PaymentsModule } from './payments/payments.module';
+import { ChatModule } from './chat/chat.module';
 
 @Module({
-  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule, AssignmentModule, RoomModule, PaymentsModule],
+  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule, AssignmentModule, RoomModule, PaymentsModule, ChatModule],
   controllers: [AppController],
   providers: [AppService],
 })

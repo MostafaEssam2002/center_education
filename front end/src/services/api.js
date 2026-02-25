@@ -340,4 +340,43 @@ export const paymentAPI = {
     api.post('/payments/initiate', { enrollmentRequestId, integration_id, walletPhoneNumber }),
 };
 
+// Chat API
+export const chatAPI = {
+  getEmployees: () =>
+    api.get('/chat/employees'),
+
+  getMyCourses: () =>
+    api.get('/chat/my-courses'),
+
+  getTeacherCourses: () =>
+    api.get('/chat/teacher-courses'),
+
+  getCourseStudents: (courseId) =>
+    api.get(`/chat/course/${courseId}/students`),
+
+  getCourseMessages: (courseId) =>
+    api.get(`/chat/course/${courseId}/messages`),
+
+  getConversationWithTeacher: (courseId) =>
+    api.get(`/chat/course/${courseId}/teacher-conversation`),
+
+  getConversationWithEmployee: (employeeId) =>
+    api.get(`/chat/employee/${employeeId}/conversation`),
+
+  getTeacherInbox: () =>
+    api.get('/chat/teacher-inbox'),
+
+  getEmployeeInbox: () =>
+    api.get('/chat/employee-inbox'),
+
+  getTeacherStudentConversation: (courseId, studentId) =>
+    api.get(`/chat/course/${courseId}/student/${studentId}/conversation`),
+
+  getTotalUnread: () =>
+    api.get('/chat/unread/total'),
+
+  getUnreadConversations: () =>
+    api.get('/chat/unread/conversations'),
+};
+
 export default api;
