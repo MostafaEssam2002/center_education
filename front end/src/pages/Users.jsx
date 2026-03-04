@@ -75,6 +75,11 @@ const Users = () => {
       age: user.age || '',
       phone: user.phone || '',
       address: user.address || '',
+      AdditionalAddress: user.AdditionalAddress || '',
+      Center_name: user.Center_name || '',
+      country: user.countryCode || '',
+      region: user.regionId ? String(user.regionId) : '',
+      city: user.cityCode || '',
     });
     setShowEditModal(true);
   };
@@ -92,6 +97,11 @@ const Users = () => {
 
       if (payload.phone === '') delete payload.phone;
       if (payload.address === '') delete payload.address;
+      if (payload.AdditionalAddress === '') delete payload.AdditionalAddress;
+      if (payload.Center_name === '') delete payload.Center_name;
+      if (payload.country === '') delete payload.country;
+      if (payload.region === '') delete payload.region;
+      if (payload.city === '') delete payload.city;
       if (payload.first_name === '') delete payload.first_name;
       if (payload.last_name === '') delete payload.last_name;
 
@@ -293,45 +303,87 @@ const Users = () => {
               <h2 style={{ fontSize: 'clamp(1.1rem, 4vw, 1.4rem)' }}>تعديل المستخدم</h2>
             </div>
             <form onSubmit={handleUpdate} style={{ padding: '0 16px 16px' }}>
-              <div className="form-group">
-                <label>الاسم الأول</label>
-                <input
-                  type="text"
-                  value={editForm.first_name}
-                  onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>الاسم الأخير</label>
-                <input
-                  type="text"
-                  value={editForm.last_name}
-                  onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>العمر</label>
-                <input
-                  type="number"
-                  value={editForm.age}
-                  onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>الهاتف</label>
-                <input
-                  type="tel"
-                  value={editForm.phone}
-                  onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
-                />
-              </div>
-              <div className="form-group">
-                <label>العنوان</label>
-                <input
-                  type="text"
-                  value={editForm.address}
-                  onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
-                />
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px', marginBottom: '15px' }}>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>الاسم الأول</label>
+                  <input
+                    type="text"
+                    value={editForm.first_name}
+                    onChange={(e) => setEditForm({ ...editForm, first_name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>الاسم الأخير</label>
+                  <input
+                    type="text"
+                    value={editForm.last_name}
+                    onChange={(e) => setEditForm({ ...editForm, last_name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>العمر</label>
+                  <input
+                    type="number"
+                    value={editForm.age}
+                    onChange={(e) => setEditForm({ ...editForm, age: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>الهاتف</label>
+                  <input
+                    type="tel"
+                    value={editForm.phone}
+                    onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>العنوان</label>
+                  <input
+                    type="text"
+                    value={editForm.address}
+                    onChange={(e) => setEditForm({ ...editForm, address: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>العنوان الإضافي</label>
+                  <input
+                    type="text"
+                    value={editForm.AdditionalAddress}
+                    onChange={(e) => setEditForm({ ...editForm, AdditionalAddress: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>اسم المركز</label>
+                  <input
+                    type="text"
+                    value={editForm.Center_name}
+                    onChange={(e) => setEditForm({ ...editForm, Center_name: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>الدولة</label>
+                  <input
+                    type="text"
+                    value={editForm.country}
+                    onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>المحافظة</label>
+                  <input
+                    type="text"
+                    value={editForm.region}
+                    onChange={(e) => setEditForm({ ...editForm, region: e.target.value })}
+                  />
+                </div>
+                <div className="form-group" style={{ marginBottom: 0 }}>
+                  <label>المدينة</label>
+                  <input
+                    type="text"
+                    value={editForm.city}
+                    onChange={(e) => setEditForm({ ...editForm, city: e.target.value })}
+                  />
+                </div>
               </div>
               <div style={{ display: 'flex', gap: '10px', flexDirection: 'row-reverse' }}>
                 <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
