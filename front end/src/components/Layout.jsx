@@ -55,16 +55,16 @@ const Layout = ({ children }) => {
                   {user?.role === 'USER'
                     ? 'مستخدم'
                     : user?.role === 'TEACHER'
-                    ? 'معلم'
-                    : user?.role === 'EMPLOYEE'
-                    ? 'موظف'
-                    : user?.role === 'ASSISTANT'
-                    ? 'مساعد'
-                    : user?.role === 'STUDENT'
-                    ? 'طالب'
-                    : user?.role === 'ADMIN'
-                    ? 'مدير'
-                    : user?.role}
+                      ? 'معلم'
+                      : user?.role === 'EMPLOYEE'
+                        ? 'موظف'
+                        : user?.role === 'ASSISTANT'
+                          ? 'مساعد'
+                          : user?.role === 'STUDENT'
+                            ? 'طالب'
+                            : user?.role === 'ADMIN'
+                              ? 'مدير'
+                              : user?.role}
                 </p>
               </div>
             </div>
@@ -123,10 +123,8 @@ const Layout = ({ children }) => {
   };
 
   return (
-    <div className="layout-container">
-      <Sidebar />
-      <div className="layout-content">
-        <header className="navbar-header">
+    <div className="layout-wrapper">
+      <header className="navbar-header">
         <div className="navbar-brand">
           <h1>مركز التعليم</h1>
         </div>
@@ -150,7 +148,7 @@ const Layout = ({ children }) => {
             <ChatLink />
 
             {(user?.role === 'EMPLOYEE') && (
-              <Link to="/attendance" className="navbar-link navbar-danger">
+              <Link to="/attendance" className="navbar-link">
                 تسجيل الحضور
               </Link>
             )}
@@ -171,7 +169,7 @@ const Layout = ({ children }) => {
                 <Link to="/enrollment-requests" className="navbar-link">
                   طلبات الالتحاق
                 </Link>
-                <Link to="/attendance" className="navbar-link navbar-danger">
+                <Link to="/attendance" className="navbar-link">
                   تسجيل الحضور
                 </Link>
               </>
@@ -213,8 +211,43 @@ const Layout = ({ children }) => {
         )}
       </header>
 
-      <main>{children}</main>
+      <div className="layout-main-wrapper">
+        <Sidebar />
+        <main className="layout-main">{children}</main>
       </div>
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <div className="footer-brand">
+            <h2 className="footer-logo">مركز التعليم</h2>
+            <p className="footer-tagline">منصة تعليمية متكاملة للطلاب والمعلمين</p>
+          </div>
+
+          <div className="footer-links">
+            <h3 className="footer-links-title">روابط سريعة</h3>
+            <ul>
+              <Link to="/dashboard">لوحة التحكم</Link>
+              <Link to="/courses">الكورسات</Link>
+              <Link to="/chat">المحادثات</Link>
+              {isStudent && <Link to="/my-enrollments">كورساتي</Link>}
+              {isTeacher && <Link to="/enrollment-requests">طلبات الالتحاق</Link>}
+            </ul>
+          </div>
+
+          <div className="footer-info">
+            <h3 className="footer-links-title">معلومات</h3>
+            <ul>
+              <li>📧 support@center.edu</li>
+              <li>📞 01118606952</li>
+              <li>🕐 السبت – الخميس: 9ص – 9م</li>
+            </ul>
+          </div>
+        </div>
+
+        <div className="footer-bottom">
+          <p>© {new Date().getFullYear()} مركز التعليم – جميع الحقوق محفوظة</p>
+        </div>
+      </footer>
     </div>
   );
 };

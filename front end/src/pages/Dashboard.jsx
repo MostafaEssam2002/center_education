@@ -17,14 +17,14 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="container">
-      <div className="card" style={{ marginTop: '50px' }}>
+    <div className="main-content">
+      <div className="card">
         <div className="card-header">
           <h2>لوحة التحكم</h2>
         </div>
-        
+
         {user && (
-          <div style={{ marginBottom: '30px', padding: '20px', background: '#f8f9fa', borderRadius: '8px' }}>
+          <div style={{ marginBottom: '30px', padding: '20px', background: 'rgba(15, 23, 42, 0.4)', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
             <h3 style={{ marginBottom: '15px', color: '#667eea' }}>معلومات المستخدم</h3>
             <p><strong>البريد الإلكتروني:</strong> {user.email}</p>
             {user.role && (

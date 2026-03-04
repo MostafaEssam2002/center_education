@@ -58,7 +58,10 @@ const Register = () => {
         image_path: imageUrl || undefined,
       };
 
-      delete userData.image_path; // Remove if empty
+      if (!userData.phone) delete userData.phone;
+      if (!userData.address) delete userData.address;
+
+      // Remove if empty
       if (!imageUrl) delete userData.image_path;
 
       const response = await userAPI.register(userData);

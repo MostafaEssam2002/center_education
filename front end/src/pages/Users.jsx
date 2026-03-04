@@ -1,6 +1,5 @@
 import { useState, useEffect } from 'react';
 import { userAPI, API_BASE_URL } from '../services/api';
-import Swal from 'sweetalert2';
 
 const Users = () => {
   const [users, setUsers] = useState([]);
@@ -58,35 +57,13 @@ const Users = () => {
   };
 
   const handleDelete = async (id) => {
-    const result = await Swal.fire({
-      title: 'هل أنت متأكد من حذف هذا المستخدم؟',
-      text: "لن تتمكن من التراجع عن هذا الإجراء!",
-      icon: 'warning',
-      showCancelButton: true,
-      confirmButtonColor: '#ef4444',
-      cancelButtonColor: '#6b7280',
-      confirmButtonText: 'نعم، حذف',
-      cancelButtonText: 'إلغاء'
-    });
-
-    if (!result.isConfirmed) return;
+    if (!window.confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
 
     try {
       await userAPI.remove(id);
-      Swal.fire({
-        icon: 'success',
-        title: 'تم الحذف',
-        text: 'تم حذف المستخدم بنجاح',
-        timer: 1500,
-        showConfirmButton: false
-      });
       loadUsers();
     } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'فشل الحذف',
-        text: err.response?.data?.message || err.message
-      });
+      alert('فشل الحذف: ' + (err.response?.data?.message || err.message));
     }
   };
 
@@ -105,22 +82,28 @@ const Users = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await userAPI.update(selectedUser.id, editForm);
-      Swal.fire({
-        icon: 'success',
-        title: 'تم التحديث',
-        text: 'تم تحديث بيانات المستخدم بنجاح',
-        timer: 1500,
-        showConfirmButton: false
-      });
+      const payload = { ...editForm };
+
+      if (payload.age !== '' && payload.age !== null && payload.age !== undefined) {
+        payload.age = Number(payload.age);
+      } else {
+        delete payload.age;
+      }
+
+      if (payload.phone === '') delete payload.phone;
+      if (payload.address === '') delete payload.address;
+      if (payload.first_name === '') delete payload.first_name;
+      if (payload.last_name === '') delete payload.last_name;
+
+      await userAPI.update(selectedUser.id, payload);
       setShowEditModal(false);
       loadUsers();
     } catch (err) {
-      Swal.fire({
-        icon: 'error',
-        title: 'فشل التحديث',
-        text: err.response?.data?.message || err.message
-      });
+      alert('فشل التحديث: ' + (
+        (err.response?.data?.message && Array.isArray(err.response.data.message))
+          ? err.response.data.message.join(', ')
+          : err.response?.data?.message || err.message
+      ));
     }
   };
 
@@ -183,9 +166,9 @@ const Users = () => {
                   <th>الصورة</th>
                   <th>الاسم</th>
                   <th>البريد الإلكتروني</th>
-                  <th className="hide-mobile">العمر</th>
-                  <th className="hide-mobile">الهاتف</th>
-                  <th className="hide-tablet">العنوان</th>
+                  <th style={{ display: 'none' }} className="hide-mobile">العمر</th>
+                  <th style={{ display: 'none' }} className="hide-mobile">الهاتف</th>
+                  <th style={{ display: 'none' }} className="hide-tablet">العنوان</th>
                   <th>الدور</th>
                   <th>الإجراءات</th>
                 </tr>
@@ -225,16 +208,16 @@ const Users = () => {
                     </td>
                     <td><strong>{user.first_name} {user.last_name}</strong></td>
                     <td style={{ wordBreak: 'break-all', fontSize: 'clamp(12px, 2vw, 13px)' }}>{user.email}</td>
-                    <td className="hide-mobile">{user.age || '-'}</td>
-                    <td className="hide-mobile">{user.phone || '-'}</td>
-                    <td className="hide-tablet">{user.address || '-'}</td>
+                    <td style={{ display: 'none' }} className="hide-mobile">{user.age || '-'}</td>
+                    <td style={{ display: 'none' }} className="hide-mobile">{user.phone || '-'}</td>
+                    <td style={{ display: 'none' }} className="hide-tablet">{user.address || '-'}</td>
                     <td>
                       <span className={`badge badge-${user.role}`}>
                         {getRoleName(user.role)}
                       </span>
                     </td>
                     <td>
-                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'nowrap' }}>
+                      <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
                         <button
                           className="btn btn-secondary"
                           style={{ padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: '12px' }}

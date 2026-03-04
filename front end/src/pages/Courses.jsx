@@ -177,7 +177,7 @@ const Courses = () => {
   const canManageCourses = user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   return (
-    <div className="container">
+    <div className="main-content">
       <div className="card">
         <div className="card-header">
           <h2>الكورسات</h2>
@@ -187,7 +187,7 @@ const Courses = () => {
                 إضافة كورس جديد
               </button>
             )}
-            <button className="btn btn-secondary" onClick={() => loadCourses(currentPage)}>
+            <button className="btn btn-primary" onClick={() => loadCourses(currentPage)}>
               تحديث
             </button>
           </div>
@@ -200,9 +200,9 @@ const Courses = () => {
             value={searchTitle}
             onChange={(e) => setSearchTitle(e.target.value)}
             onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
-            style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '2px solid #e0e0e0' }}
+            style={{ flex: 1, padding: '12px 20px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(30, 41, 59, 0.7)', color: 'var(--neutral-100)', outline: 'none' }}
           />
-          <button className="btn btn-secondary" onClick={handleSearch}>
+          <button className="btn btn-primary" onClick={handleSearch}>
             بحث
           </button>
         </div>
@@ -230,7 +230,7 @@ const Courses = () => {
             {pagination && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-primary"
                   disabled={currentPage === 1}
                   onClick={() => loadCourses(currentPage - 1)}
                 >
@@ -238,7 +238,7 @@ const Courses = () => {
                 </button>
                 <span>صفحة {currentPage} من {pagination.totalPages}</span>
                 <button
-                  className="btn btn-secondary"
+                  className="btn btn-primary"
                   disabled={currentPage === pagination.totalPages}
                   onClick={() => loadCourses(currentPage + 1)}
                 >

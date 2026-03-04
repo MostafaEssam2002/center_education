@@ -149,14 +149,38 @@ export default function Chat() {
 
     const openChat = (config) => {
         setActiveChat(config); setMessages([]); setLoading(true);
+
+        // ✅ إخفاء الـ badge فوراً (local update)
+        if (config.type === 'teacher_student') {
+            setTeacherInbox(prev => prev.map(item =>
+                item.userId === config.studentId && item.courseId === config.courseId
+                    ? { ...item, unreadCount: 0 }
+                    : item
+            ));
+        } else if (config.type === 'employee_student') {
+            setEmployeeInbox(prev => prev.map(item =>
+                item.userId === config.studentId
+                    ? { ...item, unreadCount: 0 }
+                    : item
+            ));
+        } else if (config.type === 'teacher') {
+            setCourses(prev => prev.map(c =>
+                c.id === config.courseId ? { ...c, unreadCount: 0 } : c
+            ));
+        } else if (config.type === 'employee') {
+            setEmployees(prev => prev.map(e =>
+                e.id === config.employeeId ? { ...e, unreadCount: 0 } : e
+            ));
+        }
+
         const sid = socketRef.current; if (!sid) { setLoading(false); return; }
 
-        const targetId = config.courseId || config.employeeId || config.studentId;
-        if (config.type === 'course_broadcast') sid.emit('joinCourse', { courseId: targetId });
-        else if (config.type === 'teacher') sid.emit('getConversationWithTeacher', { courseId: targetId });
-        else if (config.type === 'employee') sid.emit('getConversationWithEmployee', { employeeId: targetId });
-        else if (config.type === 'teacher_student') sid.emit('getTeacherStudentConversation', { studentId: targetId, courseId: config.courseId });
-        else if (config.type === 'employee_student') sid.emit('getConversationWithEmployee', { studentId: targetId });
+        if (config.type === 'course_broadcast') sid.emit('joinCourse', { courseId: config.courseId });
+        else if (config.type === 'teacher') sid.emit('getConversationWithTeacher', { courseId: config.courseId });
+        else if (config.type === 'employee') sid.emit('getConversationWithEmployee', { employeeId: config.employeeId });
+        else if (config.type === 'teacher_student') sid.emit('getTeacherStudentConversation', { studentId: config.studentId, courseId: config.courseId });
+        else if (config.type === 'employee_student') sid.emit('getConversationWithEmployee', { studentId: config.studentId });
+
 
         setTimeout(loadInboxes, 500);
         if (window.innerWidth <= 768) setSidebarClosed(true);
@@ -170,14 +194,13 @@ export default function Chat() {
         if (customContent === null) setInputText('');
         const s = socketRef.current;
 
-        const targetId = activeChat.courseId || activeChat.employeeId || activeChat.studentId;
         const payload = { content, imageUrl };
 
-        if (activeChat.type === 'course_broadcast') s.emit('broadcastToCourse', { ...payload, courseId: targetId });
-        else if (activeChat.type === 'teacher') s.emit('sendToTeacher', { ...payload, courseId: targetId });
-        else if (activeChat.type === 'employee') s.emit('sendToEmployee', { ...payload, employeeId: targetId });
-        else if (activeChat.type === 'teacher_student') s.emit('replyToStudent', { ...payload, studentId: targetId, courseId: activeChat.courseId });
-        else if (activeChat.type === 'employee_student') s.emit('employeeReply', { ...payload, studentId: targetId });
+        if (activeChat.type === 'course_broadcast') s.emit('broadcastToCourse', { ...payload, courseId: activeChat.courseId });
+        else if (activeChat.type === 'teacher') s.emit('sendToTeacher', { ...payload, courseId: activeChat.courseId });
+        else if (activeChat.type === 'employee') s.emit('sendToEmployee', { ...payload, employeeId: activeChat.employeeId });
+        else if (activeChat.type === 'teacher_student') s.emit('replyToStudent', { ...payload, studentId: activeChat.studentId, courseId: activeChat.courseId });
+        else if (activeChat.type === 'employee_student') s.emit('employeeReply', { ...payload, studentId: activeChat.studentId });
     };
 
     const handleImageUpload = async (e) => {

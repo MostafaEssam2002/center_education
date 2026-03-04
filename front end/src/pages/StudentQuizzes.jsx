@@ -90,7 +90,7 @@ export default function StudentQuizzes() {
     }
 
     return (
-        <div className="container">
+        <div className="main-content">
             <div className="page-header">
                 <div>
                     <h1>My Quizzes</h1>

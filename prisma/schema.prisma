@@ -135,6 +135,11 @@ model User {
   phone                 String?
   address               String?
   role                  Role                   @default(USER)
+  Center_name           String?
+  AdditionalAddress     String?
+  countryCode           String?
+  cityCode              String?
+  regionId              Int?
   enrollments           Enrollment[]           @relation("UserToEnrollment")
   teachingCourses       Course[]               @relation("TeacherToCourse")
   enrollmentRequest     EnrollmentRequest[]    @relation("UserToEnrollmentRequest")

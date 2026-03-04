@@ -433,16 +433,16 @@ const Schedule = () => {
 
     return (
         <div
+            className={`main-content ${isResizing ? 'disable-selection' : ''}`}
             style={{
                 display: 'flex',
                 flexDirection: isMobile ? 'column' : 'row',
-                height: isMobile ? 'auto' : 'calc(100vh - 100px)',
-                gap: '20px',
-                padding: '20px'
+                height: isMobile ? 'auto' : 'calc(100vh - 70px)',
+                gap: '0',
+                padding: '0'
             }}
             onDragOver={handleDragOver}
             onDrop={handleTrashDrop}
-            className={isResizing ? 'disable-selection' : ''}
         >
             {/* Sidebar (Courses) */}
             <div style={{

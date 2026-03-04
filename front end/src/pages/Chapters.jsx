@@ -227,7 +227,7 @@ const Chapters = () => {
   const canManageChapters = user?.role === 'ADMIN' || user?.role === 'TEACHER';
 
   return (
-    <div className="container">
+    <div className="main-content">
       <div className="card">
         <div className="card-header">
           <h2>{selectedCourseId ? `فصول: ${courses.find(c => c.id.toString() === selectedCourseId)?.title}` : 'إدارة الفصول'}</h2>

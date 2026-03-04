@@ -33,7 +33,7 @@ const Attendance = () => {
     };
 
     return (
-        <div className="container mt-4">
+        <div className="main-content">
             <h2 className="mb-4 text-center" style={{ color: '#4a5568' }}>إدارة الحضور والغياب</h2>
 
             {!selectedSession && (

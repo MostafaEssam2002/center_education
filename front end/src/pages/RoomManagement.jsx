@@ -186,8 +186,8 @@ const RoomManagement = () => {
     }
 
     return (
-        <div style={{ padding: '20px', maxWidth: '1400px', margin: '0 auto' }}>
-            <h1 style={{ marginBottom: '30px', color: '#2d3748' }}>إدارة الغرف</h1>
+        <div className="main-content">
+            <h1 style={{ padding: '20px 20px 0', color: 'var(--primary-light)', marginBottom: '10px' }}>إدارة الغرف</h1>
 
             {/* CRUD Section - Only for ADMIN */}
             {isAdmin && (

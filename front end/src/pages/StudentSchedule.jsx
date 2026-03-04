@@ -41,7 +41,7 @@ const StudentSchedule = () => {
     if (loading) return <div className="container">جاري التحميل...</div>;
 
     return (
-        <div className="container" style={{ padding: '20px' }}>
+        <div className="main-content">
             <div className="card" style={{ maxWidth: '100%', overflow: 'hidden' }}>
                 <div className="card-header">
                     <h2>جدول محاضراتي ({user?.first_name || user?.email})</h2>

@@ -58,4 +58,29 @@ export class CreateUserDto {
     @ApiPropertyOptional({ description: 'User region' })
     @IsOptional()
     region?: string;
+
+    @ApiPropertyOptional({ description: 'User Center_name' })
+    @IsOptional()
+    @IsString()
+    Center_name?: string;
+
+    @ApiPropertyOptional({ description: 'User AdditionalAddress' })
+    @IsOptional()
+    @IsString()
+    AdditionalAddress?: string;
+
+    @ApiPropertyOptional({ description: 'User countryCode' })
+    @IsOptional()
+    @IsString()
+    countryCode?: string;
+
+    @ApiPropertyOptional({ description: 'User cityCode' })
+    @IsOptional()
+    @IsString()
+    cityCode?: string;
+
+    @ApiPropertyOptional({ description: 'User regionId' })
+    @IsOptional()
+    @IsNumber()
+    regionId?: number;
 }

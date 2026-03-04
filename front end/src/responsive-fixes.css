@@ -45,8 +45,7 @@ main {
 /* Prevent horizontal scroll on all screens */
 .navbar-header,
 .layout-content {
-  max-width: none;
-  width: auto;
+  max-width: 100%;
 }
 
 /* Fix table overflow on small screens */
@@ -83,7 +82,9 @@ main {
 }
 
 /* Extra safe fixes */
-/* Removed restrictive global max-width */
+* {
+  max-width: 100%;
+}
 
 html,
 body,

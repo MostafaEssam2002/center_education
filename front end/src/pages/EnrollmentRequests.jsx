@@ -136,7 +136,7 @@ const EnrollmentRequests = () => {
     if (loading && !requests) return <div className="loading-spinner">جاري التحميل...</div>;
 
     return (
-        <div className="container" style={{ maxWidth: '1200px', padding: '20px' }}>
+        <div className="main-content">
 
             <ConfirmationModal
                 isOpen={confirmModal.isOpen}

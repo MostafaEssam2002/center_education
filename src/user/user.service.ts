@@ -112,6 +112,7 @@ export class UserService {
         if (error.code === 'P2002') {
           throw new BadRequestException('Email already exists');
         }
+        
         if (error.code === 'P2025') {
           throw new BadRequestException('User not found');
         }

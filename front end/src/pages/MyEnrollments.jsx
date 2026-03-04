@@ -150,7 +150,7 @@ const MyEnrollments = () => {
     };
 
     return (
-        <div className="container">
+        <div className="main-content">
             <div className="card">
                 <div className="card-header">
                     <h2>كورساتي</h2>

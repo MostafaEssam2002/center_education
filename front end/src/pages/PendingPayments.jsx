@@ -114,7 +114,7 @@ const PendingPayments = () => {
     }
 
     return (
-        <div className="container" style={{ maxWidth: '1000px', padding: '20px' }}>
+        <div className="main-content">
             <ConfirmationModal
                 isOpen={confirmModal.isOpen}
                 onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
