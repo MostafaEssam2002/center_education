@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { roomAPI, courseScheduleAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import ConfirmationModal from '../components/ConfirmationModal';
 import Swal from 'sweetalert2';
 
 const RoomManagement = () => {
     const { user } = useAuth();
+    const navigate = useNavigate();
     const isAdmin = user?.role === 'ADMIN';
     const isAdminOrEmployee = user?.role === 'ADMIN' || user?.role === 'EMPLOYEE';
 
@@ -15,20 +16,8 @@ const RoomManagement = () => {
     const [loading, setLoading] = useState(true);
     const [selectedDay, setSelectedDay] = useState('SAT');
     const [selectedRoom, setSelectedRoom] = useState(null); // For employee view
-    const [editingRoom, setEditingRoom] = useState(null);
-    const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [roomToDelete, setRoomToDelete] = useState(null);
     const [pagination, setPagination] = useState(null);
     const [currentPage, setCurrentPage] = useState(1);
-
-    // Form state
-    const [formData, setFormData] = useState({
-        name: '',
-        type: 'OFFLINE',
-        capacity: '',
-        location: '',
-        isActive: true
-    });
 
     // Constants
     const daysOrder = ['SAT', 'SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI'];
@@ -79,87 +68,18 @@ const RoomManagement = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-
-        if (!formData.name.trim()) {
-            Swal.fire({
-                icon: 'warning',
-                title: 'بيانات ناقصة',
-                text: 'الرجاء إدخال اسم الغرفة'
-            });
-            return;
-        }
-
-        try {
-            // Prepare data with proper types
-            const roomData = {
-                name: formData.name.trim(),
-                type: formData.type,
-                capacity: formData.capacity && formData.capacity !== '' ? parseInt(formData.capacity, 10) : null,
-                location: formData.location && formData.location.trim() !== '' ? formData.location.trim() : null,
-                isActive: formData.isActive
-            };
-
-            console.log('Sending room data:', roomData); // Debug log
-
-            if (editingRoom) {
-                const response = await roomAPI.update(editingRoom.id, roomData);
-                setRooms(prev => prev.map(r => r.id === editingRoom.id ? response.data : r));
-                setEditingRoom(null);
-            } else {
-                const response = await roomAPI.create(roomData);
-                setRooms(prev => [response.data, ...prev]);
-                fetchData(currentPage); // Refresh to respect pagination limits if needed
-            }
-
-            setFormData({ name: '', type: 'OFFLINE', capacity: '', location: '', isActive: true });
-        } catch (error) {
-            console.error("Error saving room:", error);
-            console.error("Error details:", error.response?.data);
-            Swal.fire({
-                icon: 'error',
-                title: 'فشل الحفظ',
-                text: error.response?.data?.message || error.message
-            });
-        }
     };
 
     const handleEdit = (room) => {
-        setEditingRoom(room);
-        setFormData({
-            name: room.name,
-            type: room.type,
-            capacity: room.capacity || '',
-            location: room.location || '',
-            isActive: room.isActive !== undefined ? room.isActive : true
-        });
     };
 
     const handleCancelEdit = () => {
-        setEditingRoom(null);
-        setFormData({ name: '', type: 'OFFLINE', capacity: '', location: '', isActive: true });
     };
 
     const handleDeleteClick = (room) => {
-        setRoomToDelete(room);
-        setShowDeleteModal(true);
     };
 
     const handleDeleteConfirm = async () => {
-        if (!roomToDelete) return;
-
-        try {
-            await roomAPI.remove(roomToDelete.id);
-            setRooms(prev => prev.filter(r => r.id !== roomToDelete.id));
-            setShowDeleteModal(false);
-            setRoomToDelete(null);
-        } catch (error) {
-            console.error("Error deleting room:", error);
-            Swal.fire({
-                icon: 'error',
-                title: 'فشل الحذف',
-                text: 'فشل حذف الغرفة. قد تكون مرتبطة بجداول موجودة.'
-            });
-        }
     };
 
     // Get schedule items for a specific room, day, and time
@@ -189,7 +109,76 @@ const RoomManagement = () => {
         <div className="main-content">
             <h1 style={{ padding: '20px 20px 0', color: 'var(--primary-light)', marginBottom: '10px' }}>إدارة الغرف</h1>
 
-            {/* CRUD Section - Only for ADMIN */}
+            {/* Navigation Section - Only for ADMIN */}
+            {isAdmin && (
+                <div style={{
+                    background: 'white',
+                    borderRadius: '15px',
+                    padding: '40px',
+                    marginBottom: '30px',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    display: 'flex',
+                    gap: '20px',
+                    justifyContent: 'center',
+                    flexWrap: 'wrap'
+                }}>
+                    <button
+                        onClick={() => navigate('/add-room')}
+                        style={{
+                            padding: '20px 40px',
+                            background: '#667eea',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                            transition: 'all 0.3s',
+                            minWidth: '200px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#5a67d8';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#667eea';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        ➕ إضافة غرفة
+                    </button>
+
+                    <button
+                        onClick={() => navigate('/room-list')}
+                        style={{
+                            padding: '20px 40px',
+                            background: '#48bb78',
+                            color: 'white',
+                            border: 'none',
+                            borderRadius: '12px',
+                            fontSize: '18px',
+                            fontWeight: 'bold',
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 12px rgba(72, 187, 120, 0.4)',
+                            transition: 'all 0.3s',
+                            minWidth: '200px'
+                        }}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.background = '#38a169';
+                            e.currentTarget.style.transform = 'translateY(-2px)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.background = '#48bb78';
+                            e.currentTarget.style.transform = 'translateY(0)';
+                        }}
+                    >
+                        📋 عرض قائمة الغرف
+                    </button>
+                </div>
+            )}
+
+            {/* Placeholder for future sections */}
             {isAdmin && (
                 <div style={{
                     background: 'white',
