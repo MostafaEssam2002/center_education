@@ -29,6 +29,7 @@ import ManageAssignments from './pages/ManageAssignments';
 import AssignmentSubmissions from './pages/AssignmentSubmissions';
 import StudentAssignments from './pages/StudentAssignments';
 import Chat from './pages/Chat';
+import Profile from './pages/Profile';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -239,6 +240,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Chat />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/profile"
+                element={
+                  <ProtectedRoute>
+                    <Profile />
                   </ProtectedRoute>
                 }
               />

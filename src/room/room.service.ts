@@ -2,6 +2,7 @@ import { BadRequestException, Injectable, NotFoundException } from "@nestjs/comm
 import { CreateRoomDto } from "./dto/create-room.dto";
 import { UpdateRoomDto } from "./dto/update-room.dto";
 import { PrismaService } from "src/prisma/prisma.service";
+import { stat } from "fs";
 
 @Injectable()
 export class RoomService {
@@ -23,13 +24,24 @@ export class RoomService {
     }
   }
   async create(dto: CreateRoomDto) {
-    this.validateRoom(dto);
+    await this.validateRoom(dto);
 
-    return this.prisma.room.create({
-      data: dto,
+    const room = await this.prisma.room.create({
+      data: {
+        name: dto.name,
+        type: dto.type,
+        capacity: dto.capacity,
+        location: dto.location,
+        isActive: dto.isActive,
+      },
     });
-  }
 
+    return {
+      message: 'Room created successfully',
+      status: 1,
+      data: room,
+    };
+  }
   async findAll(page: number = 1, limit: number = 10) {
     const skip = (page - 1) * limit;
 

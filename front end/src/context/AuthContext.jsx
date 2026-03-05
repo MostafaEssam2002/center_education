@@ -91,11 +91,18 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem('user');
   };
 
+  const updateUser = (updatedUserData) => {
+    const { password: _, ...userWithoutPassword } = updatedUserData;
+    setUser(userWithoutPassword);
+    localStorage.setItem('user', JSON.stringify(userWithoutPassword));
+  };
+
   const value = {
     user,
     token,
     login,
     logout,
+    setUser: updateUser,
     isAuthenticated: !!token,
     loading,
   };
