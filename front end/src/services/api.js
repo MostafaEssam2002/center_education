@@ -47,6 +47,9 @@ export const authAPI = {
 
   findOne: (id) =>
     api.get(`/auth/${id}`),
+
+  verifyOtp: (email, otp) =>
+    api.post('/auth/verify-otp', { email, otp }),
 };
 
 // User API
@@ -65,6 +68,11 @@ export const userAPI = {
 
   remove: (id) =>
     api.delete(`/user/${id}`),
+};
+
+// App API
+export const appAPI = {
+  getStatistics: () => api.get('/statistics'),
 };
 
 // Course API

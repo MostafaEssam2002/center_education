@@ -260,7 +260,7 @@ const Chapters = () => {
 
         {!selectedCourseId ? (
           <div style={{ padding: '20px' }}>
-            <h3 style={{ marginBottom: '20px', color: '#666' }}>اختر الكورس لعرض المحتوى:</h3>
+            <h3 style={{ marginBottom: '20px', color: 'var(--neutral-400)' }}>اختر الكورس لعرض المحتوى:</h3>
             <div style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
@@ -271,16 +271,17 @@ const Chapters = () => {
                   key={course.id}
                   className="course-card"
                   style={{
-                    background: 'white',
+                    background: 'var(--glass-bg)',
                     borderRadius: '12px',
                     padding: '20px',
-                    border: '1px solid #eee',
-                    boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+                    border: '1px solid var(--glass-border)',
+                    boxShadow: 'var(--glass-shadow)',
                     cursor: 'pointer',
                     transition: 'transform 0.2s, box-shadow 0.2s',
                     display: 'flex',
                     flexDirection: 'column',
-                    justifyContent: 'space-between'
+                    justifyContent: 'space-between',
+                    backdropFilter: 'blur(10px)'
                   }}
                   onClick={() => {
                     setSelectedCourseId(course.id.toString());
@@ -288,18 +289,20 @@ const Chapters = () => {
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.transform = 'translateY(-5px)';
-                    e.currentTarget.style.boxShadow = '0 8px 15px rgba(0,0,0,0.1)';
+                    e.currentTarget.style.boxShadow = '0 12px 30px rgba(59, 130, 246, 0.2)';
+                    e.currentTarget.style.borderColor = 'var(--primary)';
                   }}
                   onMouseLeave={(e) => {
                     e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.05)';
+                    e.currentTarget.style.boxShadow = 'var(--glass-shadow)';
+                    e.currentTarget.style.borderColor = 'var(--glass-border)';
                   }}
                 >
                   <div>
                     <div style={{
                       width: '100%',
                       height: '140px',
-                      backgroundColor: '#f0f2f5',
+                      backgroundColor: 'var(--neutral-800)',
                       borderRadius: '8px',
                       marginBottom: '15px',
                       display: 'flex',
@@ -309,8 +312,8 @@ const Chapters = () => {
                     }}>
                       📚
                     </div>
-                    <h3 style={{ color: '#333', marginBottom: '10px' }}>{course.title}</h3>
-                    <p style={{ color: '#666', fontSize: '0.9em', marginBottom: '15px' }}>
+                    <h3 style={{ color: 'var(--neutral-100)', marginBottom: '10px' }}>{course.title}</h3>
+                    <p style={{ color: 'var(--neutral-400)', fontSize: '0.9em', marginBottom: '15px' }}>
                       {course.description || 'لا يوجد وصف متاح'}
                     </p>
                   </div>
@@ -407,7 +410,13 @@ const Chapters = () => {
         >
           <div
             className="card"
-            style={{ maxWidth: '600px', width: '90%' }}
+            style={{
+              maxWidth: '500px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '20px'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="card-header">
@@ -428,6 +437,7 @@ const Chapters = () => {
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  style={{ minHeight: '80px' }}
                 />
               </div>
               <div className="form-group">
@@ -499,7 +509,13 @@ const Chapters = () => {
         >
           <div
             className="card"
-            style={{ maxWidth: '600px', width: '90%' }}
+            style={{
+              maxWidth: '500px',
+              width: '90%',
+              maxHeight: '90vh',
+              overflowY: 'auto',
+              padding: '20px'
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="card-header">
@@ -519,6 +535,7 @@ const Chapters = () => {
                 <textarea
                   value={formData.content}
                   onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+                  style={{ minHeight: '80px' }}
                 />
               </div>
               <div className="form-group">

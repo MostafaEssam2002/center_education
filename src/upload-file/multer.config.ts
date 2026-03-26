@@ -5,21 +5,21 @@ import { getUploadPath } from './upload-file.utils';
 export const multerConfig = {
     storage: diskStorage({
         destination: (req, file, cb) => {
-        try {
-            const { uploadPath } = getUploadPath(file.mimetype);
-            cb(null, uploadPath);
-        } catch (err) {
-            cb(err, '');
-        }
+            try {
+                const { uploadPath } = getUploadPath(file.mimetype);
+                cb(null, uploadPath);
+            } catch (err) {
+                cb(err, '');
+            }
         },
         filename: (req, file, cb) => {
-        const uniqueName =
-            Date.now() + '-' + Math.round(Math.random() * 1e9);
-        cb(null, uniqueName + extname(file.originalname));
+            const uniqueName =
+                Date.now() + '-' + Math.round(Math.random() * 1e9);
+            cb(null, uniqueName + extname(file.originalname));
         },
     }),
     limits: {
-        fileSize: 50 * 1024 * 1024, // 50MB
+        fileSize: 500 * 1024 * 1024, // 500MB
     },
     fileFilter: (req, file, cb) => {
         try {
@@ -28,6 +28,6 @@ export const multerConfig = {
         } catch (err) {
             cb(err, false);
         }
-        },
+    },
 
 };

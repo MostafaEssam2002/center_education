@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { userAPI } from '../services/api';
+import { userAPI, uploadAPI, API_BASE_URL } from '../services/api';
 
 const Profile = () => {
   const { user, setUser } = useAuth();
@@ -22,73 +22,53 @@ const Profile = () => {
     city: '',
   });
 
-  // تحميل بيانات المستخدم عند فتح الصفحة
+  // مزامنة البيانات عند تغير كائن المستخدم أو تحميله
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        first_name: user.first_name || prev.first_name,
+        last_name: user.last_name || prev.last_name,
+        email: user.email || prev.email,
+        phone: user.phone || prev.phone,
+        age: user.age ? String(user.age) : prev.age,
+        address: user.address || prev.address,
+        AdditionalAddress: user.AdditionalAddress || prev.AdditionalAddress,
+        Center_name: user.Center_name || prev.Center_name,
+        country: user.countryCode || prev.country,
+        city: user.cityCode || prev.city,
+      }));
+    }
+  }, [user]);
+
+  // تحميل بيانات المستخدم الكاملة من الخادم عند فتح الصفحة
   useEffect(() => {
     const loadUserData = async () => {
+      if (!user?.email) return;
+
       try {
-        if (user && user.id) {
-          // محاولة تحميل البيانات من الـ API
-          const response = await userAPI.findOne(user.id);
-          if (response.data) {
-            setUser(response.data);
-            setFormData({
-              first_name: response.data.first_name || '',
-              last_name: response.data.last_name || '',
-              email: response.data.email || '',
-              phone: response.data.phone || '',
-              age: response.data.age ? String(response.data.age) : '',
-              address: response.data.address || '',
-              AdditionalAddress: response.data.AdditionalAddress || '',
-              Center_name: response.data.Center_name || '',
-              country: response.data.countryCode || '',
-              city: response.data.cityCode || '',
-            });
+        setLoading(true);
+        const response = await userAPI.findByEmail(user.email);
+
+        if (response.data) {
+          // التعامل مع البيانات سواء كانت مغلفة في 'data' أو مباشرة
+          const userData = response.data.data || response.data;
+
+          if (userData) {
+            // تحديث المستخدم في السياق وبناءً عليه سيتم تحديث formData عبر useEffect أعلاه
+            setUser(userData);
           }
-        } else if (user && user.email) {
-          // محاولة تحميل البيانات من البريد الإلكتروني
-          const response = await userAPI.findByEmail(user.email);
-          if (response.data) {
-            setUser(response.data);
-            setFormData({
-              first_name: response.data.first_name || '',
-              last_name: response.data.last_name || '',
-              email: response.data.email || '',
-              phone: response.data.phone || '',
-              age: response.data.age ? String(response.data.age) : '',
-              address: response.data.address || '',
-              AdditionalAddress: response.data.AdditionalAddress || '',
-              Center_name: response.data.Center_name || '',
-              country: response.data.countryCode || '',
-              city: response.data.cityCode || '',
-            });
-          }
-        } else {
-          setError('لم يتم العثور على بيانات المستخدم');
         }
       } catch (err) {
         console.error('Error loading user data:', err);
-        // استخدام البيانات المتاحة من user object إذا فشل تحميل الـ API
-        if (user) {
-          setFormData({
-            first_name: user.first_name || '',
-            last_name: user.last_name || '',
-            email: user.email || '',
-            phone: user.phone || '',
-            age: user.age ? String(user.age) : '',
-            address: user.address || '',
-            AdditionalAddress: user.AdditionalAddress || '',
-            Center_name: user.Center_name || '',
-            country: user.countryCode || '',
-            city: user.cityCode || '',
-          });
-        }
+        setError('فشل في تحميل بيانات الملف الشخصي الكاملة');
       } finally {
         setLoading(false);
       }
     };
 
     loadUserData();
-  }, [user?.id || user?.email]);
+  }, [user?.email]);
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
@@ -132,53 +112,57 @@ const Profile = () => {
     setSuccess('');
 
     try {
-      // إذا كانت هناك صورة جديدة، استخدم FormData
+      const payload = {};
+
+      if (formData.first_name !== user.first_name && formData.first_name.trim() !== '') {
+        payload.first_name = formData.first_name;
+      }
+      if (formData.last_name !== user.last_name && formData.last_name.trim() !== '') {
+        payload.last_name = formData.last_name;
+      }
+      if (formData.phone !== (user.phone || '')) {
+        if (formData.phone.trim() !== '') payload.phone = formData.phone;
+      }
+      if (formData.age !== String(user.age || '')) {
+        if (formData.age !== '') payload.age = Number(formData.age);
+      }
+      if (formData.address !== (user.address || '')) {
+        if (formData.address.trim() !== '') payload.address = formData.address;
+      }
+      if (formData.AdditionalAddress !== (user.AdditionalAddress || '')) {
+        if (formData.AdditionalAddress.trim() !== '') payload.AdditionalAddress = formData.AdditionalAddress;
+      }
+      if (formData.Center_name !== (user.Center_name || '')) {
+        if (formData.Center_name.trim() !== '') payload.Center_name = formData.Center_name;
+      }
+      if (formData.country !== (user.countryCode || '')) {
+        if (formData.country.trim() !== '') payload.countryCode = formData.country;
+      }
+      if (formData.city !== (user.cityCode || '')) {
+        if (formData.city.trim() !== '') payload.cityCode = formData.city;
+      }
+
       if (profileImage) {
-        const formDataWithImage = new FormData();
-        formDataWithImage.append('first_name', formData.first_name);
-        formDataWithImage.append('last_name', formData.last_name);
-        formDataWithImage.append('phone', formData.phone || '');
-        formDataWithImage.append('age', formData.age || '');
-        formDataWithImage.append('address', formData.address || '');
-        formDataWithImage.append('AdditionalAddress', formData.AdditionalAddress || '');
-        formDataWithImage.append('Center_name', formData.Center_name || '');
-        formDataWithImage.append('countryCode', formData.country || '');
-        formDataWithImage.append('cityCode', formData.city || '');
-        formDataWithImage.append('profileImage', profileImage);
-
-        const response = await userAPI.update(user.id, formDataWithImage);
-        if (response.data) {
-          setUser(response.data);
-          setProfileImage(null);
-          setImagePreview(null);
-        }
-      } else {
-        // إذا لم تكن هناك صورة جديدة، استخدم JSON عادي وأرسل فقط الحقول المتغيرة
-        const payload = {};
-        
-        if (formData.first_name !== user.first_name) payload.first_name = formData.first_name;
-        if (formData.last_name !== user.last_name) payload.last_name = formData.last_name;
-        if (formData.phone !== (user.phone || '')) payload.phone = formData.phone || null;
-        if (formData.age !== String(user.age || '')) payload.age = formData.age ? Number(formData.age) : null;
-        if (formData.address !== (user.address || '')) payload.address = formData.address || null;
-        if (formData.AdditionalAddress !== (user.AdditionalAddress || '')) payload.AdditionalAddress = formData.AdditionalAddress || null;
-        if (formData.Center_name !== (user.Center_name || '')) payload.Center_name = formData.Center_name || null;
-        if (formData.country !== (user.countryCode || '')) payload.countryCode = formData.country || null;
-        if (formData.city !== (user.cityCode || '')) payload.cityCode = formData.city || null;
-
-        // إذا لم يكن هناك أي تغييرات، أعرض رسالة
-        if (Object.keys(payload).length === 0) {
-          setError('لم تقم بأي تعديلات');
-          setLoading(false);
-          return;
-        }
-
-        const response = await userAPI.update(user.id, payload);
-        if (response.data) {
-          setUser(response.data);
+        const uploadRes = await uploadAPI.uploadFile(profileImage);
+        if (uploadRes.data && uploadRes.data.url) {
+          payload.image_path = uploadRes.data.url;
         }
       }
-      
+
+      // إذا لم يكن هناك أي تغييرات ولم تكن هناك صورة، أعرض رسالة
+      if (Object.keys(payload).length === 0) {
+        setError('لم تقم بأي تعديلات للملف الشخصي');
+        setLoading(false);
+        return;
+      }
+
+      const response = await userAPI.update(user.id, payload);
+      if (response.data) {
+        setUser(response.data);
+        setProfileImage(null);
+        setImagePreview(null);
+      }
+
       setSuccess('تم تحديث بيانات الملف الشخصي بنجاح');
       setTimeout(() => setSuccess(''), 3000);
     } catch (err) {
@@ -209,6 +193,10 @@ const Profile = () => {
     );
   }
 
+  const userImage = user?.image_path 
+    ? (user.image_path.startsWith('http') ? user.image_path : `${API_BASE_URL}${user.image_path}`) 
+    : null;
+
   return (
     <div className="profile-container">
       <div className="profile-card">
@@ -223,8 +211,8 @@ const Profile = () => {
             <div className="image-preview">
               {imagePreview ? (
                 <img src={imagePreview} alt="معاينة الصورة" />
-              ) : user?.profileImage ? (
-                <img src={user.profileImage} alt="صورة المستخدم" />
+              ) : userImage ? (
+                <img src={userImage} alt="صورة المستخدم" />
               ) : (
                 <div className="image-placeholder">
                   👤
@@ -264,28 +252,26 @@ const Profile = () => {
         <form onSubmit={handleSubmit} className="profile-form">
           <div className="form-row">
             <div className="form-group">
-              <label htmlFor="first_name">الاسم الأول *</label>
+              <label htmlFor="first_name">الاسم الأول</label>
               <input
                 type="text"
                 id="first_name"
                 name="first_name"
-                value={formData.first_name}
+                value={formData.first_name || ''}
                 onChange={handleInputChange}
                 placeholder="أدخل الاسم الأول"
-                required
               />
             </div>
 
             <div className="form-group">
-              <label htmlFor="last_name">الاسم الأخير *</label>
+              <label htmlFor="last_name">الاسم الأخير</label>
               <input
                 type="text"
                 id="last_name"
                 name="last_name"
-                value={formData.last_name}
+                value={formData.last_name || ''}
                 onChange={handleInputChange}
                 placeholder="أدخل الاسم الأخير"
-                required
               />
             </div>
           </div>
@@ -413,28 +399,32 @@ const Profile = () => {
 
       <style jsx>{`
         .profile-container {
-          padding: 20px;
-          max-width: 800px;
+          padding: 24px clamp(16px, 3vw, 32px);
+          width: 100%;
+          max-width: 900px;
           margin: 0 auto;
           direction: rtl;
+          animation: fadeInUp 0.4s ease;
         }
 
         .profile-card {
-          background: white;
-          border-radius: 8px;
+          background: rgba(15, 23, 42, 0.4);
+          backdrop-filter: var(--glass-backdrop);
+          border: 1px solid var(--glass-border);
+          border-radius: var(--radius-xl);
           padding: 30px;
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+          box-shadow: var(--glass-shadow);
         }
 
         .profile-card h1 {
-          color: #333;
+          color: var(--neutral-100);
           margin-bottom: 5px;
           font-size: 28px;
           text-align: right;
         }
 
         .profile-subtitle {
-          color: #666;
+          color: var(--neutral-400);
           text-align: right;
           margin-bottom: 25px;
           font-size: 14px;
@@ -442,28 +432,28 @@ const Profile = () => {
 
         .alert {
           padding: 12px 16px;
-          border-radius: 6px;
+          border-radius: var(--radius-md);
           margin-bottom: 20px;
           text-align: right;
           font-size: 14px;
         }
 
         .alert-error {
-          background-color: #fee;
-          color: #c33;
-          border: 1px solid #fcc;
+          background-color: rgba(239, 68, 68, 0.1);
+          color: var(--danger);
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .alert-success {
-          background-color: #efe;
-          color: #3c3;
-          border: 1px solid #cfc;
+          background-color: rgba(34, 197, 94, 0.1);
+          color: var(--success);
+          border: 1px solid rgba(34, 197, 94, 0.3);
         }
 
         .profile-image-section {
           margin-bottom: 30px;
           padding-bottom: 20px;
-          border-bottom: 2px solid #f0f0f0;
+          border-bottom: 1px solid var(--glass-border);
         }
 
         .image-preview-container {
@@ -479,10 +469,11 @@ const Profile = () => {
           width: 120px;
           height: 120px;
           border-radius: 50%;
-          background-color: #f5f5f5;
-          border: 3px solid #e0e0e0;
+          background-color: rgba(30, 41, 59, 0.6);
+          border: 3px solid rgba(59, 130, 246, 0.5);
           overflow: hidden;
           flex-shrink: 0;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .image-preview img {
@@ -493,11 +484,7 @@ const Profile = () => {
 
         .image-placeholder {
           font-size: 50px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          width: 100%;
-          height: 100%;
+          opacity: 0.5;
         }
 
         .image-upload-info {
@@ -511,47 +498,49 @@ const Profile = () => {
           margin: 0;
           font-size: 16px;
           font-weight: 600;
-          color: #333;
+          color: var(--neutral-100);
           text-align: right;
         }
 
         .image-upload-btn {
           display: inline-block;
           padding: 10px 16px;
-          background-color: #007bff;
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
           color: white;
-          border-radius: 6px;
+          border-radius: var(--radius-md);
           cursor: pointer;
           font-size: 14px;
           font-weight: 600;
-          transition: background-color 0.3s;
+          transition: transform 0.2s, box-shadow 0.2s;
           text-align: center;
           max-width: fit-content;
+          border: none;
         }
 
         .image-upload-btn:hover {
-          background-color: #0056b3;
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
         }
 
         .image-clear-btn {
           padding: 8px 12px;
-          background-color: #6c757d;
-          color: white;
-          border: none;
-          border-radius: 6px;
+          background: rgba(239, 68, 68, 0.15);
+          color: var(--danger);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          border-radius: var(--radius-md);
           cursor: pointer;
           font-size: 13px;
           font-weight: 600;
-          transition: background-color 0.3s;
+          transition: all 0.2s;
           max-width: fit-content;
         }
 
         .image-clear-btn:hover {
-          background-color: #5a6268;
+          background: rgba(239, 68, 68, 0.25);
         }
 
         .image-upload-info small {
-          color: #999;
+          color: var(--neutral-400);
           font-size: 12px;
           text-align: right;
         }
@@ -584,34 +573,43 @@ const Profile = () => {
         .form-group label {
           margin-bottom: 8px;
           font-weight: 600;
-          color: #333;
+          color: var(--neutral-200);
           font-size: 14px;
         }
 
         .form-group input {
-          padding: 10px 12px;
-          border: 1px solid #ddd;
-          border-radius: 6px;
+          width: 100%;
+          background: rgba(15, 23, 42, 0.6);
+          border: 1px solid var(--glass-border);
+          color: var(--neutral-100);
+          padding: 12px 16px;
+          border-radius: var(--radius-lg);
           font-size: 14px;
-          font-family: inherit;
-          transition: border-color 0.3s;
+          box-sizing: border-box;
+          transition: all 0.3s ease;
+        }
+
+        .form-group input::placeholder {
+          color: var(--neutral-500);
         }
 
         .form-group input:focus {
           outline: none;
-          border-color: #007bff;
-          box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+          border-color: var(--primary-light);
+          box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+          background: rgba(15, 23, 42, 0.8);
         }
 
         .form-group input.disabled-field {
-          background-color: #f5f5f5;
+          background-color: rgba(15, 23, 42, 0.3);
           cursor: not-allowed;
-          color: #999;
+          color: var(--neutral-500);
+          border-color: transparent;
         }
 
         .form-group small {
-          margin-top: 4px;
-          color: #999;
+          margin-top: 6px;
+          color: var(--neutral-400);
           font-size: 12px;
         }
 
@@ -623,23 +621,27 @@ const Profile = () => {
         }
 
         .btn-submit {
-          background-color: #007bff;
+          background: linear-gradient(135deg, var(--primary), var(--secondary));
           color: white;
           padding: 12px 30px;
           border: none;
-          border-radius: 6px;
+          border-radius: var(--radius-md);
           font-size: 16px;
           font-weight: 600;
           cursor: pointer;
-          transition: background-color 0.3s;
+          transition: all 0.3s ease;
+          box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
         }
 
         .btn-submit:hover:not(:disabled) {
-          background-color: #0056b3;
+          transform: translateY(-2px);
+          box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
         }
 
         .btn-submit:disabled {
-          background-color: #ccc;
+          background: rgba(15, 23, 42, 0.6);
+          color: var(--neutral-500);
+          box-shadow: none;
           cursor: not-allowed;
         }
 
@@ -647,12 +649,21 @@ const Profile = () => {
           text-align: center;
           padding: 40px;
           font-size: 18px;
-          color: #666;
+          color: var(--neutral-400);
+        }
+
+        @keyframes fadeInUp {
+          from { opacity: 0; transform: translateY(16px); }
+          to   { opacity: 1; transform: translateY(0); }
         }
 
         @media (max-width: 600px) {
           .form-row {
             grid-template-columns: 1fr;
+          }
+
+          .profile-container {
+             padding: 16px;
           }
 
           .profile-card {
@@ -661,6 +672,11 @@ const Profile = () => {
 
           .profile-card h1 {
             font-size: 24px;
+            text-align: center;
+          }
+
+          .profile-subtitle {
+             text-align: center;
           }
 
           .image-preview-container {

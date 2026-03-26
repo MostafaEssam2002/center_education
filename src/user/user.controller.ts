@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, Query } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
@@ -19,8 +19,11 @@ export class UserController {
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   @ApiResponse({ status: 200, description: 'List of users' })
-  findAll() {
-    return this.userService.findAll();
+  findAll(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return this.userService.findAll(page ? +page : 1, limit ? +limit : 10);
   }
 
   @Get(':email')

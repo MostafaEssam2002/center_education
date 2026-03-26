@@ -176,11 +176,11 @@ const EnrollmentRequests = () => {
                                         style={{
                                             padding: '15px',
                                             borderRadius: '10px',
-                                            border: selectedCourseId === course.id.toString() ? '2px solid #667eea' : '1px solid #ddd',
-                                            background: selectedCourseId === course.id.toString() ? '#f0f4ff' : 'white',
+                                            border: selectedCourseId === course.id.toString() ? '2px solid var(--primary)' : '1px solid var(--glass-border)',
+                                            background: selectedCourseId === course.id.toString() ? 'rgba(59, 130, 246, 0.15)' : 'var(--glass-bg)',
                                             cursor: 'pointer',
                                             transition: 'all 0.2s',
-                                            boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                                            boxShadow: 'var(--shadow-sm)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             gap: '10px'
@@ -191,11 +191,11 @@ const EnrollmentRequests = () => {
                                             width: '40px',
                                             height: '40px',
                                             borderRadius: '8px',
-                                            background: selectedCourseId === course.id.toString() ? '#667eea' : '#e2e8f0',
+                                            background: selectedCourseId === course.id.toString() ? 'var(--primary)' : 'rgba(255, 255, 255, 0.1)',
                                             display: 'flex',
                                             alignItems: 'center',
                                             justifyContent: 'center',
-                                            color: selectedCourseId === course.id.toString() ? 'white' : '#666',
+                                            color: 'white',
                                             fontSize: '1.2em'
                                         }}>
                                             📚
@@ -221,7 +221,7 @@ const EnrollmentRequests = () => {
                                             </div>
                                         )}
                                         {selectedCourseId === course.id.toString() && (
-                                            <div style={{ marginLeft: course._count?.requests > 0 ? '5px' : 'auto', color: '#667eea' }}>✔</div>
+                                            <div style={{ marginLeft: course._count?.requests > 0 ? '5px' : 'auto', color: 'var(--primary-light)' }}>✔</div>
                                         )}
                                     </div>
                                 ))}
@@ -231,21 +231,22 @@ const EnrollmentRequests = () => {
                         {selectedCourse && (
                             <div style={{
                                 padding: '15px',
-                                background: '#f8f9fa',
+                                background: 'var(--glass-bg)',
+                                border: '1px solid var(--glass-border)',
                                 borderRadius: '12px',
                                 marginBottom: '20px'
                             }}>
-                                <h3 style={{ color: '#667eea', margin: '0 0 10px' }}>{selectedCourse.title}</h3>
-                                <p style={{ margin: '0 0 15px', color: '#666' }}>{selectedCourse.description}</p>
+                                <h3 style={{ color: 'var(--primary-light)', margin: '0 0 10px' }}>{selectedCourse.title}</h3>
+                                <p style={{ margin: '0 0 15px', color: 'var(--neutral-300)' }}>{selectedCourse.description}</p>
 
                                 <div style={{ marginBottom: '10px' }}>
                                     {selectedCourse.discount && selectedCourse.discount > 0 ? (
                                         <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
                                             <span style={{ fontWeight: 'bold' }}>السعر:</span>
-                                            <span style={{ textDecoration: 'line-through', color: '#999' }}>
+                                            <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)' }}>
                                                 {selectedCourse.price} ج.م
                                             </span>
-                                            <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                            <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
                                                 {selectedCourse.price - selectedCourse.discount} ج.م
                                             </span>
                                         </div>
@@ -274,7 +275,7 @@ const EnrollmentRequests = () => {
                                         return (
                                             <div style={{ marginTop: '10px' }}>
                                                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.9em', marginBottom: '5px' }}>
-                                                    <span style={{ fontWeight: 'bold', color: '#4a5568' }}>
+                                                    <span style={{ fontWeight: 'bold', color: 'var(--neutral-100)' }}>
                                                         {isFull ? '🔴 الكورس ممتلئ (حسب أصغر قاعة)' : '🟢 متاح للتسجيل'}
                                                     </span>
                                                     <span>
@@ -295,7 +296,7 @@ const EnrollmentRequests = () => {
                                                         transition: 'width 0.3s ease'
                                                     }} />
                                                 </div>
-                                                <div style={{ fontSize: '0.8em', color: '#718096', marginTop: '4px' }}>
+                                                <div style={{ fontSize: '0.8em', color: 'var(--neutral-400)', marginTop: '4px' }}>
                                                     * السعة محسوبة بناءً على القاعات المستخدمة: {offlineSchedules.map(s => `${s.room.name} (${s.room.capacity})`).join('، ')}
                                                 </div>
                                             </div>
@@ -335,7 +336,10 @@ const EnrollmentRequests = () => {
                                             display: 'flex',
                                             flexDirection: 'column',
                                             gap: '15px',
-                                            borderLeft: `4px solid ${status.color}`
+                                            background: 'var(--glass-bg)',
+                                            border: '1px solid var(--glass-border)',
+                                            borderLeft: `4px solid ${status.color}`,
+                                            backdropFilter: 'blur(10px)'
                                         }}>
                                             <div style={{
                                                 display: 'flex',
@@ -343,7 +347,7 @@ const EnrollmentRequests = () => {
                                                 alignItems: 'start'
                                             }}>
                                                 <div>
-                                                    <h4 style={{ margin: '0 0 5px', color: '#333' }}>
+                                                    <h4 style={{ margin: '0 0 5px', color: 'var(--neutral-100)' }}>
                                                         {request.student?.first_name} {request.student?.last_name}
                                                     </h4>
                                                     <span
@@ -367,7 +371,7 @@ const EnrollmentRequests = () => {
                                                     width: '40px',
                                                     height: '40px',
                                                     borderRadius: '50%',
-                                                    background: '#e2e8f0',
+                                                    background: 'rgba(255, 255, 255, 0.1)',
                                                     display: 'flex',
                                                     alignItems: 'center',
                                                     justifyContent: 'center',
@@ -377,7 +381,7 @@ const EnrollmentRequests = () => {
                                                 </div>
                                             </div>
 
-                                            <div style={{ fontSize: '0.9em', color: '#666' }}>
+                                            <div style={{ fontSize: '0.9em', color: 'var(--neutral-300)' }}>
                                                 <div style={{ marginBottom: '8px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                                     <span>📧</span>
                                                     {request.student?.email || '-'}
@@ -397,7 +401,7 @@ const EnrollmentRequests = () => {
                                                 gap: '10px',
                                                 marginTop: 'auto',
                                                 paddingTop: '15px',
-                                                borderTop: '1px solid #eee'
+                                                borderTop: '1px solid var(--glass-border)'
                                             }}>
                                                 {request.status === 'SENT' && (
                                                     <>

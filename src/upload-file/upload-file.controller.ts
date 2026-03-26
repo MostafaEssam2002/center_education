@@ -41,8 +41,8 @@ export class UploadFileController {
     }
     const { folder } = getUploadPath(file.mimetype);
     // console.log('file.mimetype = ',file.mimetype)
-    if (file.mimetype === "video/mp4") {
-      const fileNameWithoutExtension = file.filename.split(".")[0];
+    if (folder === "videos") {
+      const fileNameWithoutExtension = file.filename.substring(0, file.filename.lastIndexOf('.'));
       const videoDir = join(file.destination, fileNameWithoutExtension);
 
       if (!fs.existsSync(videoDir)) {
@@ -52,7 +52,7 @@ export class UploadFileController {
       fs.renameSync(file.path, join(videoDir, file.filename));
 
       const execAsync = promisify(exec);
-      const ffmpegPath = join(process.cwd(), 'src', 'upload-file', 'ffmpeg.exe');
+      const ffmpegPath = join(process.cwd(), 'public', 'ffmpeg.exe');
       try {
         await execAsync(`"${ffmpegPath}" -i "${file.filename}" -hls_time 10 -hls_playlist_type vod -hls_segment_filename "segment_%03d.ts" index.m3u8`, { cwd: videoDir });
 
@@ -74,7 +74,7 @@ export class UploadFileController {
       return {
         url: `${folderPath}/index.m3u8`,
       };
-      
+
     }
     return {
       url: `/${folder}/${file.filename}`,

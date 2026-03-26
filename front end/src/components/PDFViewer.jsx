@@ -47,11 +47,11 @@ const PDFViewer = ({ src, title }) => {
                     <div style={{
                         padding: '40px',
                         textAlign: 'center',
-                        background: '#f8f9fa',
+                        background: 'var(--glass-bg)',
                         borderRadius: '8px',
-                        border: '2px dashed #ddd'
+                        border: '2px dashed var(--glass-border)'
                     }}>
-                        <p style={{ marginBottom: '20px', color: '#666' }}>
+                        <p style={{ marginBottom: '20px', color: 'var(--neutral-300)' }}>
                             المتصفح لا يدعم عرض PDF مباشرة
                         </p>
                         <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>

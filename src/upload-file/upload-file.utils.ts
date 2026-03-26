@@ -11,9 +11,15 @@ export const mimeTypeMap = {
 
     'video/mp4': 'videos',
     'video/mpeg': 'videos',
+    'video/quicktime': 'videos',
+    'video/x-msvideo': 'videos',
+    'video/x-matroska': 'videos',
+    'video/webm': 'videos',
 
     'audio/mpeg': 'audio',
     'audio/wav': 'audio',
+    'audio/ogg': 'audio',
+    'audio/mp4': 'audio',
 };
 
 export function getUploadPath(mimetype: string) {

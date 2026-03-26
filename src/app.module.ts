@@ -22,10 +22,12 @@ import { AssignmentModule } from './assignment/assignment.module';
 import { RoomModule } from './room/room.module';
 import { PaymentsModule } from './payments/payments.module';
 import { ChatModule } from './chat/chat.module';
+import { PrismaModule } from './prisma/prisma.module';
+import { MailModule } from './mail/mail.module';
 
 @Module({
-  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule, AssignmentModule, RoomModule, PaymentsModule, ChatModule],
+  imports: [UploadFileModule, UserModule, AuthModule, CourseModule, ChapterModule, EnrollmentModule, ChapterProgressModule, CourseScheduleModule, AttendanceModule, QuizModule, QuizQuestionModule, QuizOptionModule, QuizAttemptModule, AssignmentModule, RoomModule, PaymentsModule, ChatModule, PrismaModule, MailModule],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule { }

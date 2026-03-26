@@ -151,9 +151,9 @@ const MyEnrollments = () => {
 
     return (
         <div className="main-content">
-            <div className="card">
-                <div className="card-header">
-                    <h2>كورساتي</h2>
+            <div className="card" style={{ background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', backdropFilter: 'blur(10px)' }}>
+                <div className="card-header" style={{ borderBottom: '1px solid var(--glass-border)' }}>
+                    <h2 style={{ color: 'var(--primary-light)' }}>كورساتي</h2>
                     <button className="btn btn-secondary" onClick={() => navigate('/courses')}>
                         تصفح الكورسات
                     </button>
@@ -217,10 +217,10 @@ const MyEnrollments = () => {
                                         <div className="course-card-price" style={{ marginTop: '10px', marginBottom: '10px' }}>
                                             {enrollment.course?.discount && enrollment.course?.discount > 0 ? (
                                                 <div>
-                                                    <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
+                                                    <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)', marginRight: '8px' }}>
                                                         {enrollment.course?.price} ج.م
                                                     </span>
-                                                    <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                                    <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
                                                         {enrollment.course?.price - enrollment.course?.discount} ج.م
                                                     </span>
                                                 </div>

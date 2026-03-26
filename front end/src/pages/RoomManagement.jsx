@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { roomAPI, courseScheduleAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import Swal from 'sweetalert2';
+import Swal from 'sweetalert2'; 
 
 const RoomManagement = () => {
     const { user } = useAuth();
@@ -37,49 +37,78 @@ const RoomManagement = () => {
     });
 
     useEffect(() => {
+        console.log('RoomManagement component mounted');
         fetchData();
     }, []);
 
+    useEffect(() => {
+        console.log('Rooms data updated:', rooms);
+    }, [rooms]);
+
     const fetchData = async (page = currentPage) => {
         try {
+            setLoading(true);
             const [roomsRes, scheduleRes] = await Promise.allSettled([
                 roomAPI.findAll(page),
                 courseScheduleAPI.findWeeklySchedule()
             ]);
 
             if (roomsRes.status === 'fulfilled') {
-                if (roomsRes.value.data.data) {
-                    setRooms(roomsRes.value.data.data);
-                    setPagination(roomsRes.value.data.pagination);
+                const data = roomsRes.value.data;
+                if (Array.isArray(data)) {
+                    setRooms(data);
+                } else if (data.data && Array.isArray(data.data)) {
+                    setRooms(data.data);
+                    if (data.pagination) {
+                        setPagination(data.pagination);
+                    }
                 } else {
-                    setRooms(roomsRes.value.data);
+                    console.error("Unexpected response format:", data);
+                    setRooms([]);
                 }
+            } else {
+                console.error("Error fetching rooms:", roomsRes.reason);
+                setRooms([]);
             }
 
             if (scheduleRes.status === 'fulfilled') {
-                setScheduleItems(scheduleRes.value.data);
+                const scheduleData = scheduleRes.value.data;
+                setScheduleItems(Array.isArray(scheduleData) ? scheduleData : []);
+            } else {
+                console.error("Error fetching schedule:", scheduleRes.reason);
+                setScheduleItems([]);
             }
         } catch (error) {
             console.error("Error fetching data:", error);
+            setRooms([]);
+            setScheduleItems([]);
         } finally {
             setLoading(false);
         }
     };
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-    };
 
-    const handleEdit = (room) => {
-    };
-
-    const handleCancelEdit = () => {
-    };
 
     const handleDeleteClick = (room) => {
+        Swal.fire({
+            title: 'تأكيد الحذف',
+            text: `هل تريد حقاً حذف الغرفة "${room.name}"؟`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#f56565',
+            cancelButtonColor: '#718096',
+            confirmButtonText: 'نعم، احذف',
+            cancelButtonText: 'إلغاء'
+        }).then(result => {
+            if (result.isConfirmed) {
+                handleDeleteConfirm(room.id);
+            }
+        });
     };
 
-    const handleDeleteConfirm = async () => {
+    const handleDeleteConfirm = async (roomId) => {
+        // Add delete implementation when API endpoint is ready
+        console.log('Delete room:', roomId);
     };
 
     // Get schedule items for a specific room, day, and time
@@ -99,10 +128,39 @@ const RoomManagement = () => {
         });
     };
 
-    if (loading) return <div style={{ padding: '20px' }}>جاري التحميل...</div>;
+    if (loading) {
+        return (
+            <div style={{ padding: '20px 40px' }}>
+                <h1 style={{ color: 'var(--primary-light)', marginBottom: '20px' }}>إدارة الغرف</h1>
+                <div style={{
+                    background: '#1f2937',
+                    borderRadius: '15px',
+                    padding: '40px',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
+                }}>
+                    <div style={{ fontSize: '18px', color: '#9ca3af' }}>⏳ جاري التحميل...</div>
+                </div>
+            </div>
+        );
+    }
 
     if (!isAdminOrEmployee) {
-        return <div style={{ padding: '20px' }}>غير مصرح لك بالوصول لهذه الصفحة</div>;
+        return (
+            <div style={{ padding: '20px 40px' }}>
+                <h1 style={{ color: 'var(--primary-light)', marginBottom: '20px' }}>إدارة الغرف</h1>
+                <div style={{
+                    background: '#1f2937',
+                    borderRadius: '15px',
+                    padding: '40px',
+                    textAlign: 'center',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
+                    color: '#ef4444'
+                }}>
+                    🔒 غير مصرح لك بالوصول لهذه الصفحة
+                </div>
+            </div>
+        );
     }
 
     return (
@@ -112,11 +170,11 @@ const RoomManagement = () => {
             {/* Navigation Section - Only for ADMIN */}
             {isAdmin && (
                 <div style={{
-                    background: 'white',
+                    background: '#1f2937',
                     borderRadius: '15px',
                     padding: '40px',
                     marginBottom: '30px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                    boxShadow: '0 2px 8px rgba(0,0,0,0.3)',
                     display: 'flex',
                     gap: '20px',
                     justifyContent: 'center',
@@ -126,338 +184,72 @@ const RoomManagement = () => {
                         onClick={() => navigate('/add-room')}
                         style={{
                             padding: '20px 40px',
-                            background: '#667eea',
+                            background: 'var(--primary)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '12px',
                             fontSize: '18px',
                             fontWeight: 'bold',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(102, 126, 234, 0.4)',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
                             transition: 'all 0.3s',
                             minWidth: '200px'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#5a67d8';
+                            e.currentTarget.style.background = 'var(--primary-dark)';
                             e.currentTarget.style.transform = 'translateY(-2px)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#667eea';
+                            e.currentTarget.style.background = 'var(--primary)';
                             e.currentTarget.style.transform = 'translateY(0)';
                         }}
                     >
                         ➕ إضافة غرفة
                     </button>
 
-                    <button
+                    {/* <button
                         onClick={() => navigate('/room-list')}
                         style={{
                             padding: '20px 40px',
-                            background: '#48bb78',
+                            background: 'var(--success)',
                             color: 'white',
                             border: 'none',
                             borderRadius: '12px',
                             fontSize: '18px',
                             fontWeight: 'bold',
                             cursor: 'pointer',
-                            boxShadow: '0 4px 12px rgba(72, 187, 120, 0.4)',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.4)',
                             transition: 'all 0.3s',
                             minWidth: '200px'
                         }}
                         onMouseEnter={(e) => {
-                            e.currentTarget.style.background = '#38a169';
+                            e.currentTarget.style.background = '#059669';
                             e.currentTarget.style.transform = 'translateY(-2px)';
                         }}
                         onMouseLeave={(e) => {
-                            e.currentTarget.style.background = '#48bb78';
+                            e.currentTarget.style.background = 'var(--success)';
                             e.currentTarget.style.transform = 'translateY(0)';
                         }}
                     >
                         📋 عرض قائمة الغرف
-                    </button>
+                    </button> */}
                 </div>
             )}
 
-            {/* Placeholder for future sections */}
-            {isAdmin && (
-                <div style={{
-                    background: 'white',
-                    borderRadius: '15px',
-                    padding: '25px',
-                    marginBottom: '30px',
-                    boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-                }}>
-                    <h2 style={{ marginBottom: '20px', color: '#4a5568' }}>
-                        {editingRoom ? 'تعديل الغرفة' : 'إضافة غرفة جديدة'}
-                    </h2>
-
-                    <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '15px', alignItems: 'end', flexWrap: 'wrap' }}>
-                        <div style={{ flex: '1', minWidth: '200px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#4a5568' }}>
-                                اسم الغرفة
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.name}
-                                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #e2e8f0',
-                                    fontSize: '16px'
-                                }}
-                                placeholder="مثال: قاعة A"
-                            />
-                        </div>
-
-                        <div style={{ flex: '1', minWidth: '200px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#4a5568' }}>
-                                النوع
-                            </label>
-                            <select
-                                value={formData.type}
-                                onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #e2e8f0',
-                                    fontSize: '16px'
-                                }}
-                            >
-                                <option value="OFFLINE">حضوري</option>
-                                <option value="ONLINE">أونلاين</option>
-                            </select>
-                        </div>
-
-                        <div style={{ flex: '1', minWidth: '150px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#4a5568' }}>
-                                السعة
-                            </label>
-                            <input
-                                type="number"
-                                value={formData.capacity}
-                                onChange={(e) => setFormData(prev => ({ ...prev, capacity: e.target.value }))}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #e2e8f0',
-                                    fontSize: '16px'
-                                }}
-                                placeholder="عدد الطلاب"
-                                min="1"
-                            />
-                        </div>
-
-                        <div style={{ flex: '1', minWidth: '200px' }}>
-                            <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold', color: '#4a5568' }}>
-                                الموقع
-                            </label>
-                            <input
-                                type="text"
-                                value={formData.location}
-                                onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-                                style={{
-                                    width: '100%',
-                                    padding: '10px',
-                                    borderRadius: '8px',
-                                    border: '2px solid #e2e8f0',
-                                    fontSize: '16px'
-                                }}
-                                placeholder="مثال: الطابق الأول"
-                            />
-                        </div>
-
-                        <div style={{ flex: '0 0 auto', minWidth: '150px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', marginTop: '28px' }}>
-                                <input
-                                    type="checkbox"
-                                    checked={formData.isActive}
-                                    onChange={(e) => setFormData(prev => ({ ...prev, isActive: e.target.checked }))}
-                                    style={{
-                                        width: '18px',
-                                        height: '18px',
-                                        cursor: 'pointer'
-                                    }}
-                                />
-                                <span style={{ fontWeight: 'bold', color: '#4a5568' }}>غرفة نشطة</span>
-                            </label>
-                        </div>
-
-                        <div style={{ display: 'flex', gap: '10px' }}>
-                            <button
-                                type="submit"
-                                style={{
-                                    padding: '10px 25px',
-                                    background: '#667eea',
-                                    color: 'white',
-                                    border: 'none',
-                                    borderRadius: '8px',
-                                    fontSize: '16px',
-                                    fontWeight: 'bold',
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {editingRoom ? 'حفظ التعديلات' : 'إضافة'}
-                            </button>
-
-                            {editingRoom && (
-                                <button
-                                    type="button"
-                                    onClick={handleCancelEdit}
-                                    style={{
-                                        padding: '10px 25px',
-                                        background: '#e2e8f0',
-                                        color: '#4a5568',
-                                        border: 'none',
-                                        borderRadius: '8px',
-                                        fontSize: '16px',
-                                        fontWeight: 'bold',
-                                        cursor: 'pointer'
-                                    }}
-                                >
-                                    إلغاء
-                                </button>
-                            )}
-                        </div>
-                    </form>
-
-                    {/* Rooms Table */}
-                    <div style={{ marginTop: '30px', overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-                            <thead>
-                                <tr style={{ background: '#f7fafc', borderBottom: '2px solid #e2e8f0' }}>
-                                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>اسم الغرفة</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>النوع</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>السعة</th>
-                                    <th style={{ padding: '12px', textAlign: 'right', fontWeight: 'bold' }}>الموقع</th>
-                                    <th style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>الحالة</th>
-                                    {isAdmin && (
-                                        <th style={{ padding: '12px', textAlign: 'center', fontWeight: 'bold' }}>الإجراءات</th>
-                                    )}
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {rooms.map(room => (
-                                    <tr key={room.id} style={{ borderBottom: '1px solid #e2e8f0' }}>
-                                        <td style={{ padding: '12px' }}>{room.name}</td>
-                                        <td style={{ padding: '12px' }}>
-                                            <span style={{
-                                                padding: '4px 12px',
-                                                borderRadius: '12px',
-                                                background: room.type === 'ONLINE' ? '#ebf8ff' : '#f0fff4',
-                                                color: room.type === 'ONLINE' ? '#2c5282' : '#22543d',
-                                                fontSize: '14px'
-                                            }}>
-                                                {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
-                                            </span>
-                                        </td>
-                                        <td style={{ padding: '12px' }}>{room.capacity || '-'}</td>
-                                        <td style={{ padding: '12px' }}>{room.location || '-'}</td>
-                                        <td style={{ padding: '12px', textAlign: 'center' }}>
-                                            <span style={{
-                                                padding: '4px 12px',
-                                                borderRadius: '12px',
-                                                background: room.isActive ? '#c6f6d5' : '#fed7d7',
-                                                color: room.isActive ? '#22543d' : '#742a2a',
-                                                fontSize: '14px',
-                                                fontWeight: 'bold'
-                                            }}>
-                                                {room.isActive ? 'نشطة' : 'غير نشطة'}
-                                            </span>
-                                        </td>
-                                        {isAdmin && (
-                                            <td style={{ padding: '12px', textAlign: 'center' }}>
-                                                <button
-                                                    onClick={() => handleEdit(room)}
-                                                    style={{
-                                                        padding: '6px 15px',
-                                                        background: '#4299e1',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '6px',
-                                                        marginLeft: '8px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '14px'
-                                                    }}
-                                                >
-                                                    تعديل
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDeleteClick(room)}
-                                                    style={{
-                                                        padding: '6px 15px',
-                                                        background: '#f56565',
-                                                        color: 'white',
-                                                        border: 'none',
-                                                        borderRadius: '6px',
-                                                        cursor: 'pointer',
-                                                        fontSize: '14px'
-                                                    }}
-                                                >
-                                                    حذف
-                                                </button>
-                                            </td>
-                                        )}
-                                    </tr>
-                                ))}
-                                {rooms.length === 0 && (
-                                    <tr>
-                                        <td colSpan={isAdmin ? "6" : "5"} style={{ padding: '20px', textAlign: 'center', color: '#718096' }}>
-                                            لا توجد غرف حالياً
-                                        </td>
-                                    </tr>
-                                )}
-                            </tbody>
-                        </table>
-
-                        {/* Pagination Controls */}
-                        {pagination && (
-                            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
-                                <button
-                                    className="btn btn-secondary"
-                                    disabled={currentPage === 1}
-                                    onClick={() => {
-                                        setCurrentPage(currentPage - 1);
-                                        fetchData(currentPage - 1);
-                                    }}
-                                    style={{ padding: '5px 10px', cursor: 'pointer' }}
-                                >
-                                    السابق
-                                </button>
-                                <span>صفحة {currentPage} من {pagination.totalPages}</span>
-                                <button
-                                    className="btn btn-secondary"
-                                    disabled={currentPage === pagination.totalPages}
-                                    onClick={() => {
-                                        setCurrentPage(currentPage + 1);
-                                        fetchData(currentPage + 1);
-                                    }}
-                                    style={{ padding: '5px 10px', cursor: 'pointer' }}
-                                >
-                                    التالي
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                </div>
-            )}
 
 
             {/* Employee View: Room List with Individual Schedule */}
             {
                 !isAdmin && (
                     <div style={{
-                        background: 'white',
+                        background: '#1f2937',
                         borderRadius: '15px',
                         padding: '25px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                     }}>
                         {!selectedRoom ? (
                             <>
-                                <h2 style={{ marginBottom: '20px', color: '#4a5568' }}>قائمة الغرف</h2>
+                                <h2 style={{ marginBottom: '20px', color: '#f3f4f6' }}>قائمة الغرف</h2>
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
                                     {rooms.map(room => (
                                         <div
@@ -465,32 +257,32 @@ const RoomManagement = () => {
                                             onClick={() => setSelectedRoom(room)}
                                             style={{
                                                 padding: '20px',
-                                                background: '#f7fafc',
+                                                background: '#111827',
                                                 borderRadius: '12px',
-                                                border: '2px solid #e2e8f0',
+                                                border: '2px solid #374151',
                                                 cursor: 'pointer',
                                                 transition: 'all 0.2s',
                                             }}
                                             onMouseEnter={(e) => {
-                                                e.currentTarget.style.borderColor = '#667eea';
+                                                e.currentTarget.style.borderColor = 'var(--primary)';
                                                 e.currentTarget.style.transform = 'translateY(-2px)';
-                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(102, 126, 234, 0.15)';
+                                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.25)';
                                             }}
                                             onMouseLeave={(e) => {
-                                                e.currentTarget.style.borderColor = '#e2e8f0';
+                                                e.currentTarget.style.borderColor = '#374151';
                                                 e.currentTarget.style.transform = 'translateY(0)';
                                                 e.currentTarget.style.boxShadow = 'none';
                                             }}
                                         >
-                                            <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#2d3748', marginBottom: '8px' }}>
+                                            <div style={{ fontSize: '1.2em', fontWeight: 'bold', color: '#f3f4f6', marginBottom: '8px' }}>
                                                 {room.name}
                                             </div>
                                             <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
                                                 <span style={{
                                                     padding: '4px 10px',
                                                     borderRadius: '12px',
-                                                    background: room.type === 'ONLINE' ? '#ebf8ff' : '#f0fff4',
-                                                    color: room.type === 'ONLINE' ? '#2c5282' : '#22543d',
+                                                    background: room.type === 'ONLINE' ? 'rgba(59, 130, 246, 0.15)' : 'rgba(16, 185, 129, 0.15)',
+                                                    color: room.type === 'ONLINE' ? '#60a5fa' : '#10b981',
                                                     fontSize: '0.85em'
                                                 }}>
                                                     {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
@@ -499,8 +291,8 @@ const RoomManagement = () => {
                                                     <span style={{
                                                         padding: '4px 10px',
                                                         borderRadius: '12px',
-                                                        background: '#fef5e7',
-                                                        color: '#7c4a00',
+                                                        background: 'rgba(251, 146, 60, 0.15)',
+                                                        color: '#fb923c',
                                                         fontSize: '0.85em'
                                                     }}>
                                                         السعة: {room.capacity}
@@ -508,7 +300,7 @@ const RoomManagement = () => {
                                                 )}
                                             </div>
                                             {room.location && (
-                                                <div style={{ marginTop: '8px', color: '#718096', fontSize: '0.9em' }}>
+                                                <div style={{ marginTop: '8px', color: '#9ca3af', fontSize: '0.9em' }}>
                                                     📍 {room.location}
                                                 </div>
                                             )}
@@ -548,13 +340,13 @@ const RoomManagement = () => {
                         ) : (
                             <>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                                    <h2 style={{ margin: 0, color: '#4a5568' }}>جدول {selectedRoom.name}</h2>
+                                    <h2 style={{ margin: 0, color: '#f3f4f6' }}>جدول {selectedRoom.name}</h2>
                                     <button
                                         onClick={() => setSelectedRoom(null)}
                                         style={{
                                             padding: '8px 16px',
-                                            background: '#e2e8f0',
-                                            color: '#4a5568',
+                                            background: '#374151',
+                                            color: '#f3f4f6',
                                             border: 'none',
                                             borderRadius: '8px',
                                             cursor: 'pointer',
@@ -575,8 +367,8 @@ const RoomManagement = () => {
                                                 padding: '6px 12px',
                                                 borderRadius: '15px',
                                                 border: 'none',
-                                                background: selectedDay === day ? '#667eea' : '#edf2f7',
-                                                color: selectedDay === day ? 'white' : '#4a5568',
+                                                background: selectedDay === day ? 'var(--primary)' : '#374151',
+                                                color: selectedDay === day ? 'white' : '#9ca3af',
                                                 cursor: 'pointer',
                                                 fontWeight: 'bold',
                                                 fontSize: '14px'
@@ -588,22 +380,23 @@ const RoomManagement = () => {
                                 </div>
 
                                 {/* Single Room Schedule Grid */}
-                                <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                                <div style={{ overflowX: 'auto', border: '1px solid #374151', borderRadius: '8px' }}>
                                     <div style={{
                                         display: 'grid',
                                         gridTemplateColumns: `repeat(${timeSlots.length * 2}, 80px)`,
                                         gap: '1px',
-                                        background: '#e2e8f0'
+                                        background: '#374151'
                                     }}>
                                         {/* Time Headers */}
                                         {timeSlots.map(time => (
                                             <div key={time} style={{
-                                                background: '#f7fafc',
+                                                background: '#111827',
                                                 padding: '12px',
                                                 textAlign: 'center',
                                                 fontWeight: 'bold',
-                                                borderBottom: '2px solid #cbd5e0',
-                                                gridColumn: 'span 2'
+                                                borderBottom: '2px solid #374151',
+                                                gridColumn: 'span 2',
+                                                color: '#f3f4f6'
                                             }}>
                                                 {time}
                                             </div>
@@ -636,11 +429,11 @@ const RoomManagement = () => {
                                                     <div
                                                         key={time30}
                                                         style={{
-                                                            background: item ? '#ebf8ff' : '#fff',
+                                                            background: item ? 'rgba(59, 130, 246, 0.2)' : '#111827',
                                                             height: '80px',
                                                             padding: '8px',
                                                             gridColumn: `span ${span}`,
-                                                            border: item ? '2px solid #4299e1' : 'none',
+                                                            border: item ? '2px solid var(--primary)' : '1px dashed #4b5563',
                                                             display: 'flex',
                                                             alignItems: 'center',
                                                             justifyContent: 'center'
@@ -648,7 +441,7 @@ const RoomManagement = () => {
                                                     >
                                                         {item ? (
                                                             <div style={{
-                                                                background: '#4299e1',
+                                                                background: 'var(--primary)',
                                                                 color: 'white',
                                                                 height: '100%',
                                                                 width: '100%',
@@ -667,7 +460,7 @@ const RoomManagement = () => {
                                                                 </div>
                                                             </div>
                                                         ) : (
-                                                            <span style={{ color: '#cbd5e0', fontSize: '0.8em' }}>فارغ</span>
+                                                            <span style={{ color: '#e5e7eb', fontSize: '0.8em' }}>فارغ</span>
                                                         )}
                                                     </div>
                                                 );
@@ -685,13 +478,13 @@ const RoomManagement = () => {
             {
                 isAdmin && (
                     <div style={{
-                        background: 'white',
+                        background: '#1f2937',
                         borderRadius: '15px',
                         padding: '25px',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.3)'
                     }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', flexWrap: 'wrap', gap: '15px' }}>
-                            <h2 style={{ margin: 0, color: '#4a5568' }}>جدول الغرف</h2>
+                            <h2 style={{ margin: 0, color: '#f3f4f6' }}>جدول الغرف</h2>
 
                             {/* Day Selection */}
                             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
@@ -703,7 +496,7 @@ const RoomManagement = () => {
                                             padding: '6px 12px',
                                             borderRadius: '15px',
                                             border: 'none',
-                                            background: selectedDay === day ? '#667eea' : '#edf2f7',
+                                            background: selectedDay === day ? 'var(--primary)' : '#edf2f7',
                                             color: selectedDay === day ? 'white' : '#4a5568',
                                             cursor: 'pointer',
                                             fontWeight: 'bold',
@@ -716,37 +509,39 @@ const RoomManagement = () => {
                             </div>
                         </div>
 
-                        <div style={{ overflowX: 'auto', border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                        <div style={{ overflowX: 'auto', border: '1px solid #374151', borderRadius: '8px' }}>
                             <div style={{
                                 display: 'grid',
                                 gridTemplateColumns: `140px repeat(${timeSlots.length * 2}, 60px)`,
                                 gap: '1px',
-                                background: '#e2e8f0'
+                                background: '#111827'
                             }}>
                                 {/* Header */}
                                 <div style={{
                                     fontWeight: 'bold',
                                     padding: '12px',
-                                    background: '#f7fafc',
+                                    background: '#1f2937',
+                                    color: '#f3f4f6',
                                     position: 'sticky',
                                     top: 0,
                                     left: 0,
                                     zIndex: 10,
-                                    borderBottom: '2px solid #cbd5e0'
+                                    borderBottom: '2px solid #374151'
                                 }}>
                                     الغرفة / الوقت
                                 </div>
 
                                 {timeSlots.map(time => (
                                     <div key={time} style={{
-                                        background: '#f7fafc',
+                                        background: '#1f2937',
+                                        color: '#f3f4f6',
                                         padding: '12px',
                                         textAlign: 'center',
                                         fontWeight: 'bold',
                                         position: 'sticky',
                                         top: 0,
                                         zIndex: 5,
-                                        borderBottom: '2px solid #cbd5e0',
+                                        borderBottom: '2px solid #374151',
                                         gridColumn: 'span 2'
                                     }}>
                                         {time}
@@ -770,14 +565,14 @@ const RoomManagement = () => {
                                                 flexDirection: 'column',
                                                 justifyContent: 'center',
                                                 padding: '10px',
-                                                background: '#fff',
+                                                background: '#111827',
                                                 position: 'sticky',
                                                 left: 0,
                                                 zIndex: 5,
-                                                borderRight: '2px solid #e2e8f0'
+                                                borderRight: '2px solid #374151'
                                             }}>
-                                                <span style={{ color: '#2d3748' }}>{room.name}</span>
-                                                <span style={{ fontSize: '0.7em', color: '#718096', marginTop: '2px' }}>
+                                                <span style={{ color: '#f3f4f6' }}>{room.name}</span>
+                                                <span style={{ fontSize: '0.7em', color: '#9ca3af', marginTop: '2px' }}>
                                                     {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
                                                 </span>
                                             </div>
@@ -800,17 +595,17 @@ const RoomManagement = () => {
                                                     <div
                                                         key={`${room.id}-${time30}`}
                                                         style={{
-                                                            background: item ? '#ebf8ff' : '#fff',
+                                                            background: item ? 'rgba(59, 130, 246, 0.2)' : '#111827',
                                                             height: '70px',
                                                             padding: '4px',
                                                             position: 'relative',
                                                             gridColumn: `span ${span}`,
-                                                            border: item ? '2px solid #4299e1' : 'none'
+                                                            border: item ? '2px solid var(--primary)' : '1px dashed #4b5563'
                                                         }}
                                                     >
                                                         {item && (
                                                             <div style={{
-                                                                background: '#4299e1',
+                                                                background: 'var(--primary)',
                                                                 color: 'white',
                                                                 height: '100%',
                                                                 width: '100%',
@@ -843,21 +638,7 @@ const RoomManagement = () => {
                 )
             }
 
-            {/* Delete Confirmation Modal */}
-            <ConfirmationModal
-                isOpen={showDeleteModal}
-                onClose={() => {
-                    setShowDeleteModal(false);
-                    setRoomToDelete(null);
-                }}
-                onConfirm={handleDeleteConfirm}
-                title="تأكيد الحذف"
-                message={`هل أنت متأكد من حذف الغرفة "${roomToDelete?.name}"؟`}
-                type="danger"
-                confirmText="حذف"
-                cancelText="إلغاء"
-            />
-        </div >
+        </div>
     );
 };
 

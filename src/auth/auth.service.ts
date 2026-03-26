@@ -13,21 +13,31 @@ import { PrismaService } from 'src/prisma/prisma.service';
 export class AuthService {
   constructor(private userService: UserService, private jwtService: JwtService, private prisma: PrismaService) { }
   async validateUser(email: string, pass: string) {
-    // حاول تجيب المستخدم (من غير أي throw)
+    console.log('Attempting to validate user:', email);
     const user = await this.userService.findByEmail(email);
-    // hash ثابت علشان منع timing attack
-    const fakeHash =
-      '$2b$10$CwTycUXWue0Thq9StjUM0uJ8hQ8K/uxyW6k8fV2J7p1u9E5Dq4q6';
-    // دايمًا اعمل compare سواء user موجود أو لا
-    const passwordHash = user ? user.password : fakeHash;
-    const isPasswordValid = await bcrypt.compare(pass, passwordHash);
-    // أي فشل → null (من غير كشف السبب)
-    if (!user || !isPasswordValid) {
+
+    if (!user) {
+      console.log('User not found in DB:', email);
       return null;
     }
+
+    const passwordHash = user.password;
+    const isPasswordValid = await bcrypt.compare(pass, passwordHash);
+
+    if (!isPasswordValid) {
+      console.log('Invalid password for user:', email);
+      return null;
+    }
+
+    // Check if user is verified
+    if (!(user as any).isVerified) {
+      console.log('User found but not verified:', email);
+      throw new BadRequestException('الرجاء التأكد من حسابك عبر البريد الإلكتروني أولاً.');
+    }
+
     // شيل الباسورد قبل الإرجاع
     const { password, ...result } = user;
-    console.log(`the result =  ${result}`)
+    console.log('User validated successfully:', email);
     return result;
   }
 

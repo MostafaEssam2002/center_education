@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { userAPI, uploadAPI } from '../services/api';
+import { userAPI, uploadAPI, authAPI } from '../services/api';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -17,6 +17,8 @@ const Register = () => {
   const [imageFile, setImageFile] = useState(null);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [otp, setOtp] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
@@ -39,11 +41,10 @@ const Register = () => {
     try {
       let imageUrl = '';
 
-      // Upload image if provided
       if (imageFile) {
         try {
           const uploadResponse = await uploadAPI.uploadFile(imageFile);
-          imageUrl = uploadResponse.data.url;
+          imageUrl = uploadResponse.data.data?.url || uploadResponse.data.url;
         } catch (uploadError) {
           setError('فشل رفع الصورة: ' + (uploadError.response?.data?.message || uploadError.message));
           setLoading(false);
@@ -51,7 +52,6 @@ const Register = () => {
         }
       }
 
-      // Register user
       const userData = {
         ...formData,
         age: parseInt(formData.age),
@@ -60,20 +60,15 @@ const Register = () => {
 
       if (!userData.phone) delete userData.phone;
       if (!userData.address) delete userData.address;
-
-      // Remove if empty
       if (!imageUrl) delete userData.image_path;
 
       const response = await userAPI.register(userData);
 
-      if (response.data) {
-        localStorage.setItem('authToken', response.data.access_token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
-
-        setSuccess('تم التسجيل بنجاح! جاري تحويلك...');
-        setTimeout(() => {
-          navigate('/');
-        }, 1500);
+      if (response.data.status === 1) {
+        setSuccess(response.data.message);
+        setIsVerifying(true);
+      } else {
+        setError(response.data.message);
       }
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'حدث خطأ أثناء التسجيل');
@@ -81,6 +76,77 @@ const Register = () => {
       setLoading(false);
     }
   };
+
+  const handleVerify = async (e) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
+    setLoading(true);
+
+    try {
+      const response = await authAPI.verifyOtp(formData.email, otp);
+
+      if (response.data.status === 1) {
+        localStorage.setItem('authToken', response.data.data.access_token);
+        localStorage.setItem('user', JSON.stringify(response.data.data.user));
+
+        setSuccess('تم تفعيل الحساب بنجاح! جاري تحويلك...');
+        setTimeout(() => {
+          navigate('/');
+          window.location.reload();
+        }, 1500);
+      } else {
+        setError(response.data.message);
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'كود التحقق غير صحيح');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (isVerifying) {
+    return (
+      <div className="container">
+        <div className="card" style={{ maxWidth: '400px', margin: '50px auto' }}>
+          <div className="card-header">
+            <h2>التحقق من البريد الإلكتروني</h2>
+            <p style={{ fontSize: '14px', color: '#666' }}>أدخل الكود المرسل إلى {formData.email}</p>
+          </div>
+          <form onSubmit={handleVerify}>
+            <div className="form-group">
+              <label htmlFor="otp">كود التحقق (OTP)</label>
+              <input
+                type="text"
+                id="otp"
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+                placeholder="000000"
+                maxLength="6"
+                required
+                style={{ textAlign: 'center', fontSize: '24px', letterSpacing: '5px' }}
+              />
+            </div>
+
+            {error && <div className="message error">{error}</div>}
+            {success && <div className="message success">{success}</div>}
+
+            <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
+              {loading ? 'جاري التحقق...' : 'تأكيد الرمز'}
+            </button>
+            <button
+              type="button"
+              className="btn"
+              style={{ width: '100%', marginTop: '10px' }}
+              onClick={() => setIsVerifying(false)}
+            >
+              الرجوع للتسجيل
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="container">
@@ -191,7 +257,6 @@ const Register = () => {
               <option value="EMPLOYEE">موظف</option>
               <option value="ASSISTANT">مساعد</option>
               <option value="STUDENT">طالب</option>
-              <option value="ADMIN">مدير</option>
             </select>
           </div>
 
@@ -219,14 +284,7 @@ const Register = () => {
           {success && <div className="message success">{success}</div>}
 
           <button type="submit" className="btn btn-primary" style={{ width: '100%' }} disabled={loading}>
-            {loading ? (
-              <>
-                <span className="loading-spinner"></span>
-                جاري التسجيل...
-              </>
-            ) : (
-              'تسجيل'
-            )}
+            {loading ? 'جاري التسجيل...' : 'تسجيل'}
           </button>
         </form>
       </div>
@@ -235,4 +293,3 @@ const Register = () => {
 };
 
 export default Register;
-

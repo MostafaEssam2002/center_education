@@ -138,8 +138,8 @@ const CourseDetail = () => {
                 )}
 
                 <div style={{ marginBottom: '20px' }}>
-                    <h3 style={{ color: '#667eea', marginBottom: '10px' }}>الوصف</h3>
-                    <p style={{ lineHeight: '1.8', color: '#666' }}>{course.description}</p>
+                    <h3 style={{ color: 'var(--primary-light)', marginBottom: '10px' }}>الوصف</h3>
+                    <p style={{ lineHeight: '1.8', color: 'var(--neutral-300)' }}>{course.description}</p>
                 </div>
 
                 <div style={{
@@ -148,32 +148,33 @@ const CourseDetail = () => {
                     gap: '15px',
                     marginBottom: '20px',
                     padding: '20px',
-                    background: '#f8f9fa',
+                    background: 'var(--glass-bg)',
+                    border: '1px solid var(--glass-border)',
                     borderRadius: '12px'
                 }}>
                     <div>
-                        <strong style={{ color: '#667eea' }}>المعلم:</strong>
+                        <strong style={{ color: 'var(--primary-light)' }}>المعلم:</strong>
                         <p style={{ margin: '5px 0 0' }}>
                             {course.teacher ? `${course.teacher.first_name} ${course.teacher.last_name}` : `معرف ${course.teacherId}`}
                         </p>
                     </div>
                     <div>
-                        <strong style={{ color: '#667eea' }}>عدد الطلاب:</strong>
+                        <strong style={{ color: 'var(--primary-light)' }}>عدد الطلاب:</strong>
                         <p style={{ margin: '5px 0 0' }}>{course.enrollments?.length || 0}</p>
                     </div>
                     <div>
-                        <strong style={{ color: '#667eea' }}>عدد الفصول:</strong>
+                        <strong style={{ color: 'var(--primary-light)' }}>عدد الفصول:</strong>
                         <p style={{ margin: '5px 0 0' }}>{chapters.length}</p>
                     </div>
                     <div>
-                        <strong style={{ color: '#667eea' }}>السعر:</strong>
+                        <strong style={{ color: 'var(--primary-light)' }}>السعر:</strong>
                         <div style={{ margin: '5px 0 0' }}>
                             {course.discount && course.discount > 0 ? (
                                 <div>
-                                    <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px', fontSize: '0.9em' }}>
+                                    <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)', marginRight: '8px', fontSize: '0.9em' }}>
                                         {course.price} ج.م
                                     </span>
-                                    <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                    <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
                                         {course.price - course.discount} ج.م
                                     </span>
                                 </div>
@@ -223,60 +224,73 @@ const CourseDetail = () => {
                     </div>
                 )}
 
-                {/* Chapters List */}
                 <div>
-                    <h3 style={{ color: '#667eea', marginBottom: '15px' }}>الفصول</h3>
+                    <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>الفصول</h3>
                     {chapters.length === 0 ? (
                         <div className="empty-state">لا توجد فصول في هذا الكورس</div>
                     ) : (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' }}>
                             {chapters.map((chapter, index) => (
                                 <div
                                     key={chapter.id}
                                     style={{
-                                        padding: '15px',
-                                        background: 'white',
-                                        border: '2px solid #e0e0e0',
+                                        padding: '20px',
+                                        background: 'var(--glass-bg)',
+                                        border: '1px solid var(--glass-border)',
                                         borderRadius: '12px',
                                         cursor: 'pointer',
-                                        transition: 'all 0.3s ease',
+                                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        justifyContent: 'space-between',
+                                        gap: '15px',
+                                        boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
+                                        backdropFilter: 'blur(10px)'
                                     }}
                                     className="chapter-item"
                                     onClick={() => handleViewChapter(chapter.id)}
                                     onMouseEnter={(e) => {
-                                        e.currentTarget.style.borderColor = '#667eea';
-                                        e.currentTarget.style.transform = 'translateX(-5px)';
+                                        e.currentTarget.style.borderColor = 'var(--primary)';
+                                        e.currentTarget.style.transform = 'translateY(-4px)';
+                                        e.currentTarget.style.boxShadow = '0 10px 15px rgba(0, 0, 0, 0.2)';
                                     }}
                                     onMouseLeave={(e) => {
-                                        e.currentTarget.style.borderColor = '#e0e0e0';
-                                        e.currentTarget.style.transform = 'translateX(0)';
+                                        e.currentTarget.style.borderColor = 'var(--glass-border)';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                        e.currentTarget.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
                                     }}
                                 >
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                         <div>
-                                            <h4 style={{ margin: '0 0 5px', color: '#667eea' }}>
+                                            <h4 style={{ margin: '0 0 10px', color: 'var(--primary-light)', fontSize: '18px', fontWeight: '600' }}>
                                                 {index + 1}. {chapter.title}
                                             </h4>
                                             {chapter.content && (
-                                                <p style={{ margin: 0, color: '#999', fontSize: '14px' }}>
+                                                <p style={{ margin: 0, color: 'var(--neutral-300)', fontSize: '14px', lineHeight: '1.5' }}>
                                                     {chapter.content.substring(0, 100)}
                                                     {chapter.content.length > 100 ? '...' : ''}
                                                 </p>
                                             )}
                                         </div>
-                                        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                                            {chapter.videoPath && (
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" strokeWidth="2">
+                                    </div>
+                                    <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginTop: 'auto', paddingTop: '15px', borderTop: '1px solid var(--glass-border)' }}>
+                                        {chapter.videoPath && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--primary-light)', fontSize: '13px' }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <polygon points="5 3 19 12 5 21 5 3"></polygon>
                                                 </svg>
-                                            )}
-                                            {chapter.pdfPath && (
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#667eea" strokeWidth="2">
+                                                <span>فيديو</span>
+                                            </div>
+                                        )}
+                                        {chapter.pdfPath && (
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '5px', color: 'var(--secondary)', fontSize: '13px' }}>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                                                     <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                                                     <polyline points="13 2 13 9 20 9"></polyline>
                                                 </svg>
-                                            )}
-                                        </div>
+                                                <span>ملف</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             ))}

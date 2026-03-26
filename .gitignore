@@ -65,3 +65,4 @@ src/upload-file/ffmpeg.exe
 !/public/images/.gitkeep
 /public/pdfs/*
 !/public/pdfs/.gitkeep
+/public/ffmpeg.exe

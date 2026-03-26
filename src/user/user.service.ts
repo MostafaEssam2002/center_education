@@ -27,11 +27,15 @@ export class UserService {
     if (city) dbData.cityCode = String(city);
     if (region) dbData.regionId = Number(region);
 
+    console.log('Registering user with data:', JSON.stringify(dbData, null, 2));
+
     try {
       const user = await this.prisma.user.create({ data: dbData });
+      console.log('User created successfully:', user.id);
       const { password, ...userWithoutPassword } = user;
-      return { message: 'This action adds a new user', user: userWithoutPassword };
+      return { message: 'User registered successfully', user: userWithoutPassword };
     } catch (error) {
+      console.error('Error in UserService.register:', error);
       if (error instanceof Prisma.PrismaClientKnownRequestError) {
         if (error.code === 'P2002') {
           throw new BadRequestException('Email already exists');
@@ -44,9 +48,12 @@ export class UserService {
     }
   }
 
-  async findAll() {
-    const users = await this.prisma.user.findMany(
-      {
+  async findAll(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+    const [users, total] = await Promise.all([
+      this.prisma.user.findMany({
+        skip,
+        take: limit,
         select: {
           id: true,
           email: true,
@@ -57,15 +64,25 @@ export class UserService {
           address: true,
           role: true,
           image_path: true,
-          // country: true,
-          // city: true,
-          // region: true,
           createdAt: true,
           updatedAt: true,
         },
-      }
-    );
-    return users;
+        orderBy: {
+          createdAt: 'desc',
+        },
+      }),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      data: users,
+      pagination: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
   async findByEmail(email: string) {
     return this.prisma.user.findUnique({
@@ -112,7 +129,7 @@ export class UserService {
         if (error.code === 'P2002') {
           throw new BadRequestException('Email already exists');
         }
-        
+
         if (error.code === 'P2025') {
           throw new BadRequestException('User not found');
         }

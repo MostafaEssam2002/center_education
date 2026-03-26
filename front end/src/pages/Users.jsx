@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { userAPI, API_BASE_URL } from '../services/api';
 
 const Users = () => {
+  const navigate = useNavigate();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -25,6 +27,7 @@ const Users = () => {
         setUsers(response.data.data);
         setPagination(response.data.pagination);
         setCurrentPage(page);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
         // Fallback in case backend structure is different
         setUsers(response.data);
@@ -48,6 +51,7 @@ const Users = () => {
     try {
       const response = await userAPI.findByEmail(searchEmail);
       setUsers([response.data]);
+      setPagination(null);
     } catch (err) {
       setError(err.response?.data?.message || err.message || 'المستخدم غير موجود');
       setUsers([]);
@@ -228,6 +232,18 @@ const Users = () => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                        <button
+                          className="btn btn-primary"
+                          style={{ padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: '12px' }}
+                          onClick={() => {
+                            const chatConfig = user.role === 'STUDENT' ?
+                              { type: 'employee_student', studentId: user.id, title: `${user.first_name || user.email}` } :
+                              { type: 'employee', employeeId: user.id, title: `${user.first_name || user.email}` };
+                            navigate('/chat', { state: { openChatUser: user, openChatConfig: chatConfig } });
+                          }}
+                        >
+                          دردش
+                        </button>
                         <button
                           className="btn btn-secondary"
                           style={{ padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: '12px' }}

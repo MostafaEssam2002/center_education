@@ -41,6 +41,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const total = await this.chatService.getTotalUnreadCount(user.id);
       const conversations = await this.chatService.getUnreadConversationsCount(user.id);
       client.emit('totalUnreadUpdate', { total, conversations });
+
+      // نشر قائمة المستخدمين المتصلين
+      this.broadcastOnlineUsers();
     } catch (err) {
       console.log(`[Socket] Connection Auth Error: ${err.message}`);
       client.disconnect();
@@ -49,6 +52,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   handleDisconnect(client: Socket) {
     this.connectedUsers.delete(client.id);
+    this.broadcastOnlineUsers();
+  }
+
+  private broadcastOnlineUsers() {
+    const onlineIds = Array.from(new Set(Array.from(this.connectedUsers.values()).map(user => user.id)));
+    this.server.emit('onlineUsers', onlineIds);
   }
 
   private sendError(client: Socket, message: string) {
@@ -62,8 +71,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = this.connectedUsers.get(client.id);
       if (!user) return;
       client.join(`course_${data.courseId}`);
+      
+      // تحديث حالة قراءة رسائل البث الخاصة به
+      await this.chatService.markBroadcastAsRead(user.id, Number(data.courseId));
+      
       const messages = await this.chatService.getCourseMessages(Number(data.courseId), user.id);
       client.emit('courseHistory', { courseId: data.courseId, messages });
+
+      // تحديث المجموع المحدث
+      const total = await this.chatService.getTotalUnreadCount(user.id);
+      const conversations = await this.chatService.getUnreadConversationsCount(user.id);
+      client.emit('totalUnreadUpdate', { total, conversations });
     } catch (err) { this.sendError(client, err.message); }
   }
 
@@ -73,7 +91,17 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const user = this.connectedUsers.get(client.id);
       if (!user) return;
       const message = await this.chatService.broadcastToCourse(user.id, Number(data.courseId), data.content, data.imageUrl);
+      
+      // بث الرسالة الواحدة إلى جميع المتصلين في الكورس
       this.server.to(`course_${data.courseId}`).emit('newCourseMessage', message);
+      
+      // احصل على جميع الطلاب المسجلين في الكورس لتحديث الإشعارات
+      const enrollments = await this.chatService.getCourseStudents(Number(data.courseId), user.id);
+      for (const student of enrollments) {
+        const total = await this.chatService.getTotalUnreadCount(student.id);
+        const conversations = await this.chatService.getUnreadConversationsCount(student.id);
+        this.server.to(`user_${student.id}`).emit('totalUnreadUpdate', { total, conversations });
+      }
     } catch (err) { this.sendError(client, err.message); }
   }
 

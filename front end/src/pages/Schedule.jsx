@@ -448,7 +448,7 @@ const Schedule = () => {
             <div style={{
                 width: isMobile ? '100%' : '260px',
                 flexShrink: 0,
-                background: 'white',
+                background: '#1f2937',
                 borderRadius: '15px',
                 padding: '20px',
                 boxShadow: '0 0 10px rgba(0,0,0,0.1)',
@@ -457,11 +457,11 @@ const Schedule = () => {
                 display: 'flex',
                 flexDirection: 'column'
             }}>
-                <h3 style={{ borderBottom: '2px solid #667eea', paddingBottom: '10px' }}>الكورسات المتاحة</h3>
-                <p style={{ fontSize: '0.85em', color: '#777', margin: '10px 0' }}>
+                <h3 style={{ borderBottom: '2px solid var(--primary)', paddingBottom: '10px', color: '#f3f4f6' }}>الكورسات المتاحة</h3>
+                <p style={{ fontSize: '0.85em', color: '#d1d5db', margin: '10px 0' }}>
                     اسحب الكورس وأفلته في الجدول.
                     <br />
-                    <span style={{ color: '#e53e3e' }}>* لإلغاء موعد، اسحبه خارج الجدول.</span>
+                    <span style={{ color: '#fca5a5' }}>* لإلغاء موعد، اسحبه خارج الجدول.</span>
                 </p>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', overflowY: 'auto' }}>
                     {courses.map(course => (
@@ -471,14 +471,23 @@ const Schedule = () => {
                             onDragStart={(e) => handleDragStart(e, course)}
                             style={{
                                 padding: '12px',
-                                background: '#f8f9fa',
-                                border: '1px solid #ddd',
+                                background: '#111827',
+                                border: '1px solid #374151',
                                 borderRadius: '8px',
                                 cursor: isAdminOrEmployee ? 'grab' : 'default',
                                 fontWeight: 'bold',
-                                color: '#2d3748',
+                                color: '#f3f4f6',
                                 fontSize: '0.9em',
-                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
+                                boxShadow: '0 2px 4px rgba(0,0,0,0.05)',
+                                transition: 'all 0.2s'
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.borderColor = 'var(--primary)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.2)';
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.borderColor = '#374151';
+                                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
                             }}
                         >
                             {course.title}
@@ -492,14 +501,14 @@ const Schedule = () => {
                 flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
-                background: 'white',
+                background: '#1f2937',
                 borderRadius: '15px',
                 padding: '20px',
                 boxShadow: '0 0 10px rgba(0,0,0,0.1)',
                 minWidth: 0 // Prevents flex child from overflowing parent
             }}>
                 <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', justifyContent: 'space-between', alignItems: isMobile ? 'flex-start' : 'center', marginBottom: '20px', gap: '15px' }}>
-                    <h2 style={{ margin: 0 }}>الجدول الدراسي</h2>
+                    <h2 style={{ margin: 0, color: '#f3f4f6' }}>الجدول الدراسي</h2>
                     {/* Day Selection Tabs */}
                     <div style={{ display: 'flex', gap: '5px', overflowX: 'auto', maxWidth: '100%', paddingBottom: '5px' }}>
                         {daysOrder.map(day => (
@@ -510,8 +519,8 @@ const Schedule = () => {
                                     padding: '6px 12px',
                                     borderRadius: '15px',
                                     border: 'none',
-                                    background: selectedDay === day ? '#667eea' : '#edf2f7',
-                                    color: selectedDay === day ? 'white' : '#4a5568',
+                                    background: selectedDay === day ? 'var(--primary)' : '#374151',
+                                    color: selectedDay === day ? 'white' : '#d1d5db',
                                     cursor: 'pointer',
                                     fontWeight: 'bold',
                                     fontSize: '0.9em',
@@ -524,7 +533,7 @@ const Schedule = () => {
                     </div>
                 </div>
 
-                <div className="schedule-grid-container" style={{ overflow: 'auto', flex: 1, border: '1px solid #e2e8f0', borderRadius: '8px' }}>
+                <div className="schedule-grid-container" style={{ overflow: 'auto', flex: 1, border: '1px solid #374151', borderRadius: '8px' }}>
                     {/* 
                         Grid Template:
                         - First column: 140px fixed (Room Name)
@@ -535,33 +544,35 @@ const Schedule = () => {
                         display: 'grid',
                         gridTemplateColumns: `140px repeat(${timeSlots.length * 2}, 60px)`, // 60px per 30 mins
                         gap: '1px',
-                        background: '#e2e8f0'
+                        background: '#111827'
                     }}>
 
                         {/* Header Row (Times) */}
                         <div style={{
                             fontWeight: 'bold',
                             padding: '12px',
-                            background: '#f7fafc',
+                            background: '#1f2937',
+                            color: '#f3f4f6',
                             position: 'sticky',
                             top: 0,
                             left: 0,
                             zIndex: 10,
-                            borderBottom: '2px solid #cbd5e0',
+                            borderBottom: '2px solid #374151',
                             gridColumn: '1 / span 1'
                         }}>
                             الغرفة / الساعة
                         </div>
                         {timeSlots.map((time, index) => (
                             <div key={time} style={{
-                                background: '#f7fafc',
+                                background: '#1f2937',
+                                color: '#f3f4f6',
                                 padding: '12px',
                                 textAlign: 'center',
                                 fontWeight: 'bold',
                                 position: 'sticky',
                                 top: 0,
                                 zIndex: 5,
-                                borderBottom: '2px solid #cbd5e0',
+                                borderBottom: '2px solid #374151',
                                 gridColumn: `span 2` // Each hour header spans 2 slots (2 * 30mins)
                             }}>
                                 {time}
@@ -608,14 +619,16 @@ const Schedule = () => {
                                         flexDirection: 'column',
                                         justifyContent: 'center',
                                         padding: '10px',
-                                        background: '#fff',
+                                        background: '#111827',
                                         position: 'sticky',
                                         left: 0,
                                         zIndex: 5,
-                                        borderRight: '2px solid #e2e8f0'
+                                        borderRight: '2px solid #374151',
+                                        gridColumn: '1 / 2',
+                                        gridRow: `auto / span ${rowSlots.length}`
                                     }}>
-                                        <span style={{ color: '#2d3748' }}>{room.name}</span>
-                                        <span style={{ fontSize: '0.7em', color: '#718096', marginTop: '2px' }}>
+                                        <span style={{ color: '#f3f4f6' }}>{room.name}</span>
+                                        <span style={{ fontSize: '0.7em', color: '#9ca3af', marginTop: '2px' }}>
                                             {room.type === 'ONLINE' ? 'أونلاين' : 'حضوري'}
                                         </span>
                                     </div>
@@ -648,13 +661,14 @@ const Schedule = () => {
                                                 onDragOver={handleDragOver}
                                                 onDrop={(e) => isAdminOrEmployee && !item && handleDrop(e, room.id, time30)} // Only allow drop if empty
                                                 style={{
-                                                    background: item ? '#ebf8ff' : '#fff',
+                                                    background: item ? 'rgba(59, 130, 246, 0.2)' : '#111827',
                                                     height: '70px',
                                                     padding: '4px',
                                                     position: 'relative',
                                                     transition: 'background 0.2s',
                                                     gridColumn: `span ${span}`,
-                                                    zIndex: item ? 2 : 1 // Bring items to front
+                                                    zIndex: item ? 2 : 1, // Bring items to front
+                                                    border: item ? '1px solid var(--primary)' : '1px dashed #4b5563'
                                                 }}
                                             >
                                                 {item && (
@@ -662,7 +676,7 @@ const Schedule = () => {
                                                         draggable={isAdminOrEmployee && !isResizing} // Disable drag while resizing
                                                         onDragStart={(e) => handleExistingDragStart(e, item)}
                                                         style={{
-                                                            background: '#5a67d8',
+                                                            background: 'var(--primary)',
                                                             color: 'white',
                                                             height: '100%',
                                                             width: '100%',

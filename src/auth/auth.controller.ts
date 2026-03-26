@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body, Query, DefaultValuePipe } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body, Query, DefaultValuePipe, BadRequestException } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -10,31 +10,82 @@ import { UserService } from 'src/user/user.service';
 import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
+import { OtpService } from './otp.service';
 
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
-    private readonly userService: UserService
+    private readonly userService: UserService,
+    private readonly otpService: OtpService
   ) { }
 
   @Post('register')
   @ApiOperation({ summary: 'Register a new user' })
-  @ApiResponse({ status: 201, description: 'User successfully registered.' })
+  @ApiResponse({ status: 201, description: 'User successfully registered. Please verify your email.' })
   @ApiResponse({ status: 400, description: 'Bad Request.' })
   async register(@Body() createUserDto: CreateUserDto) {
     try {
+      console.log('AuthController.register started for:', createUserDto.email);
       const result = await this.userService.register(createUserDto);
-      const token = await this.authService.login(result.user);
+
+      try {
+        // Generate and send OTP
+        console.log('Generating OTP for:', result.user.id);
+        await this.otpService.generateAndSendOtp(createUserDto.email, result.user.id);
+        console.log('OTP sent successfully');
+      } catch (otpError) {
+        console.error('Failed to send OTP:', otpError.message);
+        return {
+          status: 1,
+          message: 'تم التسجيل بنجاح، ولكن فشل إرسال كود التحقق. يمكنك تفعيله لاحقاً.',
+          data: {
+            user: result.user,
+            otpError: otpError.message
+          }
+        };
+      }
 
       return {
-        message: result.message,
+        status: 1,
+        message: 'Registration successful. Please check your email for verification code.',
         data: {
           user: result.user,
+        }
+      };
+    } catch (e) {
+      console.error('Registration failed:', e.message);
+      return {
+        status: 0,
+        message: e.message,
+        data: null,
+      };
+    }
+  }
+
+  @Post('verify-otp')
+  @ApiOperation({ summary: 'Verify OTP code' })
+  @ApiResponse({ status: 200, description: 'Email verified successfully.' })
+  @ApiResponse({ status: 400, description: 'Invalid or expired OTP.' })
+  async verifyOtp(@Body() body: { email: string, otp: string }) {
+    try {
+      const result = await this.otpService.verifyOtp(body.email, body.otp);
+
+      // Optionally login the user automatically after verification
+      const user = await this.userService.findByEmail(body.email);
+      if (!user) {
+        throw new BadRequestException('User not found');
+      }
+      const token = await this.authService.login(user as any);
+
+      return {
+        status: 1,
+        message: result.message,
+        data: {
+          user,
           access_token: token.data.access_token,
-        },
-        status: 1
+        }
       };
     } catch (e) {
       return {

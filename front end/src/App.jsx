@@ -8,6 +8,7 @@ import Dashboard from './pages/Dashboard';
 import Users from './pages/Users';
 import Courses from './pages/Courses';
 import CourseDetail from './pages/CourseDetail';
+import Chapters from './pages/Chapters';
 import ChapterDetail from './pages/ChapterDetail';
 import EnrollmentRequests from './pages/EnrollmentRequests';
 import MyEnrollments from './pages/MyEnrollments';
@@ -17,6 +18,7 @@ import Schedule from './pages/Schedule';
 import Attendance from './pages/Attendance';
 import StudentSchedule from './pages/StudentSchedule';
 import RoomManagement from './pages/RoomManagement';
+import AddRoom from './pages/AddRoom';
 import ManageQuizzes from './pages/ManageQuizzes';
 import CreateQuiz from './pages/CreateQuiz';
 import EditQuiz from './pages/EditQuiz';
@@ -30,6 +32,7 @@ import AssignmentSubmissions from './pages/AssignmentSubmissions';
 import StudentAssignments from './pages/StudentAssignments';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
+import LandingPage from './pages/LandingPage';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -71,6 +74,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CourseDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/chapters"
+                element={
+                  <ProtectedRoute>
+                    <Chapters />
                   </ProtectedRoute>
                 }
               />
@@ -144,6 +155,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <RoomManagement />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/add-room"
+                element={
+                  <ProtectedRoute>
+                    <AddRoom />
                   </ProtectedRoute>
                 }
               />
@@ -251,7 +270,9 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/home" element={<Navigate to="/" replace />} />
+              <Route path="*" element={<Navigate to="/dashboard" replace />} />
             </Routes>
           </Layout>
         </Router>

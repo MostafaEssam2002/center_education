@@ -197,7 +197,7 @@ export default function CreateQuiz() {
                 </div>
 
                 <div className="form-group">
-                    <label>Quiz Type *</label>
+                    <label style={{ marginBottom: '12px', display: 'block' }}>Quiz Type * / نوع الاختبار *</label>
                     <div className="radio-group">
                         <label className="radio-label">
                             <input
@@ -207,7 +207,7 @@ export default function CreateQuiz() {
                                 checked={formData.type === 'CHAPTER'}
                                 onChange={handleChange}
                             />
-                            Chapter Quiz
+                            <span style={{ marginLeft: '8px' }}>Chapter Quiz (اختبار فصل)</span>
                         </label>
                         <label className="radio-label">
                             <input
@@ -217,8 +217,12 @@ export default function CreateQuiz() {
                                 checked={formData.type === 'FINAL'}
                                 onChange={handleChange}
                             />
-                            Final Exam (Entire Course)
+                            <span style={{ marginLeft: '8px' }}>Final Exam (Entire Course) (امتحان نهائي - الدورة كاملة)</span>
                         </label>
+                    </div>
+                    <div className="form-help" style={{ marginTop: '0.5rem', fontSize: '0.9rem', color: '#aab4d1' }}>
+                        <p><strong>Chapter Quiz:</strong> Requires a specific chapter to be selected below and covers only that chapter.</p>
+                        <p><strong>Final Exam:</strong> Covers the full course; chapter selection is not required or shown.</p>
                     </div>
                 </div>
 

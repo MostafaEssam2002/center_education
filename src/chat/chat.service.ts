@@ -9,6 +9,16 @@ export class ChatService {
   // ===== مدرس يبعت رسالة لكل طلاب الكورس =====
   async broadcastToCourse(senderId: number, courseId: number, content: string, imageUrl?: string) {
     console.log(`[ChatService] Broadcast from ${senderId} to course ${courseId}`);
+    
+    // احصل على جميع الطلاب المسجلين في الكورس
+    const enrollments = await this.prisma.enrollment.findMany({
+      where: { courseId },
+      select: { studentId: true },
+    });
+
+    console.log(`[ChatService] Broadcasting to ${enrollments.length} students`);
+
+    // إنشاء رسالة واحدة فقط بدون receiverId محدد
     const message = await this.prisma.message.create({
       data: {
         content,
@@ -22,6 +32,20 @@ export class ChatService {
         sender: { select: { id: true, first_name: true, last_name: true, role: true } },
       },
     });
+
+    // إنشاء سجل recipient لكل طالب لتتبع القراءة
+    await Promise.all(
+      enrollments.map((enrollment) =>
+        this.prisma.broadcastRecipient.create({
+          data: {
+            messageId: message.id,
+            studentId: enrollment.studentId,
+            isRead: false,
+          },
+        }),
+      ),
+    );
+
     return message;
   }
 
@@ -183,6 +207,15 @@ export class ChatService {
   }
 
   async getTeacherStudentConversation(teacherId: number, studentId: number, courseId: number) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      select: { teacherId: true },
+    });
+
+    if (!course || course.teacherId !== teacherId) {
+      throw new Error('غير مصرح لك بعرض هذه المحادثة');
+    }
+
     return this.prisma.message.findMany({
       where: {
         type: MessageType.TO_TEACHER,
@@ -201,6 +234,15 @@ export class ChatService {
   }
 
   async teacherReplyToStudent(teacherId: number, studentId: number, courseId: number, content: string, imageUrl?: string) {
+    const course = await this.prisma.course.findUnique({
+      where: { id: courseId },
+      select: { teacherId: true },
+    });
+
+    if (!course || course.teacherId !== teacherId) {
+      throw new Error('غير مصرح لك بإرسال رسالة لهذا الطالب');
+    }
+
     return this.prisma.message.create({
       data: { content, imageUrl, type: MessageType.TO_TEACHER, senderId: teacherId, receiverId: studentId, courseId },
       include: {
@@ -222,12 +264,23 @@ export class ChatService {
 
   // ===== جيب إجمالي الرسائل غير المقروءة لمستخدم معين =====
   async getTotalUnreadCount(userId: number) {
-    return this.prisma.message.count({
+    // احسب الرسائل الفردية غير المقروءة (TO_TEACHER, TO_EMPLOYEE, etc)
+    const directMessages = await this.prisma.message.count({
       where: {
         receiverId: userId,
         isRead: false,
       },
     });
+
+    // احسب رسائل البث التي لم يقرأها الطالب
+    const broadcastMessages = await this.prisma.broadcastRecipient.count({
+      where: {
+        studentId: userId,
+        isRead: false,
+      },
+    });
+
+    return directMessages + broadcastMessages;
   }
 
   // ===== تمييز الرسائل كمقروءة =====
@@ -240,6 +293,21 @@ export class ChatService {
         isRead: false,
       },
       data: { isRead: true },
+    });
+  }
+
+  // ===== تمييز رسائل البث كمقروءة =====
+  async markBroadcastAsRead(studentId: number, courseId: number) {
+    return this.prisma.broadcastRecipient.updateMany({
+      where: {
+        studentId,
+        message: {
+          courseId,
+          type: MessageType.COURSE_BROADCAST,
+        },
+        isRead: false,
+      },
+      data: { isRead: true, readAt: new Date() },
     });
   }
 
@@ -312,6 +380,9 @@ export class ChatService {
 
   // ===== جيب عدد الجهات اللي باعته رسائل غير مقروءة =====
   async getUnreadConversationsCount(userId: number) {
+    const uniqueConversations = new Set();
+
+    // احسب الرسائل المباشرة غير المقروءة
     const unreadMessages = await this.prisma.message.findMany({
       where: {
         receiverId: userId,
@@ -323,16 +394,35 @@ export class ChatService {
       },
     });
 
-    const uniqueConversations = new Set();
     unreadMessages.forEach(msg => {
-      // الجهة ممكن تكون شخص (senderId) أو كورس (courseId) في حالة الـ broadcast
-      // بس في السيستم الحالي الـ broadcast ملوش receiverId محدد غالباً أو بيتحسب بطريقة تانية
-      // هنركز على الـ senderId حالياً للـ TO_TEACHER و TO_EMPLOYEE
       if (msg.senderId) {
         uniqueConversations.add(`${msg.senderId}-${msg.courseId || 0}`);
+      }
+    });
+
+    // احسب رسائل البث غير المقروءة
+    const unreadBroadcasts = await this.prisma.broadcastRecipient.findMany({
+      where: {
+        studentId: userId,
+        isRead: false,
+      },
+      select: {
+        message: {
+          select: {
+            courseId: true,
+          },
+        },
+      },
+    });
+
+    unreadBroadcasts.forEach(broadcast => {
+      if (broadcast.message.courseId) {
+        // استخدم broadcast- كبادئة لتمييزها عن الرسائل المباشرة
+        uniqueConversations.add(`broadcast-${broadcast.message.courseId}`);
       }
     });
 
     return uniqueConversations.size;
   }
 }
+

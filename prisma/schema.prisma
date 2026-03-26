@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
@@ -14,10 +8,391 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
+model Chapter {
+  id              Int               @id @default(autoincrement())
+  title           String
+  content         String?
+  videoPath       String
+  pdfPath         String?
+  order           Int
+  courseId        Int
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  assignments     Assignment[]
+  course          Course            @relation("ChapterToCourse", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_chapter_course")
+  chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
+  Quiz            Quiz[]
+
+  @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
+  @@index([courseId], map: "idx_chapter_course_id")
+  @@map("chapter")
+}
+
+model Course {
+  id            Int                 @id @default(autoincrement())
+  title         String
+  description   String?
+  teacherId     Int
+  image_path    String?
+  createdAt     DateTime            @default(now())
+  updatedAt     DateTime            @updatedAt
+  discount      Float?
+  price         Float               @default(100)
+  chapters      Chapter[]           @relation("ChapterToCourse")
+  teacher       User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
+  CourseSession CourseSession[]
+  schedules     CourseSchedule[]    @relation("CourseToCourseSchedule")
+  enrollments   Enrollment[]        @relation("CourseToEnrollment")
+  requests      EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
+  payment       payment[]
+  Quiz          Quiz[]
+
+  @@index([teacherId], map: "idx_course_teacher_id")
+  @@map("course")
+}
+
+model User {
+  id                    Int                    @id @default(autoincrement())
+  email                 String                 @unique(map: "unique_user_email")
+  first_name            String?
+  last_name             String?
+  image_path            String?
+  age                   Int?
+  password              String
+  phone                 String?
+  address               String?
+  role                  Role                   @default(USER)
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  AdditionalAddress     String?
+  Center_name           String?
+  cityCode              String?
+  countryCode           String?
+  regionId              Int?
+  isVerified            Boolean                @default(false)
+  assignmentsCreated    Assignment[]
+  assignmentSubmissions AssignmentSubmission[]
+  Attendance            Attendance[]
+  chapterProgress       ChapterProgress[]      @relation("UserToChapterProgress")
+  teachingCourses       Course[]               @relation("TeacherToCourse")
+  enrollments           Enrollment[]           @relation("UserToEnrollment")
+  enrollmentRequest     EnrollmentRequest[]    @relation("UserToEnrollmentRequest")
+  receivedMessages      Message[]              @relation("ReceivedMessages")
+  sentMessages          Message[]              @relation("SentMessages")
+  broadcastRecipients   BroadcastRecipient[]   @relation("StudentToBroadcastRecipient")
+  OTPs                  Otp[]
+  payment               payment[]
+  Quiz                  Quiz[]
+  QuizAttempt           QuizAttempt[]
+
+  @@index([email], map: "idx_user_email")
+  @@map("user")
+}
+
+model Otp {
+  id        Int      @id @default(autoincrement())
+  email     String
+  otp       String
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    Int?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([email])
+  @@index([userId], map: "otp_userId_fkey")
+  @@map("otp")
+}
+
+model Message {
+  id         Int         @id @default(autoincrement())
+  content    String      @db.Text
+  type       MessageType
+  senderId   Int
+  receiverId Int?
+  courseId   Int?
+  isRead     Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  imageUrl   String?     @db.Text
+  receiver   User?       @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender     User        @relation("SentMessages", fields: [senderId], references: [id])
+  broadcastRecipients BroadcastRecipient[] @relation("MessageToBroadcastRecipient")
+
+  @@index([senderId])
+  @@index([receiverId])
+  @@index([courseId])
+  @@map("message")
+}
+
+model BroadcastRecipient {
+  id        Int      @id @default(autoincrement())
+  messageId Int
+  studentId Int
+  isRead    Boolean  @default(false)
+  readAt    DateTime?
+  createdAt DateTime @default(now())
+  message   Message  @relation("MessageToBroadcastRecipient", fields: [messageId], references: [id], onDelete: Cascade)
+  student   User     @relation("StudentToBroadcastRecipient", fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([messageId, studentId], name: "unique_broadcast_recipient_message_student", map: "idx_broadcast_recipient_unique")
+  @@index([messageId], map: "idx_broadcast_recipient_message_id")
+  @@index([studentId], map: "idx_broadcast_recipient_student_id")
+  @@index([isRead], map: "idx_broadcast_recipient_is_read")
+  @@map("broadcastrecipient")
+}
+
+model Enrollment {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  courseId  Int
+  createdAt DateTime @default(now())
+  course    Course   @relation("CourseToEnrollment", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_course")
+  user      User     @relation("UserToEnrollment", fields: [studentId], references: [id], map: "fk_enrollment_user")
+
+  @@unique([studentId, courseId], name: "unique_enrollment_student_course", map: "idx_enrollment_student_course")
+  @@index([studentId], map: "idx_enrollment_student_id")
+  @@index([courseId], map: "idx_enrollment_course_id")
+  @@map("enrollment")
+}
+
+model EnrollmentRequest {
+  id        Int                     @id @default(autoincrement())
+  studentId Int
+  courseId  Int
+  status    EnrollmentRequestStatus @default(SENT)
+  createdAt DateTime                @default(now())
+  course    Course                  @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
+  student   User                    @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
+  payment   payment?
+
+  @@unique([studentId, courseId], name: "unique_enrollment_request_student_course", map: "idx_enrollment_request_student_course")
+  @@index([studentId], map: "idx_enrollment_request_student_id")
+  @@index([courseId], map: "idx_enrollment_request_course_id")
+  @@index([status], map: "idx_enrollment_request_status")
+  @@map("enrollmentrequest")
+}
+
+model ChapterProgress {
+  id        Int      @id @default(autoincrement())
+  studentId Int
+  chapterId Int
+  progress  Float    @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  chapter   Chapter  @relation("ChapterToChapterProgress", fields: [chapterId], references: [id], onDelete: Cascade, map: "fk_chapter_progress_chapter")
+  student   User     @relation("UserToChapterProgress", fields: [studentId], references: [id], map: "fk_chapter_progress_user")
+
+  @@unique([studentId, chapterId], name: "unique_chapter_progress_student_chapter", map: "idx_chapter_progress_student_chapter")
+  @@index([studentId], map: "idx_chapter_progress_student_id")
+  @@index([chapterId], map: "idx_chapter_progress_chapter_id")
+  @@map("chapterprogress")
+}
+
+model CourseSchedule {
+  id        Int       @id @default(autoincrement())
+  courseId  Int
+  roomId    Int
+  day       DayOfWeek
+  startTime String
+  endTime   String
+  course    Course    @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade)
+  room      Room      @relation(fields: [roomId], references: [id])
+
+  @@unique([day, startTime, roomId], name: "unique_course_schedule_day_time_room")
+  @@index([courseId])
+  @@index([day])
+  @@index([roomId])
+  @@map("courseschedule")
+}
+
+model CourseSession {
+  id         Int          @id @default(autoincrement())
+  courseId   Int
+  date       DateTime
+  startTime  String
+  endTime    String
+  roomId     Int
+  createdAt  DateTime     @default(now())
+  attendance Attendance[]
+  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  room       Room         @relation(fields: [roomId], references: [id])
+
+  @@index([roomId])
+  @@index([courseId])
+  @@map("course_sessions")
+}
+
+model Attendance {
+  id        Int              @id @default(autoincrement())
+  sessionId Int
+  studentId Int
+  status    AttendanceStatus @default(PRESENT)
+  createdAt DateTime         @default(now())
+  session   CourseSession    @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student   User             @relation(fields: [studentId], references: [id])
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+  @@index([sessionId])
+  @@map("attendance")
+}
+
+model Quiz {
+  id          Int            @id @default(autoincrement())
+  title       String
+  description String?
+  type        QuizType
+  courseId    Int?
+  chapterId   Int?
+  startTime   DateTime
+  endTime     DateTime
+  durationMin Int
+  totalMarks  Int
+  keepAnswers Boolean        @default(false)
+  isPublished Boolean        @default(false)
+  createdBy   Int
+  createdAt   DateTime       @default(now())
+  updatedAt   DateTime       @updatedAt
+  chapter     Chapter?       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  course      Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher     User           @relation(fields: [createdBy], references: [id])
+  attempts    QuizAttempt[]
+  questions   QuizQuestion[]
+
+  @@index([courseId], map: "Quiz_courseId_idx")
+  @@index([chapterId], map: "Quiz_chapterId_idx")
+  @@index([createdBy], map: "idx_quiz_created_by")
+  @@map("quiz")
+}
+
+model QuizQuestion {
+  id                Int                 @id @default(autoincrement())
+  quizId            Int
+  question          String
+  marks             Int                 @default(1)
+  createdAt         DateTime            @default(now())
+  QuizAttemptAnswer QuizAttemptAnswer[]
+  options           QuizOption[]
+  quiz              Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+
+  @@index([quizId], map: "QuizQuestion_quizId_idx")
+  @@map("quizquestion")
+}
+
+model QuizOption {
+  id                Int                 @id @default(autoincrement())
+  questionId        Int
+  text              String
+  isCorrect         Boolean             @default(false)
+  QuizAttemptAnswer QuizAttemptAnswer[]
+  question          QuizQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@index([questionId], map: "QuizOption_questionId_idx")
+  @@map("quizoption")
+}
+
+model QuizAttempt {
+  id          Int                 @id @default(autoincrement())
+  quizId      Int
+  studentId   Int
+  score       Int                 @default(0)
+  status      QuizStatus
+  startedAt   DateTime            @default(now())
+  submittedAt DateTime?
+  quiz        Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
+  student     User                @relation(fields: [studentId], references: [id])
+  answers     QuizAttemptAnswer[]
+
+  @@unique([quizId, studentId], map: "QuizAttempt_quizId_studentId_key")
+  @@index([studentId], map: "QuizAttempt_studentId_idx")
+  @@map("quizattempt")
+}
+
+model QuizAttemptAnswer {
+  id         Int          @id @default(autoincrement())
+  attemptId  Int
+  questionId Int
+  optionId   Int
+  isCorrect  Boolean
+  attempt    QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
+  option     QuizOption   @relation(fields: [optionId], references: [id], onDelete: Cascade)
+  question   QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
+
+  @@unique([attemptId, questionId], map: "QuizAttemptAnswer_attemptId_questionId_key")
+  @@index([attemptId], map: "QuizAttemptAnswer_attemptId_idx")
+  @@index([questionId], map: "QuizAttemptAnswer_questionId_fkey")
+  @@index([optionId], map: "QuizAttemptAnswer_optionId_fkey")
+  @@map("quizattemptanswer")
+}
+
+model Assignment {
+  id          Int                    @id @default(autoincrement())
+  chapterId   Int
+  title       String
+  description String?
+  dueDate     DateTime
+  maxGrade    Int
+  allowLate   Boolean                @default(true)
+  createdBy   Int
+  createdAt   DateTime               @default(now())
+  updatedAt   DateTime               @updatedAt
+  chapter     Chapter                @relation(fields: [chapterId], references: [id], onDelete: Cascade)
+  teacher     User                   @relation(fields: [createdBy], references: [id])
+  submissions AssignmentSubmission[]
+
+  @@index([chapterId])
+  @@index([createdBy])
+  @@map("assignment")
+}
+
+model AssignmentSubmission {
+  id           Int                        @id @default(autoincrement())
+  assignmentId Int
+  studentId    Int
+  filePath     String
+  submittedAt  DateTime                   @default(now())
+  status       AssignmentSubmissionStatus
+  grade        Int?
+  feedback     String?
+  assignment   Assignment                 @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  student      User                       @relation(fields: [studentId], references: [id])
+
+  @@unique([assignmentId, studentId], name: "unique_assignment_student")
+  @@index([studentId])
+  @@index([assignmentId])
+  @@map("assignmentsubmission")
+}
+
+model Room {
+  id        Int              @id @default(autoincrement())
+  name      String           @unique
+  type      RoomType
+  capacity  Int?
+  location  String?
+  isActive  Boolean          @default(true)
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+  sessions  CourseSession[]
+  schedules CourseSchedule[]
+
+  @@map("room")
+}
+
+model payment {
+  id                  Int               @id @default(autoincrement())
+  userId              Int
+  courseId            Int
+  enrollmentRequestId Int               @unique(map: "Payment_enrollmentRequestId_key")
+  amountCents         Int
+  status              payment_status    @default(PENDING)
+  paymobOrderId       Int?
+  transactionId       Int?
+  createdAt           DateTime          @default(now())
+  course              Course            @relation(fields: [courseId], references: [id], map: "Payment_courseId_fkey")
+  enrollmentrequest   EnrollmentRequest @relation(fields: [enrollmentRequestId], references: [id], onDelete: Cascade, map: "Payment_enrollmentRequestId_fkey")
+  user                User              @relation(fields: [userId], references: [id], map: "Payment_userId_fkey")
+
+  @@index([courseId], map: "Payment_courseId_idx")
+  @@index([userId], map: "Payment_userId_idx")
 }
 
 enum Role {
@@ -75,411 +450,13 @@ enum EnrollmentRequestStatus {
 }
 
 enum MessageType {
-  COURSE_BROADCAST // مدرس يبعت لكل طلاب الكورس
-  TO_TEACHER // طالب يبعت للمدرس
-  TO_EMPLOYEE // طالب يبعت للموظف
+  COURSE_BROADCAST
+  TO_TEACHER
+  TO_EMPLOYEE
 }
 
-model Chapter {
-  id              Int               @id @default(autoincrement())
-  title           String
-  content         String? // شرح نصي (اختياري)
-  videoPath       String // مسار الفيديو
-  pdfPath         String? // مسار الـ PDF
-  order           Int
-  courseId        Int
-  course          Course            @relation("ChapterToCourse", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_chapter_course")
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  chapterProgress ChapterProgress[] @relation("ChapterToChapterProgress")
-  Quiz            Quiz[]
-  assignments     Assignment[]
-
-  @@unique([courseId, order], name: "unique_chapter_course_order", map: "idx_chapter_course_order")
-  @@index([courseId], map: "idx_chapter_course_id")
-  @@map("chapter")
-}
-
-model Course {
-  id            Int                 @id @default(autoincrement())
-  title         String
-  description   String?
-  teacherId     Int
-  image_path    String?
-  price         Float               @default(100)
-  discount      Float?
-  teacher       User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
-  enrollments   Enrollment[]        @relation("CourseToEnrollment")
-  requests      EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
-  chapters      Chapter[]           @relation("ChapterToCourse")
-  schedules     CourseSchedule[]    @relation("CourseToCourseSchedule")
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  CourseSession CourseSession[]
-  Quiz          Quiz[]
-  Payment       Payment[]
-
-  @@index([teacherId], map: "idx_course_teacher_id")
-  @@map("course")
-}
-
-model User {
-  id                    Int                    @id @default(autoincrement())
-  email                 String                 @unique(map: "unique_user_email")
-  first_name            String?
-  last_name             String?
-  image_path            String?
-  age                   Int?
-  payments              Payment[]
-  password              String
-  phone                 String?
-  address               String?
-  role                  Role                   @default(USER)
-  Center_name           String?
-  AdditionalAddress     String?
-  countryCode           String?
-  cityCode              String?
-  regionId              Int?
-  enrollments           Enrollment[]           @relation("UserToEnrollment")
-  teachingCourses       Course[]               @relation("TeacherToCourse")
-  enrollmentRequest     EnrollmentRequest[]    @relation("UserToEnrollmentRequest")
-  chapterProgress       ChapterProgress[]      @relation("UserToChapterProgress")
-  createdAt             DateTime               @default(now())
-  updatedAt             DateTime               @updatedAt
-  Attendance            Attendance[]
-  QuizAttempt           QuizAttempt[]
-  Quiz                  Quiz[]
-  assignmentSubmissions AssignmentSubmission[]
-  assignmentsCreated    Assignment[]
-  sentMessages          Message[]              @relation("SentMessages")
-  receivedMessages      Message[]              @relation("ReceivedMessages")
-
-  @@index([email], map: "idx_user_email")
-  @@map("user")
-}
-
-model Message {
-  id         Int         @id @default(autoincrement())
-  content    String      @db.Text
-  type       MessageType
-  senderId   Int
-  receiverId Int? // null = broadcast to all course students
-  courseId   Int? // for COURSE_BROADCAST and TO_TEACHER messages
-  imageUrl   String?     @db.Text
-  isRead     Boolean     @default(false)
-  createdAt  DateTime    @default(now())
-
-  sender   User  @relation("SentMessages", fields: [senderId], references: [id])
-  receiver User? @relation("ReceivedMessages", fields: [receiverId], references: [id])
-
-  @@index([senderId])
-  @@index([receiverId])
-  @@index([courseId])
-  @@map("message")
-}
-
-model Enrollment {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  courseId  Int
-  createdAt DateTime @default(now())
-
-  user   User   @relation("UserToEnrollment", fields: [studentId], references: [id], map: "fk_enrollment_user")
-  course Course @relation("CourseToEnrollment", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_course")
-
-  @@unique([studentId, courseId], name: "unique_enrollment_student_course", map: "idx_enrollment_student_course")
-  @@index([studentId], map: "idx_enrollment_student_id")
-  @@index([courseId], map: "idx_enrollment_course_id")
-  @@map("enrollment")
-}
-
-model EnrollmentRequest {
-  id        Int                     @id @default(autoincrement())
-  studentId Int
-  courseId  Int
-  status    EnrollmentRequestStatus @default(SENT)
-  createdAt DateTime                @default(now())
-
-  student User     @relation("UserToEnrollmentRequest", fields: [studentId], references: [id], map: "fk_enrollment_request_user")
-  course  Course   @relation("CourseToEnrollmentRequest", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_enrollment_request_course")
-  Payment Payment?
-
-  @@unique([studentId, courseId], name: "unique_enrollment_request_student_course", map: "idx_enrollment_request_student_course")
-  @@index([studentId], map: "idx_enrollment_request_student_id")
-  @@index([courseId], map: "idx_enrollment_request_course_id")
-  @@index([status], map: "idx_enrollment_request_status")
-  @@map("enrollmentrequest")
-}
-
-model ChapterProgress {
-  id        Int      @id @default(autoincrement())
-  studentId Int
-  chapterId Int
-  progress  Float    @default(0)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  student User    @relation("UserToChapterProgress", fields: [studentId], references: [id], map: "fk_chapter_progress_user")
-  chapter Chapter @relation("ChapterToChapterProgress", fields: [chapterId], references: [id], onDelete: Cascade, map: "fk_chapter_progress_chapter")
-
-  @@unique([studentId, chapterId], name: "unique_chapter_progress_student_chapter", map: "idx_chapter_progress_student_chapter")
-  @@index([studentId], map: "idx_chapter_progress_student_id")
-  @@index([chapterId], map: "idx_chapter_progress_chapter_id")
-  @@map("chapterprogress")
-}
-
-// model CourseSchedule {
-//   id        Int       @id @default(autoincrement())
-//   courseId  Int
-//   day       DayOfWeek
-//   startTime String // "10:00"
-//   endTime   String // "12:00"
-//   roomId Int
-//   room   Room @relation(fields: [roomId], references: [id])
-//   course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade, map: "fk_course_schedule_course")
-
-//   @@unique([day, startTime, room], name: "unique_course_schedule_day_time_room", map: "idx_course_schedule_day_time_room")
-//   @@index([courseId], map: "idx_course_schedule_course_id")
-//   @@index([day], map: "idx_course_schedule_day")
-//   @@map("courseschedule")
-// }
-model CourseSchedule {
-  id        Int       @id @default(autoincrement())
-  courseId  Int
-  roomId    Int
-  day       DayOfWeek
-  startTime String
-  endTime   String
-
-  course Course @relation("CourseToCourseSchedule", fields: [courseId], references: [id], onDelete: Cascade)
-  room   Room   @relation(fields: [roomId], references: [id])
-
-  @@unique([day, startTime, roomId], name: "unique_course_schedule_day_time_room")
-  @@index([courseId])
-  @@index([day])
-  @@index([roomId])
-  @@map("courseschedule")
-}
-
-model CourseSession {
-  id        Int      @id @default(autoincrement())
-  courseId  Int
-  date      DateTime // تاريخ الحصة (2026-01-01)
-  startTime String // "10:00"
-  endTime   String // "12:00"
-  roomId    Int
-  room      Room     @relation(fields: [roomId], references: [id])
-
-  course     Course       @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  attendance Attendance[]
-
-  createdAt DateTime @default(now())
-
-  @@index([roomId])
-  @@index([courseId])
-  @@map("course_sessions")
-}
-
-model Attendance {
-  id        Int              @id @default(autoincrement())
-  sessionId Int
-  studentId Int
-  status    AttendanceStatus @default(PRESENT)
-
-  session CourseSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
-  student User          @relation(fields: [studentId], references: [id])
-
-  createdAt DateTime @default(now())
-
-  @@unique([sessionId, studentId])
-  @@index([studentId])
-  @@index([sessionId])
-  @@map("attendance")
-}
-
-model Quiz {
-  id          Int     @id @default(autoincrement())
-  title       String
-  description String?
-
-  type      QuizType
-  courseId  Int?
-  chapterId Int?
-
-  startTime   DateTime
-  endTime     DateTime
-  durationMin Int
-  totalMarks  Int
-  keepAnswers Boolean  @default(false)
-  isPublished Boolean  @default(false)
-
-  createdBy Int
-  teacher   User @relation(fields: [createdBy], references: [id])
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  course    Course?        @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  chapter   Chapter?       @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  questions QuizQuestion[]
-  attempts  QuizAttempt[]
-
-  @@index([courseId], map: "Quiz_courseId_idx")
-  @@index([chapterId], map: "Quiz_chapterId_idx")
-  @@index([createdBy], map: "idx_quiz_created_by")
-  @@map("quiz")
-}
-
-model QuizQuestion {
-  id     Int @id @default(autoincrement())
-  quizId Int
-
-  question String
-  marks    Int    @default(1)
-
-  createdAt DateTime @default(now())
-
-  quiz              Quiz                @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  options           QuizOption[]
-  QuizAttemptAnswer QuizAttemptAnswer[]
-
-  @@index([quizId], map: "QuizQuestion_quizId_idx")
-  @@map("quizquestion")
-}
-
-model QuizOption {
-  id         Int @id @default(autoincrement())
-  questionId Int
-
-  text      String
-  isCorrect Boolean @default(false)
-
-  question          QuizQuestion        @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  QuizAttemptAnswer QuizAttemptAnswer[]
-
-  @@index([questionId], map: "QuizOption_questionId_idx")
-  @@map("quizoption")
-}
-
-model QuizAttempt {
-  id        Int @id @default(autoincrement())
-  quizId    Int
-  studentId Int
-
-  score  Int        @default(0)
-  status QuizStatus // IN_PROGRESS | SUBMITTED | TIMED_OUT
-
-  startedAt   DateTime  @default(now())
-  submittedAt DateTime?
-
-  quiz    Quiz @relation(fields: [quizId], references: [id], onDelete: Cascade)
-  student User @relation(fields: [studentId], references: [id])
-
-  answers QuizAttemptAnswer[]
-
-  @@unique([quizId, studentId], map: "QuizAttempt_quizId_studentId_key")
-  @@index([studentId], map: "QuizAttempt_studentId_idx")
-  @@map("quizattempt")
-}
-
-model QuizAttemptAnswer {
-  id         Int @id @default(autoincrement())
-  attemptId  Int
-  questionId Int
-  optionId   Int
-
-  isCorrect Boolean
-
-  attempt  QuizAttempt  @relation(fields: [attemptId], references: [id], onDelete: Cascade)
-  question QuizQuestion @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  option   QuizOption   @relation(fields: [optionId], references: [id], onDelete: Cascade)
-
-  @@unique([attemptId, questionId], map: "QuizAttemptAnswer_attemptId_questionId_key")
-  @@index([attemptId], map: "QuizAttemptAnswer_attemptId_idx")
-  @@index([questionId], map: "QuizAttemptAnswer_questionId_fkey")
-  @@index([optionId], map: "QuizAttemptAnswer_optionId_fkey")
-  @@map("quizattemptanswer")
-}
-
-model Assignment {
-  id          Int      @id @default(autoincrement())
-  chapterId   Int
-  title       String
-  description String?
-  dueDate     DateTime
-  maxGrade    Int
-  allowLate   Boolean  @default(true)
-
-  createdBy Int
-  teacher   User @relation(fields: [createdBy], references: [id])
-
-  chapter     Chapter                @relation(fields: [chapterId], references: [id], onDelete: Cascade)
-  submissions AssignmentSubmission[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@index([chapterId])
-  @@index([createdBy])
-  @@map("assignment")
-}
-
-model AssignmentSubmission {
-  id           Int @id @default(autoincrement())
-  assignmentId Int
-  studentId    Int
-
-  filePath    String
-  submittedAt DateTime                   @default(now())
-  status      AssignmentSubmissionStatus
-
-  grade    Int?
-  feedback String?
-
-  assignment Assignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
-  student    User       @relation(fields: [studentId], references: [id])
-
-  @@unique([assignmentId, studentId], name: "unique_assignment_student")
-  @@index([studentId])
-  @@index([assignmentId])
-  @@map("assignmentsubmission")
-}
-
-model Room {
-  id       Int      @id @default(autoincrement())
-  name     String   @unique
-  type     RoomType
-  capacity Int?
-  location String?
-  isActive Boolean  @default(true)
-
-  schedules CourseSchedule[]
-  sessions  CourseSession[]
-
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  @@map("room")
-}
-
-model Payment {
-  id                  Int @id @default(autoincrement())
-  userId              Int
-  courseId            Int
-  enrollmentRequestId Int
-
-  amountCents Int
-  status      PaymentStatus @default(PENDING)
-
-  paymobOrderId Int?
-  transactionId Int?
-
-  user      User              @relation(fields: [userId], references: [id])
-  course    Course            @relation(fields: [courseId], references: [id])
-  request   EnrollmentRequest @relation(fields: [enrollmentRequestId], references: [id], onDelete: Cascade)
-  createdAt DateTime          @default(now())
-
-  @@unique([enrollmentRequestId])
-  @@index([userId])
-  @@index([courseId])
+enum payment_status {
+  PENDING
+  PAID
+  FAILED
 }

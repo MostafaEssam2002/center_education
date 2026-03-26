@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { io } from 'socket.io-client';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { chatAPI, uploadAPI, API_BASE_URL } from '../services/api';
 import Swal from 'sweetalert2';
@@ -11,7 +12,6 @@ const MessageBubble = ({ msg, currentUserId }) => {
 
     return (
         <div className={`chat-bubble-wrapper ${isMine ? 'mine' : 'theirs'}`} data-id={msg.id}>
-            {!isMine && <span className="chat-sender-name">{msg.sender?.first_name || 'User'}</span>}
             <div className={`chat-bubble ${isMine ? 'bubble-mine' : 'bubble-theirs'}`}>
                 {msg.imageUrl && (
                     <div className="chat-bubble-image" style={{ marginBottom: '5px', borderRadius: '4px', overflow: 'hidden', background: '#f0f2f5', minWidth: '200px', minHeight: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
@@ -69,6 +69,8 @@ export default function Chat() {
     const [inputText, setInputText] = useState('');
     const [loading, setLoading] = useState(false);
     const [filterTab, setFilterTab] = useState('All');
+    const [onlineUsers, setOnlineUsers] = useState(new Set());
+    const [isAutoScroll, setIsAutoScroll] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
     const [teacherInbox, setTeacherInbox] = useState([]);
     const [employeeInbox, setEmployeeInbox] = useState([]);
@@ -76,8 +78,13 @@ export default function Chat() {
     const [uploading, setUploading] = useState(false);
 
     const messagesEndRef = useRef(null);
+    const messagesContainerRef = useRef(null);
     const socketRef = useRef(null);
     const fileInputRef = useRef(null);
+    const activeChatRef = useRef(null);
+    const userRef = useRef(user);
+    const navigate = useNavigate();
+    const location = useLocation();
 
     const isTeacher = user?.role === 'TEACHER';
     const isEmployee = user?.role === 'EMPLOYEE' || user?.role === 'ADMIN';
@@ -106,29 +113,67 @@ export default function Chat() {
     }, [token, isStudent, isTeacher, isEmployee, loadInboxes]);
 
     useEffect(() => {
+        activeChatRef.current = activeChat;
+    }, [activeChat]);
+
+    useEffect(() => {
+        userRef.current = user;
+    }, [user]);
+
+    useEffect(() => {
+        // In case we navigated to chat from Users page
+        const openChatState = location.state?.openChatConfig;
+        if (openChatState) {
+            openChat(openChatState);
+            navigate(location.pathname, { replace: true, state: {} });
+        }
+    }, [location.state, location.pathname, navigate]);
+
+    useEffect(() => {
         if (!token) return;
         const s = io(`${API_BASE_URL}`, { auth: { token }, transports: ['websocket', 'polling'] });
 
         s.on('connect', () => { setConnected(true); console.log('✅ Socket Connected'); });
         s.on('disconnect', () => { setConnected(false); });
 
+        s.on('onlineUsers', (ids) => {
+            setOnlineUsers(new Set(ids));
+        });
+
         s.on('newPrivateMessage', (msg) => {
             console.log('New message received:', msg);
-            setMessages(p => {
-                const exists = p.some(m => m.id === msg.id);
-                if (exists) return p;
-                return [...p, msg];
-            });
+            const activeChatLatest = activeChatRef.current;
+            const activeUserLatest = userRef.current;
+
+            const shouldAddToCurrentChat = activeChatLatest && (
+                (activeChatLatest.type === 'teacher' && msg.courseId === activeChatLatest.courseId) ||
+                (activeChatLatest.type === 'employee' && ((msg.senderId === activeChatLatest.employeeId && msg.receiverId === activeUserLatest?.id) || (msg.receiverId === activeChatLatest.employeeId && msg.senderId === activeUserLatest?.id))) ||
+                (activeChatLatest.type === 'teacher_student' && ((msg.senderId === activeChatLatest.studentId && msg.receiverId === activeUserLatest?.id) || (msg.senderId === activeUserLatest?.id && msg.receiverId === activeChatLatest.studentId)) && msg.courseId === activeChatLatest.courseId) ||
+                (activeChatLatest.type === 'employee_student' && ((msg.senderId === activeChatLatest.studentId && msg.receiverId === activeUserLatest?.id) || (msg.senderId === activeUserLatest?.id && msg.receiverId === activeChatLatest.studentId)))
+            );
+
+            if (shouldAddToCurrentChat) {
+                setMessages(p => {
+                    const exists = p.some(m => m.id === msg.id);
+                    if (exists) return p;
+                    return [...p, msg];
+                });
+            }
+
             loadInboxes();
         });
 
         s.on('newCourseMessage', msg => {
             console.log('New course message received:', msg);
-            setMessages(p => {
-                const exists = p.some(m => m.id === msg.id);
-                if (exists) return p;
-                return [...p, msg];
-            });
+            const activeChatLatest = activeChatRef.current;
+            if (activeChatLatest?.type === 'course_broadcast' && activeChatLatest.courseId === msg.courseId) {
+                setMessages(p => {
+                    const exists = p.some(m => m.id === msg.id);
+                    if (exists) return p;
+                    return [...p, msg];
+                });
+            }
+            loadInboxes();
         });
 
         s.on('courseHistory', d => {
@@ -147,8 +192,36 @@ export default function Chat() {
         return () => s.disconnect();
     }, [token, loadInboxes]);
 
+    const loadConversation = useCallback(async (config) => {
+        try {
+            setLoading(true);
+            let res;
+
+            if (config.type === 'course_broadcast') {
+                res = await chatAPI.getCourseMessages(config.courseId);
+            } else if (config.type === 'teacher') {
+                res = await chatAPI.getConversationWithTeacher(config.courseId);
+            } else if (config.type === 'employee') {
+                res = await chatAPI.getConversationWithEmployee(config.employeeId);
+            } else if (config.type === 'teacher_student') {
+                res = await chatAPI.getTeacherStudentConversation(config.courseId, config.studentId);
+            } else if (config.type === 'employee_student') {
+                res = await chatAPI.getConversationWithEmployee(config.studentId);
+            }
+
+            if (res?.data) {
+                setMessages(res.data);
+            }
+        } catch (err) {
+            console.error('Chat load error', err);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
     const openChat = (config) => {
-        setActiveChat(config); setMessages([]); setLoading(true);
+        setActiveChat(config);
+        setMessages([]);
 
         // ✅ إخفاء الـ badge فوراً (local update)
         if (config.type === 'teacher_student') {
@@ -173,14 +246,26 @@ export default function Chat() {
             ));
         }
 
-        const sid = socketRef.current; if (!sid) { setLoading(false); return; }
+        const sid = socketRef.current;
+        if (!sid) {
+            loadConversation(config);
+            return;
+        }
 
-        if (config.type === 'course_broadcast') sid.emit('joinCourse', { courseId: config.courseId });
-        else if (config.type === 'teacher') sid.emit('getConversationWithTeacher', { courseId: config.courseId });
-        else if (config.type === 'employee') sid.emit('getConversationWithEmployee', { employeeId: config.employeeId });
-        else if (config.type === 'teacher_student') sid.emit('getTeacherStudentConversation', { studentId: config.studentId, courseId: config.courseId });
-        else if (config.type === 'employee_student') sid.emit('getConversationWithEmployee', { studentId: config.studentId });
+        if (config.type === 'course_broadcast') {
+            sid.emit('joinCourse', { courseId: config.courseId });
+        } else if (config.type === 'teacher') {
+            sid.emit('getConversationWithTeacher', { courseId: config.courseId });
+        } else if (config.type === 'employee') {
+            sid.emit('getConversationWithEmployee', { employeeId: config.employeeId });
+        } else if (config.type === 'teacher_student') {
+            sid.emit('getTeacherStudentConversation', { studentId: config.studentId, courseId: config.courseId });
+        } else if (config.type === 'employee_student') {
+            sid.emit('getConversationWithEmployee', { studentId: config.studentId });
+        }
 
+        // fallback to API if sockets do not respond in 1.2s
+        setTimeout(() => loadConversation(config), 1200);
 
         setTimeout(loadInboxes, 500);
         if (window.innerWidth <= 768) setSidebarClosed(true);
@@ -196,11 +281,14 @@ export default function Chat() {
 
         const payload = { content, imageUrl };
 
+        // Don't add optimistic message by id - server emits the canonical message and we guard duplicates
         if (activeChat.type === 'course_broadcast') s.emit('broadcastToCourse', { ...payload, courseId: activeChat.courseId });
         else if (activeChat.type === 'teacher') s.emit('sendToTeacher', { ...payload, courseId: activeChat.courseId });
         else if (activeChat.type === 'employee') s.emit('sendToEmployee', { ...payload, employeeId: activeChat.employeeId });
         else if (activeChat.type === 'teacher_student') s.emit('replyToStudent', { ...payload, studentId: activeChat.studentId, courseId: activeChat.courseId });
         else if (activeChat.type === 'employee_student') s.emit('employeeReply', { ...payload, studentId: activeChat.studentId });
+
+        setIsAutoScroll(true);
     };
 
     const handleImageUpload = async (e) => {
@@ -227,7 +315,19 @@ export default function Chat() {
         }
     };
 
-    useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
+    useEffect(() => {
+        if (!activeChat || messages.length === 0 || !isAutoScroll) return;
+
+        const chatEl = messagesContainerRef.current;
+        if (chatEl) {
+            // Scroll only the chat panel, avoid global page scroll jumps
+            chatEl.scrollTop = chatEl.scrollHeight;
+            return;
+        }
+
+        // Fallback when the panel ref is not available
+        messagesEndRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
+    }, [messages, activeChat, isAutoScroll]);
 
     const filteredList = (list, key) => list.filter(item => {
         const name = item.user?.first_name || item.title || item.first_name || item.email || '';
@@ -348,14 +448,36 @@ export default function Chat() {
                                 </div>
                                 <div className="active-chat-info">
                                     <h2>{activeChat.title}</h2>
-                                    <span className="active-chat-status">{connected ? 'Online' : 'Offline'}</span>
+                                    <span className="active-chat-status">
+                                        {(() => {
+                                            const reactUserId =
+                                                activeChat.type === 'employee' ? activeChat.employeeId :
+                                                activeChat.type === 'teacher_student' ? activeChat.studentId :
+                                                activeChat.type === 'employee_student' ? activeChat.studentId :
+                                                activeChat.type === 'course_broadcast' ? null : null;
+
+                                            if (reactUserId === null || reactUserId === undefined) {
+                                                return connected ? 'Online' : 'Offline';
+                                            }
+
+                                            return onlineUsers.has(reactUserId) ? 'Online' : 'Offline';
+                                        })()}
+                                    </span>
                                 </div>
                                 <div style={{ marginRight: 'auto', display: 'flex', gap: '20px' }}>
                                     <span className="wa-action-icon">🔍</span>
                                     <span className="wa-action-icon">⋮</span>
                                 </div>
                             </div>
-                            <div className="chat-messages">
+                            <div
+                                className="chat-messages"
+                                ref={messagesContainerRef}
+                                onScroll={(e) => {
+                                    const el = e.target;
+                                    const nearBottom = el.scrollTop + el.clientHeight >= el.scrollHeight - 16;
+                                    setIsAutoScroll(nearBottom);
+                                }}
+                            >
                                 {loading ? (
                                     <div className="chat-loading"><div className="chat-spinner"></div></div>
                                 ) : messages.length === 0 ? (
@@ -407,13 +529,14 @@ export default function Chat() {
                         <div className="chat-welcome">
                             <div className="chat-welcome-content">
                                 <img src="https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png" alt="WhatsApp" className="chat-welcome-icon" style={{ opacity: 0.15, width: '250px' }} />
-                                <h1>WhatsApp Web</h1>
+                                <h1>محادثة مركز التعليم</h1>
                                 <p style={{ maxWidth: '400px', margin: '0 auto', marginBottom: '20px' }}>
-                                    Send and receive messages without keeping your phone online.<br />
-                                    Use WhatsApp on up to 4 linked devices and 1 phone at the same time.
+                                    تواصل مع فريق الدعم أو المدرسين في الوقت الفعلي بدون تعقيد.
+                                    <br />
+                                    ارسل رسائل سواء للنقاشات الجماعية أو للدعم الفردي.
                                 </p>
                                 <div style={{ color: '#8696a0', fontSize: '13px', marginTop: '40px' }}>
-                                    🔒 End-to-end encrypted
+                                    🔒 محفوظة وآمنة
                                 </div>
                             </div>
                         </div>

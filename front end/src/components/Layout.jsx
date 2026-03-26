@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import { useAuth } from '../context/AuthContext';
@@ -8,7 +8,13 @@ import Sidebar from './Sidebar';
 const Layout = ({ children }) => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const [showUserMenu, setShowUserMenu] = useState(false);
+
+  // Show landing page without app chrome
+  if (location.pathname === '/') {
+    return <>{children}</>;
+  }
 
   const handleLogout = () => {
     logout();
@@ -30,6 +36,29 @@ const Layout = ({ children }) => {
   const isTeacher = user?.role === 'TEACHER' || user?.role === 'ADMIN';
   const isStudent = user?.role === 'STUDENT';
 
+  const NAVBAR_ITEMS = [
+    { to: '/dashboard', label: 'لوحة التحكم', roles: ['ALL'] },
+    { to: '/users', label: 'المستخدمين', roles: ['ADMIN'] },
+    { to: '/courses', label: 'الكورسات', roles: ['ALL'] },
+    { to: '/chat', label: 'المحادثات', roles: ['ALL'], isChat: true },
+    { to: '/attendance', label: 'تسجيل الحضور', roles: ['EMPLOYEE', 'TEACHER'] },
+    { to: '/schedule', label: 'الجدول العام', roles: ['ADMIN', 'TEACHER', 'EMPLOYEE'] },
+    { to: '/rooms', label: 'إدارة الغرف', roles: ['ADMIN', 'TEACHER', 'EMPLOYEE'] },
+    { to: '/enrollment-requests', label: 'طلبات الالتحاق', roles: ['TEACHER'] },
+    { to: '/my-enrollments', label: 'كورساتي', roles: ['STUDENT'] },
+    { to: '/student-schedule', label: 'مواعيدي', roles: ['STUDENT'] },
+    { to: '/my-quizzes', label: 'اختباراتي', roles: ['STUDENT'] },
+    { to: '/my-assignments', label: 'واجباتي', roles: ['STUDENT'] },
+    { to: '/pending-payments', label: '💰 مدفوعات', roles: ['STUDENT'], className: 'navbar-warning' },
+  ];
+
+  const getVisibleNavbarItems = () => {
+    const role = user?.role || '';
+    return NAVBAR_ITEMS.filter(item =>
+      item.roles.includes('ALL') || item.roles.includes(role)
+    );
+  };
+
   // مكون قائمة المستخدم المنسدلة
   const UserMenu = () => {
     return (
@@ -40,7 +69,15 @@ const Layout = ({ children }) => {
           title="قائمة المستخدم"
         >
           <span className="user-menu-avatar">
-            {(user?.first_name && user.first_name[0]) || user?.email?.[0] || '👤'}
+            {user?.image_path ? (
+              <img 
+                src={user.image_path.startsWith('http') ? user.image_path : `${API_BASE_URL}${user.image_path}`} 
+                alt="Avatar" 
+                style={{width: '100%', height: '100%', borderRadius: '50%', objectFit: 'cover', display: 'block'}} 
+              />
+            ) : (
+              (user?.first_name && user.first_name[0]) || user?.email?.[0] || '👤'
+            )}
           </span>
           <span className="user-menu-name">{user?.first_name || user?.email}</span>
           <span className={`user-menu-arrow ${showUserMenu ? 'open' : ''}`}>▼</span>
@@ -124,130 +161,81 @@ const Layout = ({ children }) => {
 
   return (
     <div className="layout-wrapper">
-      <header className="navbar-header">
-        <div className="navbar-brand">
-          <h1>مركز التعليم</h1>
-        </div>
+      <Sidebar />
 
-        {isAuthenticated ? (
-          <nav className="navbar-menu">
-            <Link to="/dashboard" className="navbar-link">
-              لوحة التحكم
-            </Link>
+      <div className="layout-content-area">
+        <header className="navbar-header">
+          <div className="navbar-brand">
+            <h1>مركز التعليم</h1>
+          </div>
 
-            {(user?.role === 'ADMIN') && (
-              <Link to="/users" className="navbar-link">
-                المستخدمين
+          {isAuthenticated ? (
+            <nav className="navbar-menu">
+              {getVisibleNavbarItems().map((item) => {
+                if (item.isChat) {
+                  return <ChatLink key={item.to || item.label} />;
+                }
+
+                return (
+                  <Link
+                    key={item.to}
+                    to={item.to}
+                    className={`navbar-link${item.className ? ` ${item.className}` : ''}`}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
+
+              {user && <UserMenu />}
+            </nav>
+          ) : (
+            <nav className="navbar-menu">
+              <Link to="/login" className="navbar-link">
+                تسجيل الدخول
               </Link>
-            )}
-
-            <Link to="/courses" className="navbar-link">
-              الكورسات
-            </Link>
-
-            <ChatLink />
-
-            {(user?.role === 'EMPLOYEE') && (
-              <Link to="/attendance" className="navbar-link">
-                تسجيل الحضور
+              <Link to="/register" className="navbar-link">
+                تسجيل جديد
               </Link>
-            )}
+            </nav>
+          )}
+        </header>
 
-            {!isStudent && (
-              <>
-                <Link to="/schedule" className="navbar-link">
-                  الجدول العام
-                </Link>
-                <Link to="/rooms" className="navbar-link">
-                  إدارة الغرف
-                </Link>
-              </>
-            )}
-
-            {isTeacher && (
-              <>
-                <Link to="/enrollment-requests" className="navbar-link">
-                  طلبات الالتحاق
-                </Link>
-                <Link to="/attendance" className="navbar-link">
-                  تسجيل الحضور
-                </Link>
-              </>
-            )}
-
-            {isStudent && (
-              <>
-                <Link to="/my-enrollments" className="navbar-link">
-                  كورساتي
-                </Link>
-                <Link to="/student-schedule" className="navbar-link">
-                  مواعيدي
-                </Link>
-                <Link to="/my-quizzes" className="navbar-link">
-                  اختباراتي
-                </Link>
-                <Link to="/my-assignments" className="navbar-link">
-                  واجباتي
-                </Link>
-                <Link to="/pending-payments" className="navbar-link navbar-warning">
-                  💰 مدفوعات
-                </Link>
-              </>
-            )}
-
-            {user && (
-              <UserMenu />
-            )}
-          </nav>
-        ) : (
-          <nav className="navbar-menu">
-            <Link to="/login" className="navbar-link">
-              تسجيل الدخول
-            </Link>
-            <Link to="/register" className="navbar-link">
-              تسجيل جديد
-            </Link>
-          </nav>
-        )}
-      </header>
-
-      <div className="layout-main-wrapper">
-        <Sidebar />
         <main className="layout-main">{children}</main>
+
+        <footer className="app-footer">
+          <div className="footer-content">
+            <div className="footer-brand">
+              <h2 className="footer-logo">مركز التعليم</h2>
+              <p className="footer-tagline">منصة تعليمية متكاملة للطلاب والمعلمين</p>
+            </div>
+
+            <div className="footer-links">
+              <h3 className="footer-links-title">روابط سريعة</h3>
+              <ul>
+                <Link to="/dashboard">لوحة التحكم</Link>
+                <Link to="/courses">الكورسات</Link>
+                <Link to="/chat">المحادثات</Link>
+                {isStudent && <Link to="/my-enrollments">كورساتي</Link>}
+                {isTeacher && <Link to="/enrollment-requests">طلبات الالتحاق</Link>}
+              </ul>
+            </div>
+
+            <div className="footer-info">
+              <h3 className="footer-links-title">معلومات</h3>
+              <ul>
+                <li>📧 support@center.edu</li>
+                <li>📞 01118606952</li>
+                <li>🕐 السبت – الخميس: 9ص – 9م</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="footer-bottom">
+            <p>© {new Date().getFullYear()} مركز التعليم – جميع الحقوق محفوظة</p>
+          </div>
+        </footer>
       </div>
-
-      <footer className="app-footer">
-        <div className="footer-content">
-          <div className="footer-brand">
-            <h2 className="footer-logo">مركز التعليم</h2>
-            <p className="footer-tagline">منصة تعليمية متكاملة للطلاب والمعلمين</p>
-          </div>
-
-          <div className="footer-links">
-            <h3 className="footer-links-title">روابط سريعة</h3>
-            <ul>
-              <Link to="/dashboard">لوحة التحكم</Link>
-              <Link to="/courses">الكورسات</Link>
-              <Link to="/chat">المحادثات</Link>
-              {isStudent && <Link to="/my-enrollments">كورساتي</Link>}
-              {isTeacher && <Link to="/enrollment-requests">طلبات الالتحاق</Link>}
-            </ul>
-          </div>
-
-          <div className="footer-info">
-            <h3 className="footer-links-title">معلومات</h3>
-            <ul>
-              <li>📧 support@center.edu</li>
-              <li>📞 01118606952</li>
-              <li>🕐 السبت – الخميس: 9ص – 9م</li>
-            </ul>
-          </div>
-        </div>
-
-        <div className="footer-bottom">
-          <p>© {new Date().getFullYear()} مركز التعليم – جميع الحقوق محفوظة</p>
-        </div>
-      </footer>
     </div>
   );
 };

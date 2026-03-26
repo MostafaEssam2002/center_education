@@ -9,7 +9,6 @@ const Attendance = () => {
     const [selectedSession, setSelectedSession] = useState(null);
     const [loading, setLoading] = useState(true);
 
-    // Fetch all courses for the dropdown
     useEffect(() => {
         const fetchCourses = async () => {
             try {
@@ -33,27 +32,37 @@ const Attendance = () => {
     };
 
     return (
-        <div className="main-content">
-            <h2 className="mb-4 text-center" style={{ color: '#4a5568' }}>إدارة الحضور والغياب</h2>
+        <div className="attendance-page">
+            <div className="attendance-header">
+                <div className="attendance-header-icon">📋</div>
+                <h2 className="attendance-title">إدارة الحضور والغياب</h2>
+                <p className="attendance-subtitle">تسجيل ومتابعة حضور الطلاب في جلسات الكورسات</p>
+            </div>
 
             {!selectedSession && (
-                <div className="card mb-4 p-3" style={{ boxShadow: '0 4px 6px rgba(0,0,0,0.1)' }}>
-                    <div className="form-group">
-                        <label htmlFor="courseSelect" className="form-label fw-bold">اختر الكورس:</label>
-                        <select
-                            id="courseSelect"
-                            className="form-select form-control"
-                            value={selectedCourseId}
-                            onChange={(e) => setSelectedCourseId(e.target.value)}
-                            style={{ fontSize: '1.1em' }}
-                        >
-                            <option value="">-- اختر كورس --</option>
-                            {courses.map(course => (
-                                <option key={course.id} value={course.id}>
-                                    {course.title}
-                                </option>
-                            ))}
-                        </select>
+                <div className="attendance-course-select-card">
+                    <div className="form-group-modern">
+                        <label htmlFor="courseSelect" className="form-label-modern">
+                            <span className="label-icon">🎓</span>
+                            اختر الكورس:
+                        </label>
+                        {loading ? (
+                            <div className="loading-skeleton"></div>
+                        ) : (
+                            <select
+                                id="courseSelect"
+                                className="form-select-modern"
+                                value={selectedCourseId}
+                                onChange={(e) => setSelectedCourseId(e.target.value)}
+                            >
+                                <option value="">-- اختر كورس --</option>
+                                {courses.map(course => (
+                                    <option key={course.id} value={course.id}>
+                                        {course.title}
+                                    </option>
+                                ))}
+                            </select>
+                        )}
                     </div>
                 </div>
             )}

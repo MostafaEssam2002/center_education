@@ -126,7 +126,7 @@ const ChapterDetail = () => {
                     >
                         ← الفصل السابق
                     </button>
-                    <span style={{ alignSelf: 'center', color: '#999' }}>
+                    <span style={{ alignSelf: 'center', color: 'var(--neutral-400)' }}>
                         الفصل {currentIndex + 1} من {allChapters.length}
                     </span>
                     <button
@@ -141,13 +141,15 @@ const ChapterDetail = () => {
                 {/* Chapter Content */}
                 {chapter.content && (
                     <div style={{ marginBottom: '30px' }}>
-                        <h3 style={{ color: '#667eea', marginBottom: '15px' }}>المحتوى</h3>
+                        <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>المحتوى</h3>
                         <div style={{
                             padding: '20px',
-                            background: '#f8f9fa',
+                            background: 'var(--glass-bg)',
+                            border: '1px solid var(--glass-border)',
                             borderRadius: '12px',
                             lineHeight: '1.8',
-                            whiteSpace: 'pre-wrap'
+                            whiteSpace: 'pre-wrap',
+                            color: 'var(--neutral-100)'
                         }}>
                             {chapter.content}
                         </div>
@@ -174,7 +176,7 @@ const ChapterDetail = () => {
                 {/* Images */}
                 {chapter.imagePath && (
                     <div style={{ marginTop: '30px' }}>
-                        <h3 style={{ color: '#667eea', marginBottom: '15px' }}>الصور</h3>
+                        <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>الصور</h3>
                         <div style={{
                             display: 'grid',
                             gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
@@ -186,7 +188,8 @@ const ChapterDetail = () => {
                                 style={{
                                     width: '100%',
                                     borderRadius: '12px',
-                                    boxShadow: '0 4px 15px rgba(0,0,0,0.1)'
+                                    boxShadow: 'var(--glass-shadow)',
+                                    border: '1px solid var(--glass-border)'
                                 }}
                             />
                         </div>

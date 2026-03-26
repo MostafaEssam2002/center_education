@@ -70,17 +70,18 @@ const CourseStudents = () => {
 
                 <div style={{
                     padding: '15px',
-                    background: '#f8f9fa',
+                    background: 'inherit',
+                    // border: '1px solid var(--glass-border)',
                     borderRadius: '12px',
                     marginBottom: '20px'
                 }}>
                     <div style={{ display: 'flex', gap: '30px', flexWrap: 'wrap' }}>
                         <div>
-                            <strong style={{ color: '#667eea' }}>عدد الطلاب:</strong>
+                            <strong style={{ color: 'var(--primary-light)' }}>عدد الطلاب:</strong>
                             <span style={{ marginRight: '10px' }}>{students.length}</span>
                         </div>
                         <div>
-                            <strong style={{ color: '#667eea' }}>الكورس:</strong>
+                            <strong style={{ color: 'var(--primary-light)' }}>الكورس:</strong>
                             <span style={{ marginRight: '10px' }}>{course.title}</span>
                         </div>
                     </div>

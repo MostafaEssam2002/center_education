@@ -8,16 +8,17 @@ import { LocalStrategy } from './strategies/local.strategy';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { CaslModule } from './casl/casl.module';
+import { OtpService } from './otp.service';
 
 @Module({
   imports: [
     CaslModule,
     UserModule,
     PassportModule,
-    JwtModule.register({secret: process.env.JWT_SECRET ,signOptions: { expiresIn: '1d' },}),
+    JwtModule.register({ secret: process.env.JWT_SECRET, signOptions: { expiresIn: '1d' }, }),
   ],
   // imports: [UserService],
   controllers: [AuthController],
-  providers: [AuthService,LocalStrategy,JwtStrategy,PrismaService],
+  providers: [AuthService, LocalStrategy, JwtStrategy, PrismaService, OtpService],
 })
-export class AuthModule {}
+export class AuthModule { }

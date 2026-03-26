@@ -460,7 +460,7 @@ export default function ManageQuestions() {
                                                 onChange={() => handleOptionChange(option.id, 'isCorrect', true)}
                                                 title="Mark as correct answer"
                                             />
-                                            <span className="mq-option-marker" style={{ background: option.isCorrect ? '#2563eb' : '#f3f4f6', color: option.isCorrect ? 'white' : '#6b7280', border: 'none' }}>
+                                            <span className="mq-option-marker" style={{ background: option.isCorrect ? '#0ea5e9' : '#0d2d56', color: option.isCorrect ? 'white' : '#93aac8', border: `1px solid ${option.isCorrect ? '#0ea5e9' : 'rgba(56, 136, 216, 0.3)'}` }}>
                                                 {String.fromCharCode(65 + index)}
                                             </span>
                                             <input
@@ -469,7 +469,7 @@ export default function ManageQuestions() {
                                                 value={option.text}
                                                 onChange={(e) => handleOptionChange(option.id, 'text', e.target.value)}
                                                 placeholder={`Option ${String.fromCharCode(65 + index)}`}
-                                                style={{ flex: 1, border: option.isCorrect ? '1px solid #2563eb' : '1px solid #d1d5db', background: option.isCorrect ? '#eff6ff' : 'white' }}
+                                                style={{ flex: 1, border: option.isCorrect ? '1px solid #0ea5e9' : '1px solid rgba(56, 136, 216, 0.4)', background: option.isCorrect ? 'rgba(14, 165, 233, 0.1)' : '#0d2d56', color: '#e7f2ff' }}
                                                 required
                                             />
                                             {newQuestion.options.length > 2 && (

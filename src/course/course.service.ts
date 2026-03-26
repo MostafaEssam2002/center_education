@@ -42,7 +42,7 @@ export class CourseService {
             }
           },
           _count: {
-            select: { requests: true }
+            select: { requests: true, enrollments: true }
           }
         },
       }),
@@ -74,7 +74,7 @@ export class CourseService {
           }
         },
         _count: {
-          select: { requests: true }
+          select: { requests: true, enrollments: true }
         }
       },
     });
