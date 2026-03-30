@@ -95,6 +95,12 @@ const Sidebar = () => {
       icon: '💳',
       show: isStudent,
     },
+    {
+      title: 'إحصائيات الطالب',
+      path: '/student-statistics',
+      icon: '📈',
+      show: isStudent,
+    },
   ];
 
   return (

@@ -49,23 +49,23 @@ const StudentSchedule = () => {
                 <div style={{ padding: '20px', overflowX: 'auto' }}>
                     <div style={{ display: 'grid', gridTemplateColumns: `100px repeat(${timeSlots.length}, 130px)`, gap: '5px', minWidth: 'max-content' }}>
                         {/* Header Row */}
-                        <div style={{ fontWeight: 'bold' }}>اليوم / الساعة</div>
+                        <div style={{ fontWeight: 'bold', background: '#122b54', color: '#f1f6ff', padding: '10px', borderRadius: '5px' }}>اليوم / الساعة</div>
                         {timeSlots.map(time => (
-                            <div key={time} style={{ background: '#f0f0f0', padding: '10px', textAlign: 'center', borderRadius: '5px' }}>{time}</div>
+                            <div key={time} style={{ background: '#203f72', color: '#ecf4ff', padding: '10px', textAlign: 'center', borderRadius: '5px' }}>{time}</div>
                         ))}
 
                         {/* Rows */}
                         {daysOrder.map(day => (
                             <div key={day} style={{ display: 'contents' }}>
-                                <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', background: '#f9f9f9', padding: '10px' }}>{dayNames[day]}</div>
+                                <div style={{ fontWeight: 'bold', display: 'flex', alignItems: 'center', background: '#122b54', color: '#f1f6ff', padding: '10px', borderRadius: '5px' }}>{dayNames[day]}</div>
                                 {timeSlots.map(time => {
                                     const item = scheduleItems.find(i => i.day === day && i.startTime === time);
                                     return (
                                         <div
                                             key={`${day}-${time}`}
                                             style={{
-                                                background: item ? '#e6fffa' : '#fafafa',
-                                                border: '1px solid #eee',
+                                                background: item ? '#e6fffa' : '#173A6E',
+                                                border: '1px solid #2F4C7E',
                                                 minHeight: '80px',
                                                 borderRadius: '8px',
                                                 padding: '5px',

@@ -114,13 +114,29 @@ const StudentAssignments = () => {
     const getDaysUntilDue = (dueDate) => {
         const now = new Date();
         const due = new Date(dueDate);
-        const diffTime = due - now;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        const diffMs = due - now;
 
-        if (diffDays < 0) return `متأخر بـ ${Math.abs(diffDays)} يوم`;
-        if (diffDays === 0) return 'ينتهي اليوم';
-        if (diffDays === 1) return 'ينتهي غداً';
-        return `باقي ${diffDays} يوم`;
+        if (diffMs <= 0) {
+            const overdueMs = Math.abs(diffMs);
+            const overdueDays = Math.floor(overdueMs / (1000 * 60 * 60 * 24));
+            const overdueHours = Math.floor((overdueMs % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const overdueMinutes = Math.floor((overdueMs % (1000 * 60 * 60)) / (1000 * 60));
+            const parts = [];
+            if (overdueDays) parts.push(`${overdueDays} يوم`);
+            if (overdueHours) parts.push(`${overdueHours} ساعة`);
+            if (overdueMinutes) parts.push(`${overdueMinutes} دقيقة`);
+            return `متأخر بـ ${parts.join(' و ') || 'أقل من دقيقة'}`;
+        }
+
+        const totalMinutes = Math.floor(diffMs / (1000 * 60));
+        const days = Math.floor(totalMinutes / (60 * 24));
+        const hours = Math.floor((totalMinutes % (60 * 24)) / 60);
+        const minutes = totalMinutes % 60;
+        const parts = [];
+        if (days) parts.push(`${days} يوم`);
+        if (hours) parts.push(`${hours} ساعة`);
+        if (minutes) parts.push(`${minutes} دقيقة`);
+        return `باقي ${parts.join(' و ') || 'أقل من دقيقة'}`;
     };
 
     // Group assignments by course
@@ -158,10 +174,10 @@ const StudentAssignments = () => {
                     Object.entries(groupedAssignments).map(([courseName, courseAssignments]) => (
                         <div key={courseName} style={{ marginBottom: '30px' }}>
                             <h3 style={{
-                                color: '#667eea',
+                                color: '#a5b4fc',
                                 marginBottom: '15px',
                                 padding: '10px',
-                                background: '#f8f9fa',
+                                background: 'rgba(30, 41, 59, 0.85)',
                                 borderRadius: '8px'
                             }}>
                                 {courseName}
@@ -180,15 +196,15 @@ const StudentAssignments = () => {
                                         <div
                                             key={assignment.id}
                                             style={{
-                                                border: '1px solid #e0e0e0',
+                                                border: '1px solid rgba(71,85,105,0.45)',
                                                 borderRadius: '12px',
                                                 padding: '20px',
-                                                background: '#fff',
-                                                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                                                background: 'rgba(15, 23, 42, 0.95)',
+                                                boxShadow: '0 2px 14px rgba(0,0,0,0.25)',
                                             }}
                                         >
                                             <div style={{ marginBottom: '15px' }}>
-                                                <h4 style={{ color: '#333', marginBottom: '5px' }}>
+                                                <h4 style={{ color: '#e2e8f0', marginBottom: '5px' }}>
                                                     {assignment.title}
                                                 </h4>
                                                 <div style={{ fontSize: '0.85em', color: '#666' }}>
@@ -199,7 +215,7 @@ const StudentAssignments = () => {
                                             {assignment.description && (
                                                 <p style={{
                                                     fontSize: '0.9em',
-                                                    color: '#555',
+                                                    color: '#cbd5e1',
                                                     marginBottom: '15px',
                                                     lineHeight: '1.6'
                                                 }}>
@@ -236,15 +252,15 @@ const StudentAssignments = () => {
 
                                             {submission && submission.feedback && (
                                                 <div style={{
-                                                    background: '#f8f9fa',
+                                                    background: 'rgba(30, 41, 59, 0.85)',
                                                     padding: '10px',
                                                     borderRadius: '8px',
                                                     marginBottom: '15px',
                                                 }}>
-                                                    <strong style={{ fontSize: '0.9em', color: '#667eea' }}>
+                                                    <strong style={{ fontSize: '0.9em', color: '#93c5fd' }}>
                                                         ملاحظات المدرس:
                                                     </strong>
-                                                    <p style={{ fontSize: '0.85em', margin: '5px 0 0 0' }}>
+                                                    <p style={{ fontSize: '0.85em', margin: '5px 0 0 0', color: '#cbd5e1' }}>
                                                         {submission.feedback}
                                                     </p>
                                                 </div>
@@ -281,11 +297,8 @@ const StudentAssignments = () => {
                         <div className="modal-icon-wrapper" style={{ marginBottom: '10px' }}>
                             <div className="modal-icon-info"></div>
                         </div>
-
                         <h3 className="modal-title" style={{ marginBottom: '15px' }}>تسليم الواجب</h3>
-
-                        {error && <div className="alert alert-error" style={{ marginBottom: '15px' }}>{error}</div>}
-
+                        {error && <div className="alert alert-error" style={{ marginBottom: '15px', background: '#111827', color: '#f8fafc', border: '1px solid #3b82f6', padding: '12px 14px', borderRadius: '10px' }}>{error}</div>}
                         <div className="form-group" style={{ marginBottom: '20px' }}>
                             <label style={{ display: 'block', marginBottom: '8px', fontWeight: 'bold' }}>اختر ملف PDF</label>
                             <div style={{ position: 'relative', overflow: 'hidden', display: 'inline-block', width: '100%' }}>
@@ -300,8 +313,10 @@ const StudentAssignments = () => {
                                         border: '2px dashed #ccc',
                                         borderRadius: '8px',
                                         cursor: 'pointer',
-                                        background: '#f9f9f9',
-                                        transition: 'all 0.3s'
+                                        background: 'rgba(30, 41, 59, 0.95)',
+                                        transition: 'all 0.3s',
+                                        color: '#e2e8f0',
+                                        borderColor: 'rgba(148,163,184,0.5)'
                                     }}
                                 />
                             </div>

@@ -23,7 +23,6 @@ export default function StudentQuizzes() {
             setCourses(response.data);
         } catch (err) {
             setError(err.response?.data?.message || 'Failed to load courses');
-            console.error(err);
         } finally {
             setLoading(false);
         }

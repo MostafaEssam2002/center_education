@@ -1931,8 +1931,15 @@ table tbody tr:last-child {
 .option-text {
   flex: 1;
   font-size: 15px;
-  color: var(--neutral-700);
+  color: #f8fafc;
 }
+
+.option-label,
+.option-label:hover,
+.option-label.selected {
+  color: #f8fafc;
+}
+
 
 .question-actions {
   margin-bottom: 20px;
@@ -2049,12 +2056,13 @@ table tbody tr:last-child {
 
 /* Quiz Results Styles */
 .results-summary {
-  background: white;
+  background: rgba(15, 23, 42, 0.87);
   border-radius: var(--radius-lg);
   padding: 30px;
   margin-bottom: 20px;
   box-shadow: var(--shadow-lg);
-  border: 1px solid rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(56, 139, 227, 0.35);
+  color: #dbeafe;
 }
 
 .score-card {
@@ -2062,6 +2070,24 @@ table tbody tr:last-child {
   gap: 30px;
   align-items: center;
   flex-wrap: wrap;
+}
+
+.score-details .detail-row {
+  color: #e2e8f0;
+}
+
+.detail-row .label {
+  color: #7dd3fc;
+}
+
+.score-card .score-circle {
+  background: linear-gradient(135deg, rgba(59, 130, 246, 0.9) 0%, rgba(37, 99, 235, 0.9) 100%);
+}
+
+.results-summary a,
+.results-summary span,
+.results-summary p {
+  color: #f1f5f9;
 }
 
 .score-circle {
@@ -2079,7 +2105,7 @@ table tbody tr:last-child {
 }
 
 .score-value {
-  font-size: 3em;
+  font-size: 2em;
   line-height: 1;
 }
 
@@ -2130,15 +2156,17 @@ table tbody tr:last-child {
 }
 
 .review-question-card {
-  background: white;
+  background: rgba(7, 20, 38, 0.95);
   border-radius: var(--radius-lg);
   padding: 25px;
   margin-bottom: 20px;
   box-shadow: var(--shadow-md);
-  border: 1px solid rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(56, 139, 227, 0.35);
+  color: #e2e8f0;
 }
 
 .review-question-header {
+  color: #93c5fd;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -2149,10 +2177,19 @@ table tbody tr:last-child {
 
 .review-question-text {
   font-size: 1.1em;
-  color: var(--neutral-800);
+  color: #e2e8f0;
   margin-bottom: 20px;
   line-height: 1.6;
   font-weight: 500;
+}
+
+.review-question-card,
+.review-options,
+.review-option,
+.review-question-header,
+.results-summary,
+.detail-row {
+  color: #e2e8f0;
 }
 
 .review-options {
@@ -2163,28 +2200,37 @@ table tbody tr:last-child {
 
 .review-option {
   padding: 15px;
-  border: 2px solid var(--neutral-200);
+  border: 2px solid rgba(100, 116, 139, 0.55);
   border-radius: var(--radius-md);
   display: flex;
   align-items: center;
   gap: 10px;
-  background: white;
+  background: rgba(8, 22, 38, 0.88);
+  color: #f8fafc;
   transition: all 0.2s ease;
 }
 
+.review-option .option-text,
+.review-option .option-letter {
+  color: #f8fafc;
+}
+
 .review-option.correct-answer {
-  border-color: #10b981;
-  background: #f0fdf4;
+  border-color: rgba(34, 197, 94, 0.75);
+  background: rgba(22, 101, 52, 0.23);
+  color: #ccfbf1;
 }
 
 .review-option.wrong-answer {
-  border-color: #ef4444;
-  background: #fef2f2;
+  border-color: rgba(239, 68, 68, 0.85);
+  background: rgba(127, 29, 29, 0.24);
+  color: #fee2e2;
 }
 
 .review-option.correct-selected {
-  border-color: #10b981;
-  background: #f0fdf4;
+  border-color: rgba(14, 165, 233, 0.85);
+  background: rgba(14, 165, 233, 0.18);
+  color: #ddf6ff;
 }
 
 .option-indicators {
@@ -2215,7 +2261,7 @@ table tbody tr:last-child {
 }
 
 .stat-card {
-  background: white;
+  background: inherit;
   border-radius: var(--radius-lg);
   padding: 20px;
   text-align: center;
@@ -2246,13 +2292,13 @@ table tbody tr:last-child {
 }
 
 .results-table-container {
-  background: white;
+  background: rgba(11, 28, 56, 0.86);
   border-radius: var(--radius-lg);
   padding: 25px;
   margin-bottom: 20px;
   box-shadow: var(--shadow-md);
   overflow-x: auto;
-  border: 1px solid rgba(14, 165, 233, 0.1);
+  border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
 .results-table {
@@ -2264,13 +2310,14 @@ table tbody tr:last-child {
 .results-table td {
   padding: 12px;
   text-align: right;
-  border-bottom: 1px solid var(--neutral-200);
+  border-bottom: 1px solid rgba(59, 130, 246, 0.2);
+  color: #e2e8f0;
 }
 
 .results-table th {
-  background: var(--neutral-50);
+  background: rgba(20, 35, 70, 0.75);
   font-weight: 700;
-  color: var(--neutral-700);
+  color: #93c5fd;
   font-size: 13px;
   text-transform: uppercase;
 }

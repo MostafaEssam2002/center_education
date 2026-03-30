@@ -27,7 +27,7 @@ export class AssignmentService {
       data: {
         title: createDto.title,
         description: createDto.description,
-        dueDate: ((d) => { d.setHours(23, 59, 59, 999); return d; })(new Date(createDto.dueDate)),
+        dueDate: new Date(createDto.dueDate),
         maxGrade: createDto.maxGrade,
         allowLate: createDto.allowLate ?? true,
         chapterId: createDto.chapterId,
@@ -200,7 +200,7 @@ export class AssignmentService {
       where: { id: assignmentId },
       data: {
         ...dto,
-        dueDate: dto.dueDate ? ((d) => { d.setHours(23, 59, 59, 999); return d; })(new Date(dto.dueDate)) : undefined,
+        dueDate: dto.dueDate ? new Date(dto.dueDate) : undefined,
       },
     });
   }

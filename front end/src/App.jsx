@@ -17,6 +17,7 @@ import CourseStudents from './pages/CourseStudents';
 import Schedule from './pages/Schedule';
 import Attendance from './pages/Attendance';
 import StudentSchedule from './pages/StudentSchedule';
+import StudentCourseStatistics from './pages/StudentCourseStatistics';
 import RoomManagement from './pages/RoomManagement';
 import AddRoom from './pages/AddRoom';
 import ManageQuizzes from './pages/ManageQuizzes';
@@ -139,6 +140,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StudentSchedule />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/student-statistics"
+                element={
+                  <ProtectedRoute>
+                    <StudentCourseStatistics />
                   </ProtectedRoute>
                 }
               />

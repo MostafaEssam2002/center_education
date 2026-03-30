@@ -45,7 +45,8 @@ const LandingPage = () => {
     // ─── fetch courses from DB ────────────────────────────────────────────────
     useEffect(() => {
         appAPI.getStatistics().then(res => {
-            if (res.data) setTargetStats(res.data);
+            const stats = res.data?.data || res.data || {};
+            if (stats && typeof stats === 'object') setTargetStats(stats);
         }).catch(() => { });
 
         courseAPI.findAll(1, 50)
@@ -109,6 +110,13 @@ const LandingPage = () => {
     // any CTA button respects login state
     const ctaAction = () => go(isAuthenticated ? '/dashboard' : '/register');
     const loginAction = () => go(isAuthenticated ? '/dashboard' : '/login');
+
+    const safeTargetStats = {
+        students: Number(targetStats?.students ?? 0),
+        courses: Number(targetStats?.courses ?? 0),
+        satisfaction: Number(targetStats?.satisfaction ?? 0),
+        teachers: Number(targetStats?.teachers ?? 0),
+    };
 
     // ─── data ──────────────────────────────────────────────────────────────────
     const features = [
@@ -206,7 +214,7 @@ const LandingPage = () => {
                                     <span key={i} style={{ position: 'absolute', top: 0, right: i * 26, width: 40, height: 40, borderRadius: '50%', background: 'rgba(59,130,246,0.2)', border: '2.5px solid rgba(59,130,246,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>{em}</span>
                                 ))}
                             </div>
-                            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>+{targetStats.students.toLocaleString('ar-EG')} طالب نشط يثق بنا</span>
+                            <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>+{safeTargetStats.students.toLocaleString('ar-EG')} طالب نشط يثق بنا</span>
                         </div>
                     </div>
 
@@ -220,7 +228,7 @@ const LandingPage = () => {
                         </div>
                         <div style={{ ...S.floatCard, bottom: '14%', right: -28, animationDelay: '1.5s' }}>
                             <span style={{ fontSize: 22 }}>🏆</span>
-                            <div><div style={{ fontWeight: 700, color: C.textBase, fontSize: 13 }}>دورات متاحة</div><div style={{ color: C.primaryLt, fontWeight: 900, fontSize: 22 }}>{targetStats.courses}+</div></div>
+                            <div><div style={{ fontWeight: 700, color: C.textBase, fontSize: 13 }}>دورات متاحة</div><div style={{ color: C.primaryLt, fontWeight: 900, fontSize: 22 }}>{safeTargetStats.courses}+</div></div>
                         </div>
                     </div>
                 </div>
@@ -400,7 +408,7 @@ const LandingPage = () => {
                 <div style={{ ...S.container, position: 'relative', zIndex: 2, textAlign: 'center' }}>
                     <h2 style={{ fontSize: 38, fontWeight: 900, color: C.textBase, marginBottom: 14, lineHeight: 1.3 }}>هل أنت مستعد لبدء رحلتك التعليمية؟</h2>
                     <p style={{ fontSize: 17, color: C.textMuted, lineHeight: 1.8, marginBottom: 40, maxWidth: 600, margin: '0 auto 40px' }}>
-                        انضم إلى أكثر من {targetStats.students.toLocaleString('ar-EG')} طالب نجحوا في تحقيق أهدافهم المهنية معنا.
+                        انضم إلى أكثر من {safeTargetStats.students.toLocaleString('ar-EG')} طالب نجحوا في تحقيق أهدافهم المهنية معنا.
                         {!isAuthenticated && <><br />سجّل الآن واستمتع بأول دورة مجانًا!</>}
                     </p>
                     <div style={{ display: 'flex', gap: 16, justifyContent: 'center', flexWrap: 'wrap', marginBottom: 28 }}>

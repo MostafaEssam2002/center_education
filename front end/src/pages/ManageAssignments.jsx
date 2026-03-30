@@ -197,7 +197,7 @@ const ManageAssignments = () => {
                 )}
 
                 {showForm && (
-                    <div className="card" style={{ marginBottom: '30px', background: '#f8f9fa' }}>
+                    <div className="card" style={{ marginBottom: '30px', background: 'rgba(15, 23, 42, 0.95)' }}>
                         <h3 style={{ marginBottom: '20px', color: '#667eea' }}>
                             {editingId ? 'تعديل الواجب' : 'واجب جديد'}
                         </h3>
