@@ -44,7 +44,7 @@ const LandingPage = () => {
 
     // ─── fetch courses from DB ────────────────────────────────────────────────
     useEffect(() => {
-        appAPI.getStatistics().then(res => {
+        appAPI.getPlatformStatistics().then(res => {
             const stats = res.data?.data || res.data || {};
             if (stats && typeof stats === 'object') setTargetStats(stats);
         }).catch(() => { });
@@ -144,7 +144,7 @@ const LandingPage = () => {
                     {/* logo */}
                     <div style={S.logo}>
                         <span style={{ fontSize: 26 }}>🎓</span>
-                        <span style={{ fontWeight: 900, fontSize: 20, color: scrolled ? C.primaryLt : '#fff' }}>مركز التعليم</span>
+                        <span style={{ fontWeight: 900, fontSize: 20, color: scrolled ? C.primaryLt : '#fff' }}>ارتقاء Ertiqa</span>
                     </div>
 
                     {/* links */}
@@ -241,10 +241,10 @@ const LandingPage = () => {
                 <div style={S.container}>
                     <div style={S.statsGrid}>
                         {[
-                            { v: counts.students.toLocaleString('ar-EG') + '+', label: 'طالب نشط', icon: '👨‍🎓', c: C.primary },
-                            { v: counts.courses + '+', label: 'دورة تدريبية', icon: '📚', c: C.secondary },
-                            { v: counts.satisfaction + '%', label: 'نسبة الرضا', icon: '⭐', c: C.success },
-                            { v: counts.teachers + '+', label: 'مدرب خبير', icon: '👨‍🏫', c: C.warning },
+                            { v: (Number(counts.students) || 0).toLocaleString('ar-EG') + '+', label: 'طالب نشط', icon: '👨‍🎓', c: C.primary },
+                            { v: (Number(counts.courses) || 0) + '+', label: 'دورة تدريبية', icon: '📚', c: C.secondary },
+                            { v: (Number(counts.satisfaction) || 0) + '%', label: 'نسبة الرضا', icon: '⭐', c: C.success },
+                            { v: (Number(counts.teachers) || 0) + '+', label: 'مدرب خبير', icon: '👨‍🏫', c: C.warning },
                         ].map((s, i) => (
                             <div key={i} style={S.statCard}
                                 onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-8px)'; e.currentTarget.style.boxShadow = `0 20px 40px rgba(0,0,0,0.3)`; }}
@@ -441,7 +441,7 @@ const LandingPage = () => {
                 <div style={S.container}>
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1.5fr', gap: 40, marginBottom: 48 }}>
                         <div>
-                            <div style={{ fontSize: 20, fontWeight: 900, color: C.textBase, marginBottom: 14 }}>🎓 مركز التعليم</div>
+                            <div style={{ fontSize: 20, fontWeight: 900, color: C.textBase, marginBottom: 14 }}>🎓 ارتقاء Ertiqa</div>
                             <p style={{ color: C.textDim, lineHeight: 1.8, fontSize: 14, marginBottom: 20 }}>منصة تعليمية رائدة تسعى لتقديم أفضل تجربة تعلّم من خلال دورات متخصصة ومدربين محترفين.</p>
                             <div style={{ display: 'flex', gap: 10 }}>
                                 {['📘', '🐦', '📷', '💼'].map((ic, i) => (
@@ -477,7 +477,7 @@ const LandingPage = () => {
                         </div>
                     </div>
                     <div style={{ borderTop: `1px solid ${C.border}`, paddingTop: 24, textAlign: 'center', color: C.textDim, fontSize: 13 }}>
-                        © {new Date().getFullYear()} مركز التعليم المتطور – جميع الحقوق محفوظة | صُنع بكل ❤️ في مصر
+                        © {new Date().getFullYear()} ارتقاء Ertiqa المتطور – جميع الحقوق محفوظة | صُنع بكل ❤️ في مصر
                     </div>
                 </div>
             </footer>

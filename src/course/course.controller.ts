@@ -8,6 +8,8 @@ import { Role } from '@prisma/client';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import { GetUser } from 'src/auth/decorators/get-user.decorator';
+import { BadRequestException } from '@nestjs/common';
 
 @ApiTags('Course')
 @Controller('course')
@@ -21,8 +23,20 @@ export class CourseController {
   @ApiOperation({ summary: 'Create a new course' })
   @ApiResponse({ status: 201, description: 'The course has been successfully created.' })
   @ApiResponse({ status: 403, description: 'Forbidden.' })
-  create(@Body() createCourseDto: CreateCourseDto) {
-    return this.courseService.create(createCourseDto);
+  create(
+    @Body() createCourseDto: CreateCourseDto,
+    @GetUser('id') currentUserId: number,
+    @GetUser('role') role: Role,
+  ) {
+    if (role === Role.TEACHER) {
+      return this.courseService.create(createCourseDto, currentUserId);
+    }
+
+    if (!createCourseDto.teacherId) {
+      throw new BadRequestException('teacherId is required when creator is not a teacher');
+    }
+
+    return this.courseService.create(createCourseDto, createCourseDto.teacherId);
   }
 
   @Get()

@@ -253,9 +253,10 @@ const PendingPayments = () => {
                     }}>
                         {pendingRequests.map((request) => {
                             const course = request.course;
-                            const finalPrice = course.discount && course.discount > 0
-                                ? course.price - course.discount
-                                : course.price;
+                            const basePrice = course.paymentType === 'MONTHLY'
+                                ? (course.monthlyPrice || 0)
+                                : (course.price || 0);
+                            const finalPrice = basePrice - (course.discount || 0);
 
                             return (
                                 <div

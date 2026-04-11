@@ -240,21 +240,40 @@ const EnrollmentRequests = () => {
                                 <p style={{ margin: '0 0 15px', color: 'var(--neutral-300)' }}>{selectedCourse.description}</p>
 
                                 <div style={{ marginBottom: '10px' }}>
-                                    {selectedCourse.discount && selectedCourse.discount > 0 ? (
-                                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-                                            <span style={{ fontWeight: 'bold' }}>السعر:</span>
-                                            <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)' }}>
-                                                {selectedCourse.price} ج.م
-                                            </span>
-                                            <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
-                                                {selectedCourse.price - selectedCourse.discount} ج.م
-                                            </span>
-                                        </div>
+                                    {selectedCourse.paymentType === 'MONTHLY' ? (
+                                        selectedCourse.discount && selectedCourse.discount > 0 ? (
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <span style={{ fontWeight: 'bold' }}>السعر:</span>
+                                                <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)' }}>
+                                                    {selectedCourse.monthlyPrice} ج.م/شهر
+                                                </span>
+                                                <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
+                                                    {selectedCourse.monthlyPrice - selectedCourse.discount} ج.م/شهر
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <span style={{ fontWeight: 'bold' }}>السعر:</span>
+                                                <span>{selectedCourse.monthlyPrice ? `${selectedCourse.monthlyPrice} ج.م/شهر` : 'مجاني'}</span>
+                                            </div>
+                                        )
                                     ) : (
-                                        <div style={{ display: 'flex', gap: '8px' }}>
-                                            <span style={{ fontWeight: 'bold' }}>السعر:</span>
-                                            <span>{selectedCourse.price ? `${selectedCourse.price} ج.م` : 'مجاني'}</span>
-                                        </div>
+                                        selectedCourse.discount && selectedCourse.discount > 0 ? (
+                                            <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                                                <span style={{ fontWeight: 'bold' }}>السعر:</span>
+                                                <span style={{ textDecoration: 'line-through', color: 'var(--neutral-400)' }}>
+                                                    {selectedCourse.price} ج.م
+                                                </span>
+                                                <span style={{ color: 'var(--success)', fontWeight: 'bold' }}>
+                                                    {selectedCourse.price - selectedCourse.discount} ج.م
+                                                </span>
+                                            </div>
+                                        ) : (
+                                            <div style={{ display: 'flex', gap: '8px' }}>
+                                                <span style={{ fontWeight: 'bold' }}>السعر:</span>
+                                                <span>{selectedCourse.price ? `${selectedCourse.price} ج.م` : 'مجاني'}</span>
+                                            </div>
+                                        )
                                     )}
                                 </div>
 

@@ -8,15 +8,17 @@ export class CourseService {
   constructor(private prisma: PrismaService) { }
 
   // ================= CREATE COURSE =================
-  async create(createCourseDto: CreateCourseDto) {
+  async create(createCourseDto: CreateCourseDto, teacherId: number) {
     return this.prisma.course.create({
       data: {
         title: createCourseDto.title,
         description: createCourseDto.description,
-        teacherId: createCourseDto.teacherId,
+        teacherId,
         image_path: createCourseDto.imagePath || createCourseDto.image_path,
         price: createCourseDto.price,
-        discount: createCourseDto.discount
+        discount: createCourseDto.discount,
+        paymentType: createCourseDto.paymentType,
+        monthlyPrice: createCourseDto.monthlyPrice
       },
       include: {
         teacher: true,

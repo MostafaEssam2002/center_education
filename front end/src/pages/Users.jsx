@@ -220,7 +220,31 @@ const Users = () => {
                         لا توجد صورة
                       </div>
                     </td>
-                    <td><strong>{user.first_name} {user.last_name}</strong></td>
+                    <td>
+                      <button
+                        className="link-button"
+                        style={{
+                          background: 'transparent',
+                          border: 'none',
+                          padding: 0,
+                          margin: 0,
+                          color: 'var(--primary-400)',
+                          cursor: 'pointer',
+                          textDecoration: 'underline',
+                          fontWeight: 700,
+                          fontSize: 'inherit',
+                          fontFamily: 'inherit',
+                        }}
+                        onClick={() => {
+                          const chatConfig = user.role === 'STUDENT' ?
+                            { type: 'employee_student', studentId: user.id, title: `${user.first_name || user.email}` } :
+                            { type: 'employee', employeeId: user.id, title: `${user.first_name || user.email}` };
+                          navigate('/chat', { state: { openChatUser: user, openChatConfig: chatConfig } });
+                        }}
+                      >
+                        {user.first_name} {user.last_name}
+                      </button>
+                    </td>
                     <td style={{ wordBreak: 'break-all', fontSize: 'clamp(12px, 2vw, 13px)' }}>{user.email}</td>
                     <td style={{ display: 'none' }} className="hide-mobile">{user.age || '-'}</td>
                     <td style={{ display: 'none' }} className="hide-mobile">{user.phone || '-'}</td>
@@ -232,18 +256,6 @@ const Users = () => {
                     </td>
                     <td>
                       <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
-                        <button
-                          className="btn btn-primary"
-                          style={{ padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: '12px' }}
-                          onClick={() => {
-                            const chatConfig = user.role === 'STUDENT' ?
-                              { type: 'employee_student', studentId: user.id, title: `${user.first_name || user.email}` } :
-                              { type: 'employee', employeeId: user.id, title: `${user.first_name || user.email}` };
-                            navigate('/chat', { state: { openChatUser: user, openChatConfig: chatConfig } });
-                          }}
-                        >
-                          دردش
-                        </button>
                         <button
                           className="btn btn-secondary"
                           style={{ padding: 'clamp(6px, 1vw, 8px) clamp(10px, 2vw, 12px)', fontSize: '12px' }}

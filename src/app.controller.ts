@@ -18,6 +18,12 @@ export class AppController {
     return this.appService.getHello();
   }
 
+  @Get('platform-statistics')
+  @ApiOperation({ summary: 'Get public platform statistics' })
+  async getPlatformStatistics() {
+    return this.appService.getStatistics();
+  }
+
   @Get('statistics')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.STUDENT)

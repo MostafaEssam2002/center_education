@@ -1,4 +1,4 @@
-import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body, Query, DefaultValuePipe, BadRequestException } from '@nestjs/common';
+import { Controller, Get, HttpCode, Param, ParseIntPipe, Post, Request, UseGuards, Body, Query, DefaultValuePipe, BadRequestException, Res } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -11,6 +11,7 @@ import { CreateUserDto } from 'src/user/dto/create-user.dto';
 import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiBody, ApiQuery } from '@nestjs/swagger';
 import { LoginDto } from './dto/login.dto';
 import { OtpService } from './otp.service';
+import type { Response } from 'express';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -102,7 +103,7 @@ export class AuthController {
   @ApiBody({ type: LoginDto })
   @ApiResponse({ status: 200, description: 'Logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
-  async login(@Body() loginDto: LoginDto) {
+  async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
     const user = await this.authService.validateUser(loginDto.email, loginDto.password);
     if (!user) {
       return {
@@ -110,7 +111,15 @@ export class AuthController {
         message: "invalid credentials",
       };
     }
-    return this.authService.login(user as any);
+    const result = await this.authService.login(user as any);
+    const token = result?.data?.access_token;
+    if (token) {
+      res.cookie('authToken', token, {
+        httpOnly: true,
+        sameSite: 'lax',
+      });
+    }
+    return result;
   }
 
   @Get("users")

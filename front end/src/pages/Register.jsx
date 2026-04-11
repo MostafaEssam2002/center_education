@@ -155,129 +155,131 @@ const Register = () => {
           <h2>تسجيل مستخدم جديد</h2>
         </div>
         <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="email">البريد الإلكتروني <span className="required">*</span></label>
-            <input
-              type="email"
-              id="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              required
-            />
-          </div>
+          <div className="form-grid">
+            <div className="form-group">
+              <label htmlFor="email">البريد الإلكتروني <span className="required">*</span></label>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="first_name">الاسم الأول <span className="required">*</span></label>
-            <input
-              type="text"
-              id="first_name"
-              name="first_name"
-              value={formData.first_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="first_name">الاسم الأول <span className="required">*</span></label>
+              <input
+                type="text"
+                id="first_name"
+                name="first_name"
+                value={formData.first_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="last_name">الاسم الأخير <span className="required">*</span></label>
-            <input
-              type="text"
-              id="last_name"
-              name="last_name"
-              value={formData.last_name}
-              onChange={handleChange}
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="last_name">الاسم الأخير <span className="required">*</span></label>
+              <input
+                type="text"
+                id="last_name"
+                name="last_name"
+                value={formData.last_name}
+                onChange={handleChange}
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="age">العمر <span className="required">*</span></label>
-            <input
-              type="number"
-              id="age"
-              name="age"
-              value={formData.age}
-              onChange={handleChange}
-              min="1"
-              max="120"
-              required
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="age">العمر <span className="required">*</span></label>
+              <input
+                type="number"
+                id="age"
+                name="age"
+                value={formData.age}
+                onChange={handleChange}
+                min="1"
+                max="120"
+                required
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="password">كلمة المرور <span className="required">*</span></label>
-            <input
-              type="password"
-              id="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              minLength="6"
-              maxLength="15"
-              required
-            />
-            <small style={{ color: '#666', fontSize: '12px' }}>يجب أن تكون بين 6 و 15 حرف</small>
-          </div>
+            <div className="form-group">
+              <label htmlFor="password">كلمة المرور <span className="required">*</span></label>
+              <input
+                type="password"
+                id="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                minLength="6"
+                maxLength="15"
+                required
+              />
+              <small style={{ color: '#666', fontSize: '12px' }}>يجب أن تكون بين 6 و 15 حرف</small>
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="phone">رقم الهاتف</label>
-            <input
-              type="tel"
-              id="phone"
-              name="phone"
-              value={formData.phone}
-              onChange={handleChange}
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="phone">رقم الهاتف</label>
+              <input
+                type="tel"
+                id="phone"
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="address">العنوان</label>
-            <input
-              type="text"
-              id="address"
-              name="address"
-              value={formData.address}
-              onChange={handleChange}
-            />
-          </div>
+            <div className="form-group">
+              <label htmlFor="address">العنوان</label>
+              <input
+                type="text"
+                id="address"
+                name="address"
+                value={formData.address}
+                onChange={handleChange}
+              />
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="role">الدور <span className="required">*</span></label>
-            <select
-              id="role"
-              name="role"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option value="">اختر الدور</option>
-              <option value="USER">مستخدم</option>
-              <option value="TEACHER">معلم</option>
-              <option value="EMPLOYEE">موظف</option>
-              <option value="ASSISTANT">مساعد</option>
-              <option value="STUDENT">طالب</option>
-            </select>
-          </div>
+            <div className="form-group">
+              <label htmlFor="role">الدور <span className="required">*</span></label>
+              <select
+                id="role"
+                name="role"
+                value={formData.role}
+                onChange={handleChange}
+                required
+              >
+                <option value="">اختر الدور</option>
+                <option value="USER">مستخدم</option>
+                <option value="TEACHER">معلم</option>
+                <option value="EMPLOYEE">موظف</option>
+                <option value="ASSISTANT">مساعد</option>
+                <option value="STUDENT">طالب</option>
+              </select>
+            </div>
 
-          <div className="form-group">
-            <label htmlFor="image">صورة المستخدم (اختياري)</label>
-            <input
-              type="file"
-              id="image"
-              name="image"
-              accept="image/*"
-              onChange={handleImageChange}
-            />
-            {imageFile && (
-              <div style={{ marginTop: '10px' }}>
-                <img
-                  src={URL.createObjectURL(imageFile)}
-                  alt="Preview"
-                  style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px' }}
-                />
-              </div>
-            )}
+            <div className="form-group full-width">
+              <label htmlFor="image">صورة المستخدم (اختياري)</label>
+              <input
+                type="file"
+                id="image"
+                name="image"
+                accept="image/*"
+                onChange={handleImageChange}
+              />
+              {imageFile && (
+                <div style={{ marginTop: '10px' }}>
+                  <img
+                    src={URL.createObjectURL(imageFile)}
+                    alt="Preview"
+                    style={{ maxWidth: '200px', maxHeight: '200px', borderRadius: '8px' }}
+                  />
+                </div>
+              )}
+            </div>
           </div>
 
           {error && <div className="message error">{error}</div>}

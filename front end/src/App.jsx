@@ -20,6 +20,7 @@ import StudentSchedule from './pages/StudentSchedule';
 import StudentCourseStatistics from './pages/StudentCourseStatistics';
 import RoomManagement from './pages/RoomManagement';
 import AddRoom from './pages/AddRoom';
+import MonthlyPayments from './pages/MonthlyPayments';
 import ManageQuizzes from './pages/ManageQuizzes';
 import CreateQuiz from './pages/CreateQuiz';
 import EditQuiz from './pages/EditQuiz';
@@ -34,6 +35,7 @@ import StudentAssignments from './pages/StudentAssignments';
 import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
+import AddCourse from './pages/AddCourse';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -75,6 +77,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CourseDetail />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/courses/new"
+                element={
+                  <ProtectedRoute>
+                    <AddCourse />
                   </ProtectedRoute>
                 }
               />
@@ -124,6 +134,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <PendingPayments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/monthly-payments"
+                element={
+                  <ProtectedRoute>
+                    <MonthlyPayments />
                   </ProtectedRoute>
                 }
               />

@@ -7,6 +7,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from '@prisma/client';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { RolesGuard } from 'src/auth/guards/roles/roles.guard';
+import { OwnershipGuard } from 'src/auth/guards/ownership/ownership.guard';
 
 @ApiTags('Users')
 @Controller('user')
@@ -36,8 +37,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN)
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  @UseGuards(JwtAuthGuard, OwnershipGuard)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update a user by ID' })
   @ApiParam({ name: 'id', type: Number, description: 'User ID' })

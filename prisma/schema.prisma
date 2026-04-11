@@ -29,23 +29,26 @@ model Chapter {
 }
 
 model Course {
-  id            Int                 @id @default(autoincrement())
-  title         String
-  description   String?
-  teacherId     Int
-  image_path    String?
-  createdAt     DateTime            @default(now())
-  updatedAt     DateTime            @updatedAt
-  discount      Float?
-  price         Float               @default(100)
-  chapters      Chapter[]           @relation("ChapterToCourse")
-  teacher       User                @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
-  CourseSession CourseSession[]
-  schedules     CourseSchedule[]    @relation("CourseToCourseSchedule")
-  enrollments   Enrollment[]        @relation("CourseToEnrollment")
-  requests      EnrollmentRequest[] @relation("CourseToEnrollmentRequest")
-  payment       payment[]
-  Quiz          Quiz[]
+  id                   Int                   @id @default(autoincrement())
+  title                String
+  description          String?
+  teacherId            Int
+  image_path           String?
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  discount             Float?
+  price                Float                 @default(100)
+  paymentType          PaymentType           @default(ONE_TIME)
+  monthlyPrice         Float?
+  chapters             Chapter[]             @relation("ChapterToCourse")
+  teacher              User                  @relation("TeacherToCourse", fields: [teacherId], references: [id], map: "fk_course_teacher")
+  CourseSession        CourseSession[]
+  schedules            CourseSchedule[]      @relation("CourseToCourseSchedule")
+  enrollments          Enrollment[]          @relation("CourseToEnrollment")
+  requests             EnrollmentRequest[]   @relation("CourseToEnrollmentRequest")
+  payment              payment[]
+  monthlySubscriptions monthlySubscription[]
+  Quiz                 Quiz[]
 
   @@index([teacherId], map: "idx_course_teacher_id")
   @@map("course")
@@ -80,6 +83,7 @@ model User {
   receivedMessages      Message[]              @relation("ReceivedMessages")
   sentMessages          Message[]              @relation("SentMessages")
   broadcastRecipients   BroadcastRecipient[]   @relation("StudentToBroadcastRecipient")
+  monthlySubscriptions  monthlySubscription[]
   OTPs                  Otp[]
   payment               payment[]
   Quiz                  Quiz[]
@@ -104,17 +108,17 @@ model Otp {
 }
 
 model Message {
-  id         Int         @id @default(autoincrement())
-  content    String      @db.Text
-  type       MessageType
-  senderId   Int
-  receiverId Int?
-  courseId   Int?
-  isRead     Boolean     @default(false)
-  createdAt  DateTime    @default(now())
-  imageUrl   String?     @db.Text
-  receiver   User?       @relation("ReceivedMessages", fields: [receiverId], references: [id])
-  sender     User        @relation("SentMessages", fields: [senderId], references: [id])
+  id                  Int                  @id @default(autoincrement())
+  content             String               @db.Text
+  type                MessageType
+  senderId            Int
+  receiverId          Int?
+  courseId            Int?
+  isRead              Boolean              @default(false)
+  createdAt           DateTime             @default(now())
+  imageUrl            String?              @db.Text
+  receiver            User?                @relation("ReceivedMessages", fields: [receiverId], references: [id])
+  sender              User                 @relation("SentMessages", fields: [senderId], references: [id])
   broadcastRecipients BroadcastRecipient[] @relation("MessageToBroadcastRecipient")
 
   @@index([senderId])
@@ -124,14 +128,14 @@ model Message {
 }
 
 model BroadcastRecipient {
-  id        Int      @id @default(autoincrement())
+  id        Int       @id @default(autoincrement())
   messageId Int
   studentId Int
-  isRead    Boolean  @default(false)
+  isRead    Boolean   @default(false)
   readAt    DateTime?
-  createdAt DateTime @default(now())
-  message   Message  @relation("MessageToBroadcastRecipient", fields: [messageId], references: [id], onDelete: Cascade)
-  student   User     @relation("StudentToBroadcastRecipient", fields: [studentId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+  message   Message   @relation("MessageToBroadcastRecipient", fields: [messageId], references: [id], onDelete: Cascade)
+  student   User      @relation("StudentToBroadcastRecipient", fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([messageId, studentId], name: "unique_broadcast_recipient_message_student", map: "idx_broadcast_recipient_unique")
   @@index([messageId], map: "idx_broadcast_recipient_message_id")
@@ -395,6 +399,33 @@ model payment {
   @@index([userId], map: "Payment_userId_idx")
 }
 
+enum MonthlyPaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model monthlySubscription {
+  id            Int                  @id @default(autoincrement())
+  courseId      Int
+  studentId     Int
+  month         Int
+  year          Int
+  amountCents   Int
+  status        MonthlyPaymentStatus @default(PENDING)
+  dueDate       DateTime
+  paidAt        DateTime?
+  transactionId Int?
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
+  course        Course               @relation(fields: [courseId], references: [id], map: "fk_monthly_subscription_course")
+  student       User                 @relation(fields: [studentId], references: [id], map: "fk_monthly_subscription_student")
+
+  @@unique([courseId, studentId, month, year], name: "unique_monthly_subscription")
+  @@index([courseId], map: "monthly_subscription_course_id_idx")
+  @@index([studentId], map: "monthly_subscription_student_id_idx")
+}
+
 enum Role {
   USER
   STUDENT
@@ -459,4 +490,9 @@ enum payment_status {
   PENDING
   PAID
   FAILED
+}
+
+enum PaymentType {
+  ONE_TIME
+  MONTHLY
 }

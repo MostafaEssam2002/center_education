@@ -44,4 +44,36 @@ export class MailService {
             throw new Error('Failed to send verification email');
         }
     }
+
+    async sendReminderEmail(
+        to: string,
+        courseTitle: string,
+        month: number,
+        year: number,
+        amount: number,
+    ) {
+        const subject = `Reminder: Monthly payment due for ${courseTitle}`;
+        const mailOptions = {
+            from: `"Center Education" <${this.configService.get('MAIL_FROM')}>`,
+            to,
+            subject,
+            text: `Dear Student,\n\nYour monthly subscription for ${courseTitle} is due for ${month}/${year}. Please pay ${amount.toFixed(2)} EGP as soon as possible.\n\nThank you.`,
+            html: `
+        <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px; max-width: 600px; margin: auto;">
+          <h2 style="color: #333; text-align: center;">Monthly Payment Reminder</h2>
+          <p>Dear Student,</p>
+          <p>Your monthly subscription for <strong>${courseTitle}</strong> is due for <strong>${month}/${year}</strong>.</p>
+          <p>Please pay <strong>${amount.toFixed(2)} EGP</strong> to keep your course access active.</p>
+          <p style="margin-top: 20px;">Thank you,<br/>Center Education Team</p>
+        </div>
+      `,
+        };
+
+        try {
+            await this.transporter.sendMail(mailOptions);
+        } catch (error) {
+            console.error('Error sending reminder email:', error);
+            throw new Error('Failed to send monthly reminder email');
+        }
+    }
 }

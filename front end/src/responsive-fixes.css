@@ -31,7 +31,9 @@
 
   .user-menu-button {
     gap: 0;
-    padding: 6px;
+    padding: 0;
+    background: transparent;
+    border: none;
   }
 }
 

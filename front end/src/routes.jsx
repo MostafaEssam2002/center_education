@@ -13,7 +13,9 @@ import ChapterDetail from './pages/ChapterDetail';
 import EnrollmentRequests from './pages/EnrollmentRequests';
 import MyEnrollments from './pages/MyEnrollments';
 import PendingPayments from './pages/PendingPayments';
+import MyMonthlyPayments from './pages/MyMonthlyPayments';
 import CourseStudents from './pages/CourseStudents';
+import MonthlyPayments from './pages/MonthlyPayments';
 import Schedule from './pages/Schedule';
 import Attendance from './pages/Attendance';
 import StudentSchedule from './pages/StudentSchedule';
@@ -153,6 +155,14 @@ export const enrollmentRoutes = [
       </ProtectedRoute>
     ),
   },
+  {
+    path: '/my-monthly-payments',
+    element: (
+      <ProtectedRoute>
+        <MyMonthlyPayments />
+      </ProtectedRoute>
+    ),
+  },
 ];
 
 // Schedule and Attendance Routes
@@ -206,6 +216,18 @@ export const roomRoutes = [
     element: (
       <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER', 'EMPLOYEE']}>
         <AddRoom />
+      </ProtectedRoute>
+    ),
+  },
+];
+
+// Employee Routes
+export const employeeRoutes = [
+  {
+    path: '/monthly-payments',
+    element: (
+      <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
+        <MonthlyPayments />
       </ProtectedRoute>
     ),
   },
@@ -340,6 +362,7 @@ export const allRoutes = [
   ...enrollmentRoutes,
   ...scheduleRoutes,
   ...roomRoutes,
+  ...employeeRoutes,
   ...quizRoutes,
   ...assignmentRoutes,
   ...communicationRoutes,

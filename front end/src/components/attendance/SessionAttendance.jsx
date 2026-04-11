@@ -228,7 +228,7 @@ const SessionAttendance = ({ session, onBack }) => {
                                         {student.first_name} {student.last_name}
                                     </td>
                                     <td className="text-center">
-                                        <label className="radio-label radio-present">
+                                        <label className="attendance-radio-label radio-present">
                                             <input
                                                 type="radio"
                                                 name={`status-${student.id}`}
@@ -239,7 +239,7 @@ const SessionAttendance = ({ session, onBack }) => {
                                         </label>
                                     </td>
                                     <td className="text-center">
-                                        <label className="radio-label radio-late">
+                                        <label className="attendance-radio-label radio-late">
                                             <input
                                                 type="radio"
                                                 name={`status-${student.id}`}
@@ -250,7 +250,7 @@ const SessionAttendance = ({ session, onBack }) => {
                                         </label>
                                     </td>
                                     <td className="text-center">
-                                        <label className="radio-label radio-absent">
+                                        <label className="attendance-radio-label radio-absent">
                                             <input
                                                 type="radio"
                                                 name={`status-${student.id}`}

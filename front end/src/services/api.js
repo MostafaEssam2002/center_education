@@ -346,6 +346,22 @@ export const paymentAPI = {
   // Student initiates payment for enrollment request
   initiatePayment: (enrollmentRequestId, integration_id, walletPhoneNumber) =>
     api.post('/payments/initiate', { enrollmentRequestId, integration_id, walletPhoneNumber }),
+
+  // Get monthly subscriptions for a course
+  getMonthlySubscriptionsForCourse: (courseId, month, year) =>
+    api.get(`/payments/monthly/course/${courseId}`, { params: { month, year } }),
+
+  // Get logged-in student's monthly subscriptions
+  getMyMonthlySubscriptions: () =>
+    api.get('/payments/monthly/my'),
+
+  // Mark monthly subscription as paid
+  markMonthlySubscriptionPaid: (subscriptionId, payload) =>
+    api.post(`/payments/monthly/${subscriptionId}/pay`, payload),
+
+  // Generate monthly subscriptions for all courses
+  generateMonthlySubscriptionsForAll: (month, year) =>
+    api.post('/payments/monthly/generate/all', { month, year }),
 };
 
 // Chat API

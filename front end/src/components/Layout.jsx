@@ -166,7 +166,7 @@ const Layout = ({ children }) => {
       <div className="layout-content-area">
         <header className="navbar-header">
           <div className="navbar-brand">
-            <h1>مركز التعليم</h1>
+            <h1>ارتقاء Ertiqa</h1>
           </div>
 
           {isAuthenticated ? (
@@ -206,7 +206,7 @@ const Layout = ({ children }) => {
         <footer className="app-footer">
           <div className="footer-content">
             <div className="footer-brand">
-              <h2 className="footer-logo">مركز التعليم</h2>
+              <h2 className="footer-logo">ارتقاء Ertiqa</h2>
               <p className="footer-tagline">منصة تعليمية متكاملة للطلاب والمعلمين</p>
             </div>
 
@@ -232,7 +232,7 @@ const Layout = ({ children }) => {
           </div>
 
           <div className="footer-bottom">
-            <p>© {new Date().getFullYear()} مركز التعليم – جميع الحقوق محفوظة</p>
+            <p>© {new Date().getFullYear()} ارتقاء Ertiqa – جميع الحقوق محفوظة</p>
           </div>
         </footer>
       </div>

@@ -1,0 +1,3 @@
+-- AlterTable
+ALTER TABLE `course` ADD COLUMN `monthlyPrice` DOUBLE NULL,
+    ADD COLUMN `paymentType` ENUM('ONE_TIME', 'MONTHLY') NOT NULL DEFAULT 'ONE_TIME';

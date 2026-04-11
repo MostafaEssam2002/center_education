@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsNotEmpty, IsNumber, IsOptional } from "class-validator";
+import { IsNotEmpty, IsNumber, IsOptional, IsEnum } from "class-validator";
+import { PaymentType } from "@prisma/client";
 
 export class CreateCourseDto {
     @ApiProperty({ description: 'The title of the course' })
@@ -10,10 +11,10 @@ export class CreateCourseDto {
     @IsNotEmpty()
     description: string;
 
-    @ApiProperty({ description: 'The ID of the teacher' })
-    @IsNotEmpty()
+    @ApiPropertyOptional({ description: 'The ID of the teacher (required if creator is not a teacher)' })
+    @IsOptional()
     @IsNumber()
-    teacherId: number;
+    teacherId?: number;
 
     @ApiPropertyOptional({ description: 'Array of student IDs', type: [Number] })
     @IsOptional()
@@ -36,4 +37,14 @@ export class CreateCourseDto {
     @IsOptional()
     @IsNumber()
     discount?: number;
+
+    @ApiPropertyOptional({ description: 'Type of payment for the course', enum: PaymentType })
+    @IsOptional()
+    @IsEnum(PaymentType)
+    paymentType?: PaymentType;
+
+    @ApiPropertyOptional({ description: 'Monthly price for subscription courses' })
+    @IsOptional()
+    @IsNumber()
+    monthlyPrice?: number;
 }

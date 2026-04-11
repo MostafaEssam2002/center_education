@@ -54,6 +54,12 @@ const Sidebar = () => {
       show: !isStudent,
     },
     {
+      title: 'الاشتراكات الشهرية',
+      path: '/monthly-payments',
+      icon: '💰',
+      show: isAdmin || isEmployee,
+    },
+    {
       title: 'طلبات الالتحاق',
       path: '/enrollment-requests',
       icon: '📬',
@@ -93,6 +99,12 @@ const Sidebar = () => {
       title: 'المدفوعات',
       path: '/pending-payments',
       icon: '💳',
+      show: isStudent,
+    },
+    {
+      title: 'الاشتراكات الشهرية',
+      path: '/my-monthly-payments',
+      icon: '💰',
       show: isStudent,
     },
     {

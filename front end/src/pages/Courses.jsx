@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { courseAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import CourseCard from '../components/CourseCard';
@@ -10,16 +11,17 @@ const Courses = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTitle, setSearchTitle] = useState('');
-  const [showCreateModal, setShowCreateModal] = useState(false);
+  const navigate = useNavigate();
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedCourse, setSelectedCourse] = useState(null);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    teacherId: '',
     imagePath: '',
     price: '',
     discount: '',
+    paymentType: 'ONE_TIME',
+    monthlyPrice: '',
   });
   const [modalConfig, setModalConfig] = useState({
     isOpen: false,
@@ -29,7 +31,7 @@ const Courses = () => {
     confirmText: 'تأكيد',
     cancelText: 'إلغاء',
     hideCancel: false,
-    onConfirm: () => { }
+    onConfirm: () => { },
   });
   const [pagination, setPagination] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
@@ -81,41 +83,16 @@ const Courses = () => {
     setFormData({ ...formData, imagePath: url });
   };
 
-  const handleCreate = async (e) => {
-    e.preventDefault();
-    try {
-      const courseData = {
-        ...formData,
-        teacherId: parseInt(formData.teacherId),
-        price: parseFloat(formData.price) || 0,
-        discount: parseFloat(formData.discount) || 0,
-      };
-      await courseAPI.create(courseData);
-      setShowCreateModal(false);
-      setFormData({ title: '', description: '', teacherId: '', imagePath: '', price: '', discount: '' });
-      loadCourses();
-    } catch (err) {
-      setModalConfig({
-        isOpen: true,
-        title: 'خطأ',
-        message: 'فشل الإنشاء: ' + (err.response?.data?.message || err.message),
-        type: 'danger',
-        confirmText: 'موافق',
-        hideCancel: true,
-        onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
-      });
-    }
-  };
-
   const handleEdit = (course) => {
     setSelectedCourse(course);
     setFormData({
       title: course.title || '',
       description: course.description || '',
-      teacherId: course.teacherId?.toString() || '',
-      imagePath: course.imagePath || '',
+      imagePath: course.image_path || course.imagePath || '',
       price: course.price || '',
       discount: course.discount || '',
+      paymentType: course.paymentType || 'ONE_TIME',
+      monthlyPrice: course.monthlyPrice || '',
     });
     setShowEditModal(true);
   };
@@ -125,9 +102,9 @@ const Courses = () => {
     try {
       const courseData = {
         ...formData,
-        teacherId: parseInt(formData.teacherId),
         price: parseFloat(formData.price) || 0,
         discount: parseFloat(formData.discount) || 0,
+        monthlyPrice: formData.paymentType === 'MONTHLY' ? parseFloat(formData.monthlyPrice) || 0 : null,
       };
       await courseAPI.update(selectedCourse.id, courseData);
       setShowEditModal(false);
@@ -140,7 +117,7 @@ const Courses = () => {
         type: 'danger',
         confirmText: 'موافق',
         hideCancel: true,
-        onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+        onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false })),
       });
     }
   };
@@ -167,10 +144,10 @@ const Courses = () => {
             type: 'danger',
             confirmText: 'موافق',
             hideCancel: true,
-            onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false }))
+            onConfirm: () => setModalConfig(prev => ({ ...prev, isOpen: false })),
           });
         }
-      }
+      },
     });
   };
 
@@ -183,7 +160,7 @@ const Courses = () => {
           <h2>الكورسات</h2>
           <div style={{ display: 'flex', gap: '10px' }}>
             {canManageCourses && (
-              <button className="btn btn-primary" onClick={() => setShowCreateModal(true)}>
+              <button className="btn btn-primary" onClick={() => navigate('/courses/new')}>
                 إضافة كورس جديد
               </button>
             )}
@@ -217,31 +194,16 @@ const Courses = () => {
           <div>
             <div className="course-grid">
               {courses.map((course) => (
-                <CourseCard
-                  key={course.id}
-                  course={course}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
+                <CourseCard key={course.id} course={course} onEdit={handleEdit} onDelete={handleDelete} />
               ))}
             </div>
-
-            {/* Pagination Controls */}
             {pagination && (
               <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', marginTop: '20px', gap: '10px' }}>
-                <button
-                  className="btn btn-primary"
-                  disabled={currentPage === 1}
-                  onClick={() => loadCourses(currentPage - 1)}
-                >
+                <button className="btn btn-primary" disabled={currentPage === 1} onClick={() => loadCourses(currentPage - 1)}>
                   السابق
                 </button>
                 <span>صفحة {currentPage} من {pagination.totalPages}</span>
-                <button
-                  className="btn btn-primary"
-                  disabled={currentPage === pagination.totalPages}
-                  onClick={() => loadCourses(currentPage + 1)}
-                >
+                <button className="btn btn-primary" disabled={currentPage === pagination.totalPages} onClick={() => loadCourses(currentPage + 1)}>
                   التالي
                 </button>
               </div>
@@ -250,203 +212,65 @@ const Courses = () => {
         )}
       </div>
 
-      {/* Create Modal */}
-      {
-        showCreateModal && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}
-            onClick={() => setShowCreateModal(false)}
-          >
-            <div
-              className="card"
-              style={{ maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="card-header">
-                <h2>إضافة كورس جديد</h2>
+      {showEditModal && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0,0,0,0.5)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+          }}
+          onClick={() => setShowEditModal(false)}
+        >
+          <div className="card" style={{ maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' }} onClick={(e) => e.stopPropagation()}>
+            <div className="card-header"><h2>تحديث الكورس</h2></div>
+            <form onSubmit={handleUpdate}>
+              <div className="form-group">
+                <label>العنوان</label>
+                <input type="text" value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
               </div>
-              <form onSubmit={handleCreate}>
-                <div className="form-group">
-                  <label>العنوان <span className="required">*</span></label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>الوصف <span className="required">*</span></label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>السعر <span className="required">*</span></label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                    required
-                  />
-                </div>
-                <div className="form-group">
-                  <label>الخصم (المبلغ)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.discount}
-                    onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>معرف المعلم <span className="required">*</span></label>
-                  <input
-                    type="number"
-                    value={formData.teacherId}
-                    onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                    required
-                  />
-                </div>
-
-                <FileUpload
-                  label="صورة الكورس"
-                  acceptedTypes="image/*"
-                  maxSizeMB={5}
-                  onUploadSuccess={handleImageUpload}
-                />
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                    إضافة
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setShowCreateModal(false)}
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )
-      }
-
-      {/* Edit Modal */}
-      {
-        showEditModal && (
-          <div
-            style={{
-              position: 'fixed',
-              top: 0,
-              left: 0,
-              right: 0,
-              bottom: 0,
-              background: 'rgba(0,0,0,0.5)',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              zIndex: 1000,
-            }}
-            onClick={() => setShowEditModal(false)}
-          >
-            <div
-              className="card"
-              style={{ maxWidth: '600px', width: '90%', maxHeight: '90vh', overflow: 'auto' }}
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="card-header">
-                <h2>تعديل الكورس</h2>
+              <div className="form-group">
+                <label>الوصف</label>
+                <textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
               </div>
-              <form onSubmit={handleUpdate}>
-                <div className="form-group">
-                  <label>العنوان</label>
-                  <input
-                    type="text"
-                    value={formData.title}
-                    onChange={(e) => setFormData({ ...formData, title: e.target.value })}
-                  />
-                </div>
-                <div className="form-group">
-                  <label>الوصف</label>
-                  <textarea
-                    value={formData.description}
-                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  />
-                </div>
+              <div className="form-group">
+                <label>نوع الدفع <span className="required">*</span></label>
+                <select value={formData.paymentType} onChange={(e) => setFormData({ ...formData, paymentType: e.target.value })} required>
+                  <option value="ONE_TIME">دفعة واحدة</option>
+                  <option value="MONTHLY">اشتراك شهري</option>
+                </select>
+              </div>
+              {formData.paymentType === 'ONE_TIME' && (
                 <div className="form-group">
                   <label>السعر</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.price}
-                    onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                  />
+                  <input type="number" min="0" step="0.01" value={formData.price} onChange={(e) => setFormData({ ...formData, price: e.target.value })} required />
                 </div>
+              )}
+              {formData.paymentType === 'MONTHLY' && (
                 <div className="form-group">
-                  <label>الخصم (المبلغ)</label>
-                  <input
-                    type="number"
-                    min="0"
-                    step="0.01"
-                    value={formData.discount}
-                    onChange={(e) => setFormData({ ...formData, discount: e.target.value })}
-                  />
+                  <label>السعر الشهري</label>
+                  <input type="number" min="0" step="0.01" value={formData.monthlyPrice} onChange={(e) => setFormData({ ...formData, monthlyPrice: e.target.value })} required />
                 </div>
-                <div className="form-group">
-                  <label>معرف المعلم</label>
-                  <input
-                    type="number"
-                    value={formData.teacherId}
-                    onChange={(e) => setFormData({ ...formData, teacherId: e.target.value })}
-                  />
-                </div>
-
-                <FileUpload
-                  label="تغيير صورة الكورس"
-                  acceptedTypes="image/*"
-                  maxSizeMB={5}
-                  onUploadSuccess={handleImageUpload}
-                />
-
-                <div style={{ display: 'flex', gap: '10px' }}>
-                  <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>
-                    حفظ
-                  </button>
-                  <button
-                    type="button"
-                    className="btn btn-secondary"
-                    style={{ flex: 1 }}
-                    onClick={() => setShowEditModal(false)}
-                  >
-                    إلغاء
-                  </button>
-                </div>
-              </form>
-            </div>
+              )}
+              <div className="form-group">
+                <label>الخصم (%)</label>
+                <input type="number" min="0" step="0.01" value={formData.discount} onChange={(e) => setFormData({ ...formData, discount: e.target.value })} />
+              </div>
+              <FileUpload label="صورة الكورس" acceptedTypes="image/*" maxSizeMB={5} onUploadSuccess={handleImageUpload} />
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <button type="submit" className="btn btn-primary" style={{ flex: 1 }}>تحديث</button>
+                <button type="button" className="btn btn-secondary" style={{ flex: 1 }} onClick={() => setShowEditModal(false)}>إلغاء</button>
+              </div>
+            </form>
           </div>
-        )
-      }
+        </div>
+      )}
 
       <ConfirmationModal
         isOpen={modalConfig.isOpen}
@@ -459,7 +283,7 @@ const Courses = () => {
         cancelText={modalConfig.cancelText}
         hideCancel={modalConfig.hideCancel}
       />
-    </div >
+    </div>
   );
 };
 

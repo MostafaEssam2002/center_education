@@ -53,6 +53,13 @@ const Dashboard = () => {
             <h3 style={{ color: '#667eea', marginBottom: '10px' }}>📖 الفصول</h3>
             <p>إدارة فصول الكورسات</p>
           </Link>
+
+          {(user?.role === 'ADMIN' || user?.role === 'EMPLOYEE') && (
+            <Link to="/monthly-payments" className="card" style={{ textDecoration: 'none', color: 'inherit', padding: '30px', textAlign: 'center' }}>
+              <h3 style={{ color: '#667eea', marginBottom: '10px' }}>💰 الاشتراكات الشهرية</h3>
+              <p>متابعة مدفوعات الطلاب الشهرية</p>
+            </Link>
+          )}
         </div>
       </div>
     </div>

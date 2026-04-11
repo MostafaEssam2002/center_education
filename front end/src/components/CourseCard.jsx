@@ -37,19 +37,39 @@ const CourseCard = ({ course, onEdit, onDelete }) => {
                 </p>
 
                 <div className="course-card-price" style={{ marginTop: '10px', marginBottom: '10px' }}>
-                    {course.discount && course.discount > 0 ? (
+                    {course.paymentType === 'MONTHLY' ? (
                         <div>
-                            <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
-                                {course.price} ج.م
-                            </span>
-                            <span style={{ color: '#28a745', fontWeight: 'bold' }}>
-                                {course.price - course.discount} ج.م
-                            </span>
+                            <div style={{ fontSize: '12px', color: '#666', marginBottom: '4px' }}>اشتراك شهري</div>
+                            {course.discount && course.discount > 0 ? (
+                                <div>
+                                    <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
+                                        {course.monthlyPrice} ج.م/شهر
+                                    </span>
+                                    <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                        {course.monthlyPrice - course.discount} ج.م/شهر
+                                    </span>
+                                </div>
+                            ) : (
+                                <span style={{ fontWeight: 'bold' }}>
+                                    {course.monthlyPrice ? `${course.monthlyPrice} ج.م/شهر` : 'مجاني'}
+                                </span>
+                            )}
                         </div>
                     ) : (
-                        <span style={{ fontWeight: 'bold' }}>
-                            {course.price ? `${course.price} ج.م` : 'مجاني'}
-                        </span>
+                        course.discount && course.discount > 0 ? (
+                            <div>
+                                <span style={{ textDecoration: 'line-through', color: '#999', marginRight: '8px' }}>
+                                    {course.price} ج.م
+                                </span>
+                                <span style={{ color: '#28a745', fontWeight: 'bold' }}>
+                                    {course.price - course.discount} ج.م
+                                </span>
+                            </div>
+                        ) : (
+                            <span style={{ fontWeight: 'bold' }}>
+                                {course.price ? `${course.price} ج.م` : 'مجاني'}
+                            </span>
+                        )
                     )}
                 </div>
 
