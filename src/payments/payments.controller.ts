@@ -76,6 +76,23 @@ export class PaymentsController {
     );
   }
 
+  @Get('monthly/admin-report')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get monthly subscription report for admin' })
+  getMonthlySubscriptionAdminReport(
+    @Query('month') month?: string,
+    @Query('year') year?: string,
+  ) {
+    const monthNumber = month ? Number(month) : undefined;
+    const yearNumber = year ? Number(year) : undefined;
+    return this.paymentsService.getMonthlySubscriptionAdminReport(
+      monthNumber,
+      yearNumber,
+    );
+  }
+
   @Post('monthly/:id/pay')
   @ApiOperation({ summary: 'Mark a monthly subscription as paid' })
   markMonthlySubscriptionPaid(

@@ -30,7 +30,15 @@ export class AppService {
           include: {
             Quiz: {
               where: { isPublished: true },
-              select: { id: true, title: true, totalMarks: true, courseId: true, isPublished: true },
+              select: {
+                id: true,
+                title: true,
+                totalMarks: true,
+                courseId: true,
+                isPublished: true,
+                startTime: true,
+                endTime: true,
+              },
             },
           },
         },
@@ -135,6 +143,9 @@ export class AppService {
           score: attempt?.score ?? null,
           status: attempt?.status ?? 'NOT_SUBMITTED',
           totalMarks: quiz.totalMarks ?? null,
+          isPublished: quiz.isPublished,
+          startTime: quiz.startTime,
+          endTime: quiz.endTime,
         };
       });
 
@@ -171,6 +182,197 @@ export class AppService {
         totalQuizzes: courses.reduce((sum, course) => sum + course.quizzes.total, 0),
         totalAssignments: courses.reduce((sum, course) => sum + course.assignments.total, 0),
       },
+    };
+  }
+
+  async getTeacherStatistics(teacherId: number) {
+    const courses = await this.prisma.course.findMany({
+      where: { teacherId },
+      include: {
+        enrollments: {
+          include: {
+            user: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        Quiz: {
+          select: {
+            id: true,
+            title: true,
+            totalMarks: true,
+            attempts: {
+              select: {
+                id: true,
+                studentId: true,
+                score: true,
+                status: true,
+                startedAt: true,
+                submittedAt: true,
+                student: {
+                  select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
+        chapters: {
+          include: {
+            assignments: {
+              select: {
+                id: true,
+                title: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return {
+      courses: courses.map((course) => ({
+        id: course.id,
+        title: course.title,
+        enrollments: course.enrollments,
+        quizzes: {
+          details: course.Quiz,
+        },
+        assignments: {
+          details: course.chapters.flatMap((ch) => ch.assignments),
+        },
+      })),
+      summary: {
+        totalCourses: courses.length,
+        totalStudents: courses.reduce((sum, c) => sum + c.enrollments.length, 0),
+      },
+    };
+  }
+
+  async getCenterPerformance() {
+    const [teacherCount, employeeCount, assistantCount, studentCount, courseCount, enrollmentCount] = await Promise.all([
+      this.prisma.user.count({ where: { role: 'TEACHER' } }),
+      this.prisma.user.count({ where: { role: 'EMPLOYEE' } }),
+      this.prisma.user.count({ where: { role: 'ASSISTANT' } }),
+      this.prisma.user.count({ where: { role: 'STUDENT' } }),
+      this.prisma.course.count(),
+      this.prisma.enrollment.count(),
+    ]);
+
+    const requestStatusGroups = await this.prisma.enrollmentRequest.groupBy({
+      by: ['status'],
+      _count: { _all: true },
+    });
+
+    const courses = await this.prisma.course.findMany({
+      select: {
+        id: true,
+        title: true,
+        teacher: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+          },
+        },
+        _count: {
+          select: {
+            enrollments: true,
+            requests: true,
+          },
+        },
+      },
+    });
+
+    const teacherMap = new Map();
+    const coursePopularity = courses.map((course) => {
+      const teacher = course.teacher;
+      if (teacher) {
+        const teacherId = teacher.id;
+        const teacherName = `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() || 'غير محدد';
+        const existing = teacherMap.get(teacherId) || {
+          teacherId,
+          teacherName,
+          email: teacher.email,
+          requestCount: 0,
+          enrollmentCount: 0,
+          courseCount: 0,
+        };
+
+        existing.requestCount += course._count.requests;
+        existing.enrollmentCount += course._count.enrollments;
+        existing.courseCount += 1;
+
+        teacherMap.set(teacherId, existing);
+      }
+
+      return {
+        courseId: course.id,
+        courseTitle: course.title,
+        teacherName: course.teacher
+          ? `${course.teacher.first_name || ''} ${course.teacher.last_name || ''}`.trim() || 'غير محدد'
+          : 'غير محدد',
+        enrollmentsCount: course._count.enrollments,
+        requestCount: course._count.requests,
+      };
+    });
+
+    const topTeachersByRequests = Array.from(teacherMap.values())
+      .sort((a, b) => b.requestCount - a.requestCount)
+      .slice(0, 10);
+
+    const topTeachersByEnrollments = Array.from(teacherMap.values())
+      .sort((a, b) => b.enrollmentCount - a.enrollmentCount)
+      .slice(0, 10);
+
+    const topCoursesByEnrollments = coursePopularity
+      .sort((a, b) => b.enrollmentsCount - a.enrollmentsCount)
+      .slice(0, 10);
+
+    const requestStatusCounts = requestStatusGroups.map((group) => ({
+      status: group.status,
+      count: group._count._all,
+    }));
+
+    const totalRequests = requestStatusCounts.reduce((sum, item) => sum + item.count, 0);
+    const pendingRequests = requestStatusCounts
+      .filter((item) => item.status === 'WAIT_FOR_PAY' || item.status === 'SENT')
+      .reduce((sum, item) => sum + item.count, 0);
+    const acceptedRequests = requestStatusCounts.find((item) => item.status === 'APPROVED')?.count || 0;
+    const rejectedRequests = requestStatusCounts.find((item) => item.status === 'REJECTED')?.count || 0;
+
+    const normalizedRequestStatusCounts = [
+      { status: 'SENT', count: requestStatusCounts.find((item) => item.status === 'SENT')?.count || 0 },
+      { status: 'WAIT_FOR_PAY', count: requestStatusCounts.find((item) => item.status === 'WAIT_FOR_PAY')?.count || 0 },
+      { status: 'APPROVED', count: requestStatusCounts.find((item) => item.status === 'APPROVED')?.count || 0 },
+      { status: 'REJECTED', count: requestStatusCounts.find((item) => item.status === 'REJECTED')?.count || 0 },
+    ];
+
+    return {
+      teacherCount,
+      employeeCount,
+      assistantCount,
+      studentCount,
+      courseCount,
+      enrollmentCount,
+      totalRequests,
+      pendingRequests,
+      acceptedRequests,
+      rejectedRequests,
+      requestStatusCounts: normalizedRequestStatusCounts,
+      topTeachersByRequests,
+      topTeachersByEnrollments,
+      topCoursesByEnrollments,
     };
   }
 }

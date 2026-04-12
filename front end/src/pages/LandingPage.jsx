@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { courseAPI, appAPI } from '../services/api';
+import { publicCourseAPI, publicAppAPI } from '../services/api';
 import heroImage from '../assets/hero_education.png';
 import featureLiveClasses from '../assets/feature_live_classes.png';
 import featureCertificates from '../assets/feature_certificates.png';
@@ -44,12 +44,12 @@ const LandingPage = () => {
 
     // ─── fetch courses from DB ────────────────────────────────────────────────
     useEffect(() => {
-        appAPI.getPlatformStatistics().then(res => {
+        publicAppAPI.getStatistics().then(res => {
             const stats = res.data?.data || res.data || {};
             if (stats && typeof stats === 'object') setTargetStats(stats);
         }).catch(() => { });
 
-        courseAPI.findAll(1, 50)
+        publicCourseAPI.findAll(1, 50)
             .then(res => {
                 const all = res.data?.data || res.data || [];
                 // shuffle and take 6

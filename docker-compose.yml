@@ -57,6 +57,8 @@ services:
     dns:
       - 8.8.8.8
       - 8.8.4.4
+    env_file:
+      - .env
     environment:
       DATABASE_URL: mysql://center_user:center_password@mysql:3306/center_education
       PORT: 3000
@@ -75,7 +77,12 @@ services:
     command: >
       sh -c "
         echo 'Waiting for MySQL to be ready...' &&
-        npx prisma migrate deploy &&
+        until mysqladmin ping -h mysql -u root -prootpassword >/dev/null 2>&1; do
+          echo 'Waiting for MySQL...';
+          sleep 2;
+        done &&
+        echo 'Pushing Prisma schema to database...' &&
+        npx prisma db push --accept-data-loss &&
         npm run start:prod
       "
 

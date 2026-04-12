@@ -518,6 +518,152 @@ export class PaymentsService {
     });
   }
 
+  async getMonthlySubscriptionAdminReport(month?: number, year?: number) {
+    const now = new Date();
+    const targetMonth = month || now.getMonth() + 1;
+    const targetYear = year || now.getFullYear();
+
+    const subscriptions = await this.prisma.monthlySubscription.findMany({
+      where: {
+        month: targetMonth,
+        year: targetYear,
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            monthlyPrice: true,
+            teacher: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+                email: true,
+              },
+            },
+          },
+        },
+        student: {
+          select: {
+            id: true,
+            first_name: true,
+            last_name: true,
+            email: true,
+            phone: true,
+          },
+        },
+      },
+      orderBy: {
+        courseId: 'asc',
+      },
+    });
+
+    const teacherCount = await this.prisma.user.count({
+      where: { role: 'TEACHER' },
+    });
+    const employeeCount = await this.prisma.user.count({
+      where: { role: 'EMPLOYEE' },
+    });
+    const assistantCount = await this.prisma.user.count({
+      where: { role: 'ASSISTANT' },
+    });
+
+    const paidCount = subscriptions.filter((sub) => sub.status === 'PAID').length;
+    const pendingCount = subscriptions.filter((sub) => sub.status === 'PENDING').length;
+    const overdueCount = subscriptions.filter((sub) => sub.status === 'OVERDUE').length;
+    const totalAmountCents = subscriptions.reduce(
+      (sum, sub) => sum + sub.amountCents,
+      0,
+    );
+    const paidAmountCents = subscriptions.reduce(
+      (sum, sub) => (sub.status === 'PAID' ? sum + sub.amountCents : sum),
+      0,
+    );
+
+    const courseSummaries = [] as Array<{
+      courseId: number;
+      title: string;
+      teacherName: string;
+      totalSubscriptions: number;
+      paidCount: number;
+      pendingCount: number;
+      overdueCount: number;
+      collectedAmountCents: number;
+      expectedMonthlyPriceCents?: number;
+    }>;
+
+    const courseMap = new Map<number, typeof courseSummaries[number]>();
+    subscriptions.forEach((subscription) => {
+      const courseId = subscription.courseId;
+      const courseTitle = subscription.course.title;
+      const teacher = subscription.course.teacher;
+      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : 'غير محدد';
+      const existing = courseMap.get(courseId);
+      if (!existing) {
+        courseMap.set(courseId, {
+          courseId,
+          title: courseTitle,
+          teacherName,
+          totalSubscriptions: 0,
+          paidCount: 0,
+          pendingCount: 0,
+          overdueCount: 0,
+          collectedAmountCents: 0,
+          expectedMonthlyPriceCents: subscription.course.monthlyPrice ? Math.round(subscription.course.monthlyPrice * 100) : undefined,
+        });
+      }
+
+      const courseSummary = courseMap.get(courseId)!;
+      courseSummary.totalSubscriptions += 1;
+      courseSummary.collectedAmountCents += subscription.amountCents;
+      if (subscription.status === 'PAID') {
+        courseSummary.paidCount += 1;
+      } else if (subscription.status === 'PENDING') {
+        courseSummary.pendingCount += 1;
+      } else if (subscription.status === 'OVERDUE') {
+        courseSummary.overdueCount += 1;
+      }
+    });
+
+    courseMap.forEach((summary) => courseSummaries.push(summary));
+
+    const subscriptionsData = subscriptions.map((sub) => ({
+      id: sub.id,
+      courseId: sub.courseId,
+      courseTitle: sub.course.title,
+      teacherName: sub.course.teacher
+        ? `${sub.course.teacher.first_name || ''} ${sub.course.teacher.last_name || ''}`.trim()
+        : 'غير محدد',
+      studentId: sub.student.id,
+      studentName: `${sub.student.first_name || '-'} ${sub.student.last_name || '-'}`.trim(),
+      studentEmail: sub.student.email,
+      studentPhone: sub.student.phone,
+      status: sub.status,
+      amountCents: sub.amountCents,
+      dueDate: sub.dueDate,
+      paidAt: sub.paidAt,
+      transactionId: sub.transactionId,
+      createdAt: sub.createdAt,
+    }));
+
+    return {
+      month: targetMonth,
+      year: targetYear,
+      totalSubscriptions: subscriptions.length,
+      paidCount,
+      pendingCount,
+      overdueCount,
+      totalAmountCents,
+      paidAmountCents,
+      teacherCount,
+      employeeCount,
+      assistantCount,
+      courseSummaries,
+      subscriptions: subscriptionsData,
+    };
+  }
+
   async sendMonthlyReminder(dto: SendMonthlyReminderDto) {
     const pendingSubscriptions = await this.prisma.monthlySubscription.findMany({
       where: {

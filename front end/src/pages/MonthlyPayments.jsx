@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { courseAPI, enrollmentAPI, paymentAPI } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 const MonthlyPayments = () => {
     const navigate = useNavigate();
+    const { user } = useAuth();
     const [courses, setCourses] = useState([]);
     const [selectedCourse, setSelectedCourse] = useState('');
     const [selectedMonth, setSelectedMonth] = useState(new Date().getMonth() + 1);
@@ -73,8 +75,6 @@ const MonthlyPayments = () => {
             setLoading(false);
         }
     };
-
-
 
     const handleCourseChange = (e) => {
         setSelectedCourse(e.target.value);

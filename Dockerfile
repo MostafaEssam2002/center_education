@@ -27,8 +27,8 @@ FROM node:20-slim AS production
 
 WORKDIR /app
 
-# Install OpenSSL for Prisma
-RUN apt-get update && apt-get install -y openssl && rm -rf /var/lib/apt/lists/*
+# Install OpenSSL and MySQL client for Prisma startup checks
+RUN apt-get update && apt-get install -y openssl default-mysql-client && rm -rf /var/lib/apt/lists/*
 
 # Copy package files
 COPY package*.json ./
@@ -37,10 +37,11 @@ COPY prisma ./prisma/
 # Install production dependencies
 RUN npm ci --only=production
 
-# Install Prisma CLI for migrations (needed for migrate deploy)
-RUN npm install prisma --save-dev
+# Copy Prisma CLI from builder stage so we don't re-install it
+COPY --from=builder /app/node_modules/prisma ./node_modules/prisma
+COPY --from=builder /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
 
-# Generate Prisma Client in production (in case it wasn't copied correctly)
+# Generate Prisma Client in production using the copied Prisma CLI
 RUN npx prisma generate
 
 # Copy built application from builder

@@ -21,6 +21,7 @@ import StudentCourseStatistics from './pages/StudentCourseStatistics';
 import RoomManagement from './pages/RoomManagement';
 import AddRoom from './pages/AddRoom';
 import MonthlyPayments from './pages/MonthlyPayments';
+import AdminMonthlyReport from './pages/AdminMonthlyReport';
 import ManageQuizzes from './pages/ManageQuizzes';
 import CreateQuiz from './pages/CreateQuiz';
 import EditQuiz from './pages/EditQuiz';
@@ -36,6 +37,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
 import AddCourse from './pages/AddCourse';
+import CenterPerformance from './pages/CenterPerformance';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -142,6 +144,22 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <MonthlyPayments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-monthly-report"
+                element={
+                  <ProtectedRoute>
+                    <AdminMonthlyReport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/center-performance"
+                element={
+                  <ProtectedRoute>
+                    <CenterPerformance />
                   </ProtectedRoute>
                 }
               />
@@ -299,7 +317,8 @@ function App() {
               />
               <Route path="/" element={<LandingPage />} />
               <Route path="/home" element={<Navigate to="/" replace />} />
-              <Route path="*" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/landing" element={<LandingPage />} />
+              <Route path="*" element={<Navigate to="/" replace />} />
             </Routes>
           </Layout>
         </Router>

@@ -1,3 +1,0 @@
--- AlterTable
-ALTER TABLE `course` ADD COLUMN `discount` DOUBLE NULL,
-    ADD COLUMN `price` DOUBLE NOT NULL DEFAULT 100;

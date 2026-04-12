@@ -60,6 +60,18 @@ const Sidebar = () => {
       show: isAdmin || isEmployee,
     },
     {
+      title: 'تقرير الإدارة',
+      path: '/admin-monthly-report',
+      icon: '📊',
+      show: isAdmin,
+    },
+    {
+      title: 'أداء المركز',
+      path: '/center-performance',
+      icon: '📈',
+      show: isAdmin,
+    },
+    {
       title: 'طلبات الالتحاق',
       path: '/enrollment-requests',
       icon: '📬',
@@ -70,6 +82,12 @@ const Sidebar = () => {
       path: '/attendance',
       icon: '✅',
       show: isTeacher || isEmployee,
+    },
+    {
+      title: 'إحصائيات المعلم',
+      path: '/teacher-statistics',
+      icon: '📊',
+      show: isTeacher && !isAdmin,
     },
     {
       title: 'كورساتي',

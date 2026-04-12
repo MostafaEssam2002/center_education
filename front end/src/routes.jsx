@@ -36,6 +36,7 @@ import Chat from './pages/Chat';
 import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
 import StudentCourseStatistics from './pages/StudentCourseStatistics';
+import TeacherStatistics from './pages/TeacherStatistics';
 
 // Public Routes (Auth)
 export const publicRoutes = [
@@ -196,6 +197,14 @@ export const scheduleRoutes = [
     element: (
       <ProtectedRoute>
         <StudentCourseStatistics />
+      </ProtectedRoute>
+    ),
+  },
+  {
+    path: '/teacher-statistics',
+    element: (
+      <ProtectedRoute allowedRoles={['TEACHER']}>
+        <TeacherStatistics />
       </ProtectedRoute>
     ),
   },

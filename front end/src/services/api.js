@@ -10,6 +10,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
+const publicApi = axios.create({
+  baseURL: API_BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  withCredentials: false,
+});
+
 // Request interceptor to add token
 api.interceptors.request.use(
   (config) => {
@@ -73,6 +81,12 @@ export const userAPI = {
 // App API
 export const appAPI = {
   getStatistics: () => api.get('/statistics'),
+  getTeacherStatistics: () => api.get('/teacher/statistics'),
+  getCenterPerformance: () => api.get('/admin/center-performance'),
+};
+
+export const publicAppAPI = {
+  getStatistics: () => publicApi.get('/statistics'),
 };
 
 // Course API
@@ -94,6 +108,11 @@ export const courseAPI = {
 
   remove: (id) =>
     api.delete(`/course/${id}`),
+};
+
+export const publicCourseAPI = {
+  findAll: (page = 1, limit = 10) =>
+    publicApi.get('/course', { params: { page, limit } }),
 };
 
 // Chapter API
@@ -354,6 +373,10 @@ export const paymentAPI = {
   // Get logged-in student's monthly subscriptions
   getMyMonthlySubscriptions: () =>
     api.get('/payments/monthly/my'),
+
+  // Get admin report for monthly subscriptions
+  getAdminMonthlyReport: (month, year) =>
+    api.get('/payments/monthly/admin-report', { params: { month, year } }),
 
   // Mark monthly subscription as paid
   markMonthlySubscriptionPaid: (subscriptionId, payload) =>

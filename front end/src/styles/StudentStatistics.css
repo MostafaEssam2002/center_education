@@ -515,3 +515,245 @@
     font-size: 12px;
   }
 }
+
+/* Teacher Statistics Specific Styles */
+.page-header {
+  padding: 30px;
+  border-bottom: 1px solid var(--glass-border);
+}
+
+.page-header h1 {
+  margin: 0 0 10px 0;
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.page-header p {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+/* Statistics Summary Cards */
+.statistics-summary {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  padding: 30px;
+}
+
+.summary-card {
+  padding: 25px;
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(10, 185, 129, 0.05) 100%);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  text-align: center;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.summary-card:hover {
+  background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(10, 185, 129, 0.1) 100%);
+  transform: translateY(-4px);
+  border-color: var(--primary-light);
+}
+
+.summary-value {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--primary-light);
+  margin-bottom: 10px;
+}
+
+.summary-label {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+/* Course Selector */
+.course-selector {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.course-btn {
+  padding: 10px 20px;
+  border: 2px solid var(--glass-border);
+  background: rgba(15, 23, 42, 0.4);
+  color: var(--text-secondary);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+}
+
+.course-btn:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-light);
+}
+
+.course-btn.active {
+  background: rgba(102, 126, 234, 0.2);
+  border-color: var(--primary-light);
+  color: var(--primary-light);
+}
+
+/* Tabs Container */
+.tabs-container {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0 30px;
+  overflow-x: auto;
+}
+
+.tab {
+  padding: 15px 25px;
+  background: transparent;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 500;
+  border-bottom: 3px solid transparent;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+}
+
+.tab:hover {
+  color: var(--primary-light);
+}
+
+.tab.active {
+  color: var(--primary-light);
+  border-bottom-color: var(--primary-light);
+}
+
+/* Tab Content */
+.tab-content {
+  display: grid;
+  gap: 30px;
+  padding: 30px;
+}
+
+/* Ranking List Items */
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 30px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid var(--glass-border);
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.ranking-item:hover {
+  background: rgba(102, 126, 234, 0.1);
+  border-color: var(--primary-light);
+}
+
+.ranking-position {
+  font-size: 20px;
+  font-weight: 700;
+  min-width: 40px;
+}
+
+.ranking-name {
+  flex: 1;
+  margin: 0 20px;
+  color: var(--text-primary);
+  font-weight: 500;
+}
+
+.ranking-score {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--primary-light);
+  min-width: 80px;
+  text-align: right;
+}
+
+/* Message Styles */
+.message {
+  padding: 20px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.message.error {
+  background: rgba(244, 67, 54, 0.1);
+  color: #f44336;
+  border: 1px solid rgba(244, 67, 54, 0.3);
+}
+
+/* Responsive for Teacher Statistics */
+@media (max-width: 768px) {
+  .statistics-summary {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .page-header {
+    padding: 20px;
+  }
+
+  .page-header h1 {
+    font-size: 22px;
+  }
+
+  .summary-value {
+    font-size: 24px;
+  }
+
+  .tab {
+    padding: 12px 16px;
+    font-size: 13px;
+  }
+
+  .ranking-item {
+    flex-wrap: wrap;
+  }
+
+  .ranking-name {
+    width: 100%;
+    margin: 10px 0;
+  }
+}
+
+@media (max-width: 480px) {
+  .statistics-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .course-selector {
+    flex-direction: column;
+  }
+
+  .course-btn {
+    width: 100%;
+  }
+
+  .tabs-container {
+    padding: 0;
+  }
+
+  .tab {
+    padding: 12px 12px;
+    font-size: 12px;
+  }
+
+  .tab-content {
+    padding: 15px;
+  }
+}

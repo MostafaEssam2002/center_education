@@ -32,4 +32,22 @@ export class AppController {
   async getStatistics(@Req() req: any) {
     return this.appService.getStudentStatistics(req.user.id);
   }
+
+  @Get('teacher/statistics')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.TEACHER)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get statistics for the current teacher' })
+  async getTeacherStatistics(@Req() req: any) {
+    return this.appService.getTeacherStatistics(req.user.id);
+  }
+
+  @Get('admin/center-performance')
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get center performance report for admin' })
+  async getCenterPerformance() {
+    return this.appService.getCenterPerformance();
+  }
 }
