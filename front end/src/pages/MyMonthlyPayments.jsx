@@ -9,6 +9,7 @@ const MyMonthlyPayments = () => {
     const navigate = useNavigate();
     const { user } = useAuth();
     const { showToast } = useToast();
+    const CARD_INTEGRATION_ID = Number(import.meta.env.VITE_PAYMOB_INTEGRATION_ID) || 5468545;
 
     const [monthlySubscriptions, setMonthlySubscriptions] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -60,12 +61,10 @@ const MyMonthlyPayments = () => {
     };
 
     const handlePaymentClick = (subscription) => {
-        // For now, we'll use a simple confirmation
-        // In a real implementation, you might want to integrate with Paymob
         setConfirmModal({
             isOpen: true,
             title: 'تأكيد الدفع',
-            message: `هل تريد تأكيد دفع الاشتراك الشهري لكورس "${subscription.course.title}" لشهر ${subscription.month}/${subscription.year} بمبلغ ${subscription.amountCents / 100} جنيه؟`,
+            message: `هل تريد المتابعة إلى بوابة الدفع للاشتراك الشهري لكورس "${subscription.course.title}" لشهر ${subscription.month}/${subscription.year} بمبلغ ${subscription.amountCents / 100} جنيه؟`,
             type: 'info',
             onConfirm: () => processPayment(subscription),
         });
@@ -76,19 +75,21 @@ const MyMonthlyPayments = () => {
         setConfirmModal({ ...confirmModal, isOpen: false });
 
         try {
-            // For now, directly mark as paid
-            // In production, you should integrate with Paymob payment gateway
-            await paymentAPI.markMonthlySubscriptionPaid(subscription.id, {
-                paidAt: new Date().toISOString(),
-                transactionId: `manual-${Date.now()}`, // Generate a transaction ID
-            });
+            const response = await paymentAPI.initiateMonthlySubscriptionPayment(
+                subscription.id,
+                CARD_INTEGRATION_ID,
+            );
 
-            showToast('✅ تم دفع الاشتراك الشهري بنجاح!', 'success');
-            // Refresh the list
-            loadMonthlySubscriptions();
+            const redirectUrl = response.data?.redirectUrl;
+            if (redirectUrl) {
+                window.location.href = redirectUrl;
+                return;
+            }
+
+            showToast('فشل في إنشاء رابط الدفع', 'error');
         } catch (error) {
-            console.error('Payment failed:', error);
-            showToast(error.response?.data?.message || 'فشل في دفع الاشتراك الشهري', 'error');
+            console.error('Payment initiation failed:', error);
+            showToast(error.response?.data?.message || 'فشل بدء عملية الدفع', 'error');
         } finally {
             setPaymentLoading(false);
         }
@@ -187,12 +188,11 @@ const MyMonthlyPayments = () => {
                 title={confirmModal.title}
                 message={confirmModal.message}
                 type={confirmModal.type}
+                onClose={() => setConfirmModal({ ...confirmModal, isOpen: false })}
                 onConfirm={confirmModal.onConfirm}
-                onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
             />
         </div>
     );
 };
 
-export default MyMonthlyPayments;</content>
-<parameter name="filePath">c:\Users\mws83\Desktop\center_education\front end\src\pages\MyMonthlyPayments.jsx
+export default MyMonthlyPayments;

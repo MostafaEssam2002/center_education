@@ -167,8 +167,8 @@ const RoomManagement = () => {
         <div className="main-content">
             <h1 style={{ padding: '20px 20px 0', color: 'var(--primary-light)', marginBottom: '10px' }}>إدارة الغرف</h1>
 
-            {/* Navigation Section - Only for ADMIN */}
-            {isAdmin && (
+            {/* Navigation Section - Admin and Employee */}
+            {isAdminOrEmployee && (
                 <div style={{
                     background: '#1f2937',
                     borderRadius: '15px',
@@ -204,7 +204,7 @@ const RoomManagement = () => {
                             e.currentTarget.style.transform = 'translateY(0)';
                         }}
                     >
-                        ➕ إضافة غرفة
+                        ➕ إدارة الغرف
                     </button>
 
                     {/* <button

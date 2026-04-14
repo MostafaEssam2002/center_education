@@ -16,8 +16,8 @@ export class RoomController {
   constructor(private readonly roomService: RoomService) { }
 
   @Post()
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Create a new room (Admin only)' })
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
+  @ApiOperation({ summary: 'Create a new room (Admin and Employee)' })
   @ApiResponse({ status: 201, description: 'Room successfully created.' })
   create(@Body() dto: CreateRoomDto) {
     return this.roomService.create(dto);
@@ -44,8 +44,8 @@ export class RoomController {
   }
 
   @Patch(':id')
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Update a room (Admin only)' })
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
+  @ApiOperation({ summary: 'Update a room (Admin and Employee)' })
   @ApiParam({ name: 'id', type: Number })
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -55,8 +55,8 @@ export class RoomController {
   }
 
   @Delete(':id')
-  @Roles(Role.ADMIN)
-  @ApiOperation({ summary: 'Delete a room (Admin only)' })
+  @Roles(Role.ADMIN, Role.EMPLOYEE)
+  @ApiOperation({ summary: 'Delete a room (Admin and Employee)' })
   @ApiParam({ name: 'id', type: Number })
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.roomService.remove(id);

@@ -2,6 +2,7 @@ import { Body, Controller, Post, Headers, Req, Get, Query, Res, Param, ParseIntP
 import { PaymentsService } from './payments.service';
 import { CreatePaymentDto } from './dto/create-payment.dto';
 import { CreateMonthlySubscriptionDto } from './dto/create-monthly-subscription.dto';
+import { InitiateMonthlySubscriptionPaymentDto } from './dto/initiate-monthly-subscription-payment.dto';
 import { MarkMonthlySubscriptionPaidDto } from './dto/mark-monthly-subscription-paid.dto';
 import { SendMonthlyReminderDto } from './dto/send-monthly-reminder.dto';
 import type { Response } from 'express';
@@ -93,6 +94,40 @@ export class PaymentsController {
     );
   }
 
+  @Get('monthly/admin-accounts')
+  @Roles(Role.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get monthly accounts report for admin' })
+  getMonthlyAccountsAdminReport(
+    @Query('month') month?: string,
+    @Query('year') year?: string,
+  ) {
+    const monthNumber = month ? Number(month) : undefined;
+    const yearNumber = year ? Number(year) : undefined;
+    return this.paymentsService.getMonthlyAccountsAdminReport(
+      monthNumber,
+      yearNumber,
+    );
+  }
+
+  @Post('monthly/:id/initiate')
+  @Roles(Role.STUDENT)
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Initiate payment for a monthly subscription' })
+  initiateMonthlySubscriptionPayment(
+    @Req() request: any,
+    @Param('id', ParseIntPipe) id: number,
+    @Body() dto: InitiateMonthlySubscriptionPaymentDto,
+  ) {
+    return this.paymentsService.initiateMonthlySubscriptionPayment(
+      id,
+      request.user.id,
+      dto,
+    );
+  }
+
   @Post('monthly/:id/pay')
   @ApiOperation({ summary: 'Mark a monthly subscription as paid' })
   markMonthlySubscriptionPaid(
@@ -122,17 +157,31 @@ export class PaymentsController {
   @ApiOperation({ summary: 'Payment success callback' })
   @ApiQuery({ name: 'success', type: String })
   @ApiQuery({ name: 'order', type: String })
-  paymentSuccess(@Query() query: any, @Res() res: Response) {
+  async paymentSuccess(@Query() query: any, @Res() res: Response) {
     // Get payment status from query parameters
     const success = query.success === 'true';
     const orderId = query.order;
+
+    if (success && orderId) {
+      try {
+        await this.paymentsService.finalizePaymentFromSuccess(orderId);
+      } catch (error: any) {
+        console.error('❌ Error finalizing payment from success callback:', error.message || error);
+      }
+    }
 
     // Get frontend URL from environment or use default
     const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
 
     // Redirect to frontend with payment status
     const status = success ? 'success' : 'failed';
-    const redirectUrl = `${frontendUrl}/pending-payments?payment=${status}&order=${orderId}`;
+    const orderNumericId = Number(orderId);
+    const redirectTarget =
+      !Number.isNaN(orderNumericId) &&
+      (await this.paymentsService.isPaymentForMonthlyCourse(orderNumericId))
+        ? 'my-monthly-payments'
+        : 'pending-payments';
+    const redirectUrl = `${frontendUrl}/${redirectTarget}?payment=${status}&order=${orderId}`;
 
     return res.redirect(redirectUrl);
   }

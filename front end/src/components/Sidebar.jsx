@@ -7,131 +7,37 @@ const Sidebar = () => {
   const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const isTeacher = user?.role === 'TEACHER' || user?.role === 'ADMIN';
-  const isStudent = user?.role === 'STUDENT';
-  const isEmployee = user?.role === 'EMPLOYEE';
-  const isAdmin = user?.role === 'ADMIN';
-
+  const role = user?.role?.toString().toUpperCase() || '';
   const isActive = (path) => location.pathname === path;
 
   if (!isAuthenticated) return null;
 
   const menuItems = [
-    {
-      title: 'لوحة التحكم',
-      path: '/dashboard',
-      icon: '📊',
-      show: true,
-    },
-    {
-      title: 'الكورسات',
-      path: '/courses',
-      icon: '📚',
-      show: true,
-    },
-    {
-      title: 'المستخدمين',
-      path: '/users',
-      icon: '👥',
-      show: isAdmin,
-    },
-    {
-      title: 'المحادثات',
-      path: '/chat',
-      icon: '💬',
-      show: true,
-    },
-    {
-      title: 'الجدول العام',
-      path: '/schedule',
-      icon: '📅',
-      show: !isStudent,
-    },
-    {
-      title: 'إدارة الغرف',
-      path: '/rooms',
-      icon: '🏛️',
-      show: !isStudent,
-    },
-    {
-      title: 'الاشتراكات الشهرية',
-      path: '/monthly-payments',
-      icon: '💰',
-      show: isAdmin || isEmployee,
-    },
-    {
-      title: 'تقرير الإدارة',
-      path: '/admin-monthly-report',
-      icon: '📊',
-      show: isAdmin,
-    },
-    {
-      title: 'أداء المركز',
-      path: '/center-performance',
-      icon: '📈',
-      show: isAdmin,
-    },
-    {
-      title: 'طلبات الالتحاق',
-      path: '/enrollment-requests',
-      icon: '📬',
-      show: isTeacher,
-    },
-    {
-      title: 'تسجيل الحضور',
-      path: '/attendance',
-      icon: '✅',
-      show: isTeacher || isEmployee,
-    },
-    {
-      title: 'إحصائيات المعلم',
-      path: '/teacher-statistics',
-      icon: '📊',
-      show: isTeacher && !isAdmin,
-    },
-    {
-      title: 'كورساتي',
-      path: '/my-enrollments',
-      icon: '📖',
-      show: isStudent,
-    },
-    {
-      title: 'مواعيدي',
-      path: '/student-schedule',
-      icon: '🗓️',
-      show: isStudent,
-    },
-    {
-      title: 'اختباراتي',
-      path: '/my-quizzes',
-      icon: '❓',
-      show: isStudent,
-    },
-    {
-      title: 'واجباتي',
-      path: '/my-assignments',
-      icon: '📝',
-      show: isStudent,
-    },
-    {
-      title: 'المدفوعات',
-      path: '/pending-payments',
-      icon: '💳',
-      show: isStudent,
-    },
-    {
-      title: 'الاشتراكات الشهرية',
-      path: '/my-monthly-payments',
-      icon: '💰',
-      show: isStudent,
-    },
-    {
-      title: 'إحصائيات الطالب',
-      path: '/student-statistics',
-      icon: '📈',
-      show: isStudent,
-    },
+    { title: 'لوحة التحكم', path: '/dashboard', icon: '📊', roles: ['ALL'] },
+    { title: 'الكورسات', path: '/courses', icon: '📚', roles: ['ALL'] },
+    { title: 'المستخدمين', path: '/users', icon: '👥', roles: ['ADMIN'] },
+    { title: 'المحادثات', path: '/chat', icon: '💬', roles: ['ALL'] },
+    { title: 'الجدول العام', path: '/schedule', icon: '📅', roles: ['ADMIN', 'TEACHER', 'EMPLOYEE'] },
+    { title: 'إدارة الغرف', path: '/rooms', icon: '🏛️', roles: ['ADMIN', 'EMPLOYEE'] },
+    { title: 'الاشتراكات الشهرية', path: '/monthly-payments', icon: '💰', roles: ['ADMIN', 'EMPLOYEE'] },
+    { title: 'تقرير الإدارة', path: '/admin-monthly-report', icon: '📊', roles: ['ADMIN'] },
+    { title: 'حسابات المركز', path: '/admin-accounts', icon: '🧾', roles: ['ADMIN'] },
+    { title: 'أداء المركز', path: '/center-performance', icon: '📈', roles: ['ADMIN'] },
+    { title: 'طلبات الالتحاق', path: '/enrollment-requests', icon: '📬', roles: ['ADMIN', 'TEACHER'] },
+    { title: 'تسجيل الحضور', path: '/attendance', icon: '✅', roles: ['EMPLOYEE', 'TEACHER'] },
+    { title: 'إحصائيات المعلم', path: '/teacher-statistics', icon: '📊', roles: ['TEACHER'] },
+    { title: 'كورساتي', path: '/my-enrollments', icon: '📖', roles: ['STUDENT'] },
+    { title: 'مواعيدي', path: '/student-schedule', icon: '🗓️', roles: ['STUDENT'] },
+    { title: 'اختباراتي', path: '/my-quizzes', icon: '❓', roles: ['STUDENT'] },
+    { title: 'واجباتي', path: '/my-assignments', icon: '📝', roles: ['STUDENT'] },
+    { title: 'المدفوعات', path: '/pending-payments', icon: '💳', roles: ['STUDENT'] },
+    { title: 'الاشتراكات الشهرية', path: '/my-monthly-payments', icon: '💰', roles: ['STUDENT'] },
+    { title: 'إحصائيات الطالب', path: '/student-statistics', icon: '📈', roles: ['STUDENT'] },
   ];
+
+  const visibleMenuItems = menuItems.filter(item =>
+    item.roles.includes('ALL') || item.roles.includes(role)
+  );
 
   return (
     <aside className={`sidebar ${isCollapsed ? 'collapsed' : ''}`}>
@@ -147,20 +53,17 @@ const Sidebar = () => {
       </div>
 
       <nav className="sidebar-menu">
-        {menuItems.map(
-          (item) =>
-            item.show && (
-              <Link
-                key={item.path}
-                to={item.path}
-                className={`sidebar-link ${isActive(item.path) ? 'active' : ''}`}
-                title={isCollapsed ? item.title : ''}
-              >
-                <span className="sidebar-icon">{item.icon}</span>
-                {!isCollapsed && <span className="sidebar-text">{item.title}</span>}
-              </Link>
-            )
-        )}
+        {visibleMenuItems.map((item) => (
+          <Link
+            key={item.path}
+            to={item.path}
+            className={`sidebar-link ${isActive(item.path) ? 'active' : ''}`}
+            title={isCollapsed ? item.title : ''}
+          >
+            <span className="sidebar-icon">{item.icon}</span>
+            {!isCollapsed && <span className="sidebar-text">{item.title}</span>}
+          </Link>
+        ))}
       </nav>
 
       {!isCollapsed && (

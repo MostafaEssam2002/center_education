@@ -6,7 +6,7 @@ import Swal from 'sweetalert2';
 
 const AddRoom = () => {
     const { user } = useAuth();
-    const isAdmin = user?.role === 'ADMIN';
+    const isAdminOrEmployee = user?.role === 'ADMIN' || user?.role === 'EMPLOYEE';
     const navigate = useNavigate();
 
     const [editingRoom, setEditingRoom] = useState(null);
@@ -154,7 +154,7 @@ const AddRoom = () => {
         }
     };
 
-    if (!isAdmin) {
+    if (!isAdminOrEmployee) {
         return <div style={{ padding: '20px' }}>غير مصرح لك بالوصول لهذه الصفحة</div>;
     }
 

@@ -21,7 +21,9 @@ import StudentCourseStatistics from './pages/StudentCourseStatistics';
 import RoomManagement from './pages/RoomManagement';
 import AddRoom from './pages/AddRoom';
 import MonthlyPayments from './pages/MonthlyPayments';
+import MyMonthlyPayments from './pages/MyMonthlyPayments';
 import AdminMonthlyReport from './pages/AdminMonthlyReport';
+import AdminAccounts from './pages/AdminAccounts';
 import ManageQuizzes from './pages/ManageQuizzes';
 import CreateQuiz from './pages/CreateQuiz';
 import EditQuiz from './pages/EditQuiz';
@@ -148,10 +150,26 @@ function App() {
                 }
               />
               <Route
+                path="/my-monthly-payments"
+                element={
+                  <ProtectedRoute>
+                    <MyMonthlyPayments />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
                 path="/admin-monthly-report"
                 element={
                   <ProtectedRoute>
                     <AdminMonthlyReport />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/admin-accounts"
+                element={
+                  <ProtectedRoute>
+                    <AdminAccounts />
                   </ProtectedRoute>
                 }
               />

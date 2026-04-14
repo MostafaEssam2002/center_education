@@ -378,9 +378,17 @@ export const paymentAPI = {
   getAdminMonthlyReport: (month, year) =>
     api.get('/payments/monthly/admin-report', { params: { month, year } }),
 
+  // Get admin account report for monthly subscriptions
+  getAdminMonthlyAccountsReport: (month, year) =>
+    api.get('/payments/monthly/admin-accounts', { params: { month, year } }),
+
   // Mark monthly subscription as paid
   markMonthlySubscriptionPaid: (subscriptionId, payload) =>
     api.post(`/payments/monthly/${subscriptionId}/pay`, payload),
+
+  // Initiate payment for monthly subscription
+  initiateMonthlySubscriptionPayment: (subscriptionId, integration_id, walletPhoneNumber) =>
+    api.post(`/payments/monthly/${subscriptionId}/initiate`, { integration_id, walletPhoneNumber }),
 
   // Generate monthly subscriptions for all courses
   generateMonthlySubscriptionsForAll: (month, year) =>

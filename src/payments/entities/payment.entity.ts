@@ -2,7 +2,7 @@ export class Payment {
     id: number;
     userId: number;
     courseId: number;
-    enrollmentRequestId: number;
+    enrollmentRequestId?: number | null;
     amountCents: number;
     status: 'PENDING' | 'PAID' | 'FAILED';
     paymobOrderId?: number;

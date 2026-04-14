@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { chapterAPI, courseAPI, API_BASE_URL } from '../services/api';
+import { chapterAPI, courseAPI, API_BASE_URL, paymentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import VideoPlayer from '../components/VideoPlayer';
 import PDFViewer from '../components/PDFViewer';
@@ -20,6 +20,8 @@ const ChapterDetail = () => {
     const [allChapters, setAllChapters] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [subscriptionLocked, setSubscriptionLocked] = useState(false);
+    const [subscriptionMessage, setSubscriptionMessage] = useState('');
 
     useEffect(() => {
         loadChapterData();
@@ -31,11 +33,31 @@ const ChapterDetail = () => {
         try {
             // Load current chapter
             const chapterResponse = await chapterAPI.findOne(id);
-            setChapter(chapterResponse.data);
+            const fetchedChapter = chapterResponse.data;
+            setChapter(fetchedChapter);
 
             // Load all chapters for navigation
             const chaptersResponse = await chapterAPI.findAllByCourse(courseId);
             setAllChapters(chaptersResponse.data.sort((a, b) => a.order - b.order));
+
+            if (user?.role === 'STUDENT' && fetchedChapter.course?.paymentType === 'MONTHLY') {
+                try {
+                    const subscriptionsResponse = await paymentAPI.getMyMonthlySubscriptions();
+                    const currentMonth = new Date().getMonth() + 1;
+                    const currentYear = new Date().getFullYear();
+                    const currentSub = subscriptionsResponse.data.find(
+                        sub => sub.course?.id === parseInt(courseId) && sub.month === currentMonth && sub.year === currentYear,
+                    );
+                    if (currentSub?.status !== 'PAID') {
+                        setSubscriptionLocked(true);
+                        setSubscriptionMessage(
+                            `يجب دفع اشتراك الشهر ${currentMonth}/${currentYear} لهذا الكورس قبل الوصول للمحتوى الحالي أو أي محتوى لاحق.`,
+                        );
+                    }
+                } catch (err) {
+                    console.error('Error checking monthly subscription:', err);
+                }
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'فشل تحميل بيانات الفصل');
         } finally {
@@ -64,6 +86,8 @@ const ChapterDetail = () => {
     const currentIndex = getCurrentChapterIndex();
     const hasPrevious = currentIndex > 0;
     const hasNext = currentIndex < allChapters.length - 1;
+    const currentMonthStart = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    const isChapterBlocked = subscriptionLocked && chapter && new Date(chapter.createdAt) >= currentMonthStart;
 
     if (loading) {
         return (
@@ -138,25 +162,81 @@ const ChapterDetail = () => {
                     </button>
                 </div>
 
-                {/* Chapter Content */}
-                {chapter.content && (
+                {isChapterBlocked ? (
                     <div style={{ marginBottom: '30px' }}>
-                        <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>المحتوى</h3>
-                        <div style={{
-                            padding: '20px',
-                            background: 'var(--glass-bg)',
-                            border: '1px solid var(--glass-border)',
-                            borderRadius: '12px',
-                            lineHeight: '1.8',
-                            whiteSpace: 'pre-wrap',
-                            color: 'var(--neutral-100)'
-                        }}>
-                            {chapter.content}
+                        <div className="message warning">
+                            {subscriptionMessage}
                         </div>
+                        <button
+                            className="btn btn-primary"
+                            onClick={() => navigate('/my-monthly-payments')}
+                        >
+                            دفع الاشتراك الآن
+                        </button>
                     </div>
+                ) : (
+                    <>
+                        {/* Chapter Content */}
+                        {chapter.content && (
+                            <div style={{ marginBottom: '30px' }}>
+                                <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>المحتوى</h3>
+                                <div style={{
+                                    padding: '20px',
+                                    background: 'var(--glass-bg)',
+                                    border: '1px solid var(--glass-border)',
+                                    borderRadius: '12px',
+                                    lineHeight: '1.8',
+                                    whiteSpace: 'pre-wrap',
+                                    color: 'var(--neutral-100)'
+                                }}>
+                                    {chapter.content}
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Video */}
+                        {chapter.videoPath && (
+                            <VideoPlayer
+                                src={getFullUrl(chapter.videoPath)}
+                                title="فيديو الفصل"
+                                chapterId={chapter.id}
+                            />
+                        )}
+
+                        {/* PDF */}
+                        {chapter.pdfPath && (
+                            <PDFViewer
+                                src={getFullUrl(chapter.pdfPath)}
+                                title={`${chapter.title}.pdf`}
+                            />
+                        )}
+
+                        {/* Images */}
+                        {chapter.imagePath && (
+                            <div style={{ marginTop: '30px' }}>
+                                <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>الصور</h3>
+                                <div style={{
+                                    display: 'grid',
+                                    gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))',
+                                    gap: '15px'
+                                }}>
+                                    <img
+                                        src={chapter.imagePath}
+                                        alt={chapter.title}
+                                        style={{
+                                            width: '100%',
+                                            borderRadius: '12px',
+                                            boxShadow: 'var(--glass-shadow)',
+                                            border: '1px solid var(--glass-border)'
+                                        }}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                    </>
                 )}
 
-                {/* Video */}
+                {/* Bottom Navigation */}
                 {chapter.videoPath && (
                     <VideoPlayer
                         src={getFullUrl(chapter.videoPath)}

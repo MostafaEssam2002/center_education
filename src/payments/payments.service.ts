@@ -20,6 +20,24 @@ export class PaymentsService {
     private mailService: MailService,
   ) { }
 
+  private getComputedSubscriptionStatus(subscription: { status: string; dueDate?: Date | string | null; }) {
+    if (subscription.status === 'PAID') {
+      return 'PAID';
+    }
+
+    if (!subscription.dueDate) {
+      return 'PENDING';
+    }
+
+    const dueDate = new Date(subscription.dueDate);
+    const now = new Date();
+    if (!isNaN(dueDate.getTime()) && dueDate < now) {
+      return 'OVERDUE';
+    }
+
+    return 'PENDING';
+  }
+
   /* ============================================================
      1️⃣ Auth Token (with file cache like your code)
   ============================================================ */
@@ -214,6 +232,155 @@ export class PaymentsService {
     };
   }
 
+  async initiateMonthlySubscriptionPayment(
+    subscriptionId: number,
+    studentId: number,
+    dto: { integration_id: number; walletPhoneNumber?: string },
+  ) {
+    const subscription = await this.prisma.monthlySubscription.findUnique({
+      where: { id: subscriptionId },
+      include: {
+        course: true,
+        student: true,
+      },
+    });
+
+    if (!subscription) {
+      throw new NotFoundException(
+        `Monthly subscription ${subscriptionId} not found`,
+      );
+    }
+
+    if (subscription.studentId !== studentId) {
+      throw new BadRequestException(
+        'You are not allowed to pay this subscription',
+      );
+    }
+
+    if (subscription.status === 'PAID') {
+      throw new BadRequestException('This monthly subscription is already paid');
+    }
+
+    let existingPayment = await this.prisma.payment.findFirst({
+      where: {
+        userId: studentId,
+        courseId: subscription.courseId,
+      },
+      orderBy: { updatedAt: 'desc' },
+    });
+
+    if (!existingPayment) {
+      existingPayment = await this.prisma.payment.create({
+        data: {
+          userId: studentId,
+          courseId: subscription.courseId,
+          enrollmentRequestId: null,
+          amountCents: subscription.amountCents,
+          status: 'PENDING',
+        },
+      });
+    }
+
+    const authToken = await this.getAuthToken();
+
+    const shipping_data = {
+      first_name: subscription.student.first_name || 'Student',
+      last_name: subscription.student.last_name || 'User',
+      email: subscription.student.email,
+      phone_number: subscription.student.phone || '01000000000',
+      city: 'Cairo',
+      country: 'EG',
+      street: 'NA',
+      building: 'NA',
+      floor: 'NA',
+      apartment: 'NA',
+    };
+
+    const items = [
+      {
+        name: `${subscription.course.title} - اشتراك ${subscription.month}/${subscription.year}`,
+        amount_cents: subscription.amountCents,
+        description: subscription.course.description || 'Monthly subscription payment',
+        quantity: 1,
+      },
+    ];
+
+    const orderRes = await axios.post(
+      'https://accept.paymob.com/api/ecommerce/orders',
+      {
+        auth_token: authToken,
+        api_source: 'INVOICE',
+        amount_cents: subscription.amountCents,
+        currency: 'EGP',
+        delivery_needed: false,
+        items,
+        shipping_data,
+        integrations: dto.integration_id ? [dto.integration_id] : [],
+      },
+    );
+
+    const orderId = orderRes.data.id;
+
+    await this.prisma.payment.update({
+      where: { id: existingPayment.id },
+      data: {
+        paymobOrderId: orderId,
+        status: 'PENDING',
+        amountCents: subscription.amountCents,
+      },
+    });
+
+    const paymentKeyRes = await axios.post(
+      'https://accept.paymob.com/api/acceptance/payment_keys',
+      {
+        auth_token: authToken,
+        amount_cents: subscription.amountCents,
+        expiration: 3600,
+        order_id: orderId,
+        currency: 'EGP',
+        integration_id: dto.integration_id,
+        billing_data: shipping_data,
+      },
+    );
+
+    const paymentToken = paymentKeyRes.data.token;
+    let redirectUrl = '';
+
+    if (String(dto.integration_id) === String(process.env.WALLET_INTEGRATION_ID)) {
+      const walletRes = await axios.post(
+        'https://accept.paymob.com/api/acceptance/payments/pay',
+        {
+          source: {
+            identifier: dto.walletPhoneNumber || shipping_data.phone_number,
+            subtype: 'WALLET',
+          },
+          payment_token: paymentToken,
+        },
+      );
+
+      redirectUrl = walletRes.data.iframe_redirection_url || walletRes.data.url;
+    } else {
+      redirectUrl = `https://accept.paymob.com/api/acceptance/iframes/${process.env.IFRAME_ID}?payment_token=${paymentToken}`;
+    }
+
+    return {
+      orderId,
+      paymentToken,
+      redirectUrl,
+      amount: subscription.amountCents / 100,
+      currency: 'EGP',
+    };
+  }
+
+  async isPaymentForMonthlyCourse(orderId: number) {
+    const payment = await this.prisma.payment.findFirst({
+      where: { paymobOrderId: orderId },
+      include: { course: true },
+    });
+
+    return payment?.course?.paymentType === 'MONTHLY';
+  }
+
   async createMonthlySubscriptions(dto: CreateMonthlySubscriptionDto) {
     const course = await this.prisma.course.findUnique({
       where: { id: dto.courseId },
@@ -377,7 +544,7 @@ export class PaymentsService {
           },
         },
       },
-      orderBy: { year: 'desc', month: 'desc' },
+      orderBy: [{ year: 'desc' }, { month: 'desc' }],
     });
   }
 
@@ -425,15 +592,26 @@ export class PaymentsService {
           courseId,
           userId: enrollment.studentId,
           status: 'PAID',
-          createdAt: {
-            gte: fromDate,
-            lt: toDate,
-          },
+          OR: [
+            {
+              createdAt: {
+                gte: fromDate,
+                lt: toDate,
+              },
+            },
+            {
+              updatedAt: {
+                gte: fromDate,
+                lt: toDate,
+              },
+            },
+          ],
         },
-        orderBy: { createdAt: 'desc' },
+        orderBy: { updatedAt: 'desc' },
       });
 
       if (!existing && paidPayment) {
+        const paidAt = paidPayment.updatedAt || paidPayment.createdAt;
         const newSub = await this.prisma.monthlySubscription.create({
           data: {
             courseId,
@@ -443,7 +621,7 @@ export class PaymentsService {
             amountCents: paidPayment.amountCents,
             dueDate: fromDate,
             status: 'PAID',
-            paidAt: paidPayment.createdAt,
+            paidAt,
             transactionId: paidPayment.transactionId || undefined,
           },
           include: {
@@ -492,6 +670,90 @@ export class PaymentsService {
     }
 
     return subscriptions;
+  }
+
+  async finalizePaymentFromSuccess(orderId: string) {
+    const paymobOrderId = Number(orderId);
+    if (Number.isNaN(paymobOrderId)) {
+      return;
+    }
+
+    const payment = await this.prisma.payment.findFirst({
+      where: { paymobOrderId },
+    });
+
+    if (!payment) {
+      return;
+    }
+
+    const updatedPayment =
+      payment.status === 'PAID'
+        ? payment
+        : await this.prisma.payment.update({
+            where: { id: payment.id },
+            data: { status: 'PAID' },
+          });
+
+    const paymentDate =
+      updatedPayment.updatedAt || updatedPayment.createdAt || new Date();
+
+    try {
+      await this.enrollmentService.confirmPayment(
+        updatedPayment.courseId,
+        updatedPayment.userId,
+      );
+    } catch (error: any) {
+      console.debug(
+        '⚠️ Enrollment confirmPayment skipped or already processed:',
+        error.message || error,
+      );
+    }
+
+    const course = await this.prisma.course.findUnique({
+      where: { id: updatedPayment.courseId },
+    });
+
+    if (course && course.paymentType === 'MONTHLY') {
+      const paymentMonth = paymentDate.getMonth() + 1;
+      const paymentYear = paymentDate.getFullYear();
+      const dueDate = new Date(Date.UTC(paymentYear, paymentMonth - 1, 1));
+
+      const existingSubscription = await this.prisma.monthlySubscription.findUnique({
+        where: {
+          unique_monthly_subscription: {
+            courseId: updatedPayment.courseId,
+            studentId: updatedPayment.userId,
+            month: paymentMonth,
+            year: paymentYear,
+          },
+        },
+      });
+
+      if (existingSubscription) {
+        await this.prisma.monthlySubscription.update({
+          where: { id: existingSubscription.id },
+          data: {
+            status: 'PAID',
+            paidAt: paymentDate,
+            transactionId: updatedPayment.transactionId || existingSubscription.transactionId,
+          },
+        });
+      } else {
+        await this.prisma.monthlySubscription.create({
+          data: {
+            courseId: updatedPayment.courseId,
+            studentId: updatedPayment.userId,
+            month: paymentMonth,
+            year: paymentYear,
+            amountCents: updatedPayment.amountCents,
+            dueDate,
+            status: 'PAID',
+            paidAt: paymentDate,
+            transactionId: updatedPayment.transactionId || undefined,
+          },
+        });
+      }
+    }
   }
 
   async markMonthlySubscriptionPaid(
@@ -569,15 +831,15 @@ export class PaymentsService {
       where: { role: 'ASSISTANT' },
     });
 
-    const paidCount = subscriptions.filter((sub) => sub.status === 'PAID').length;
-    const pendingCount = subscriptions.filter((sub) => sub.status === 'PENDING').length;
-    const overdueCount = subscriptions.filter((sub) => sub.status === 'OVERDUE').length;
+    const paidCount = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'PAID').length;
+    const pendingCount = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'PENDING').length;
+    const overdueCount = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'OVERDUE').length;
     const totalAmountCents = subscriptions.reduce(
       (sum, sub) => sum + sub.amountCents,
       0,
     );
     const paidAmountCents = subscriptions.reduce(
-      (sum, sub) => (sub.status === 'PAID' ? sum + sub.amountCents : sum),
+      (sum, sub) => (this.getComputedSubscriptionStatus(sub) === 'PAID' ? sum + sub.amountCents : sum),
       0,
     );
 
@@ -595,6 +857,7 @@ export class PaymentsService {
 
     const courseMap = new Map<number, typeof courseSummaries[number]>();
     subscriptions.forEach((subscription) => {
+      const effectiveStatus = this.getComputedSubscriptionStatus(subscription);
       const courseId = subscription.courseId;
       const courseTitle = subscription.course.title;
       const teacher = subscription.course.teacher;
@@ -617,11 +880,11 @@ export class PaymentsService {
       const courseSummary = courseMap.get(courseId)!;
       courseSummary.totalSubscriptions += 1;
       courseSummary.collectedAmountCents += subscription.amountCents;
-      if (subscription.status === 'PAID') {
+      if (effectiveStatus === 'PAID') {
         courseSummary.paidCount += 1;
-      } else if (subscription.status === 'PENDING') {
+      } else if (effectiveStatus === 'PENDING') {
         courseSummary.pendingCount += 1;
-      } else if (subscription.status === 'OVERDUE') {
+      } else if (effectiveStatus === 'OVERDUE') {
         courseSummary.overdueCount += 1;
       }
     });
@@ -639,7 +902,7 @@ export class PaymentsService {
       studentName: `${sub.student.first_name || '-'} ${sub.student.last_name || '-'}`.trim(),
       studentEmail: sub.student.email,
       studentPhone: sub.student.phone,
-      status: sub.status,
+      status: this.getComputedSubscriptionStatus(sub),
       amountCents: sub.amountCents,
       dueDate: sub.dueDate,
       paidAt: sub.paidAt,
@@ -661,6 +924,240 @@ export class PaymentsService {
       assistantCount,
       courseSummaries,
       subscriptions: subscriptionsData,
+    };
+  }
+
+  async getMonthlyAccountsAdminReport(month?: number, year?: number) {
+    const now = new Date();
+    const targetMonth = month || now.getMonth() + 1;
+    const targetYear = year || now.getFullYear();
+
+    const teacherSharePercentage = Number(process.env.TEACHER_SHARE_PERCENTAGE) || 50;
+    const startDate = new Date(targetYear, targetMonth - 1, 1);
+    const endDate = new Date(targetYear, targetMonth, 1);
+
+    const subscriptions = await this.prisma.monthlySubscription.findMany({
+      where: {
+        month: targetMonth,
+        year: targetYear,
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            teacher: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        courseId: 'asc',
+      },
+    });
+
+    const oneTimeEnrollments = await this.prisma.enrollment.findMany({
+      where: {
+        createdAt: {
+          gte: startDate,
+          lt: endDate,
+        },
+        course: {
+          paymentType: 'ONE_TIME',
+        },
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            price: true,
+            discount: true,
+            teacher: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        courseId: 'asc',
+      },
+    });
+
+    const enrollmentKeys = new Set(
+      oneTimeEnrollments.map((enrollment) => `${enrollment.courseId}-${enrollment.studentId}`),
+    );
+
+    const payments = await this.prisma.payment.findMany({
+      where: {
+        OR: [
+          {
+            createdAt: {
+              gte: startDate,
+              lt: endDate,
+            },
+          },
+          {
+            status: 'PAID',
+            updatedAt: {
+              gte: startDate,
+              lt: endDate,
+            },
+          },
+        ],
+      },
+      include: {
+        course: {
+          select: {
+            id: true,
+            title: true,
+            paymentType: true,
+            teacher: {
+              select: {
+                id: true,
+                first_name: true,
+                last_name: true,
+              },
+            },
+          },
+        },
+      },
+      orderBy: {
+        courseId: 'asc',
+      },
+    });
+
+    const subscriptionKeys = new Set(
+      subscriptions.map((sub) => `${sub.courseId}-${sub.studentId}-${sub.month}-${sub.year}`),
+    );
+
+    const oneTimePayments = payments.filter((payment) => {
+      if (!payment.course) return false;
+      const isMonthlyCourse = payment.course.paymentType === 'MONTHLY';
+      const paymentKey = `${payment.courseId}-${payment.userId}-${targetMonth}-${targetYear}`;
+      if (isMonthlyCourse && subscriptionKeys.has(paymentKey)) {
+        return false;
+      }
+
+      const enrollmentKey = `${payment.courseId}-${payment.userId}`;
+      if (payment.course.paymentType === 'ONE_TIME' && enrollmentKeys.has(enrollmentKey)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    const courseMap = new Map();
+
+    const addSubscriptionRow = (courseId, courseTitle, teacherName, amountCents, status) => {
+      const existing = courseMap.get(courseId);
+      if (!existing) {
+        courseMap.set(courseId, {
+          courseId,
+          title: courseTitle,
+          teacherName,
+          totalSubscriptions: 0,
+          paidSubscriptions: 0,
+          pendingSubscriptions: 0,
+          overdueSubscriptions: 0,
+          expectedAmountCents: 0,
+          collectedAmountCents: 0,
+          teacherShareCents: 0,
+          centerShareCents: 0,
+        });
+      }
+
+      const courseSummary = courseMap.get(courseId);
+      courseSummary.totalSubscriptions += 1;
+      courseSummary.expectedAmountCents += amountCents;
+
+      if (status === 'PAID') {
+        courseSummary.paidSubscriptions += 1;
+        courseSummary.collectedAmountCents += amountCents;
+      } else if (status === 'PENDING') {
+        courseSummary.pendingSubscriptions += 1;
+      } else if (status === 'OVERDUE') {
+        courseSummary.overdueSubscriptions += 1;
+      }
+    };
+
+    subscriptions.forEach((subscription) => {
+      const effectiveStatus = this.getComputedSubscriptionStatus(subscription);
+      const courseId = subscription.courseId;
+      const courseTitle = subscription.course.title;
+      const teacher = subscription.course.teacher;
+      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : 'غير محدد';
+      addSubscriptionRow(courseId, courseTitle, teacherName, subscription.amountCents, effectiveStatus);
+    });
+
+    oneTimeEnrollments.forEach((enrollment) => {
+      const courseId = enrollment.courseId;
+      const courseTitle = enrollment.course.title;
+      const teacher = enrollment.course.teacher;
+      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : 'غير محدد';
+      const price = enrollment.course.price || 0;
+      const discount = enrollment.course.discount || 0;
+      const amountCents = Math.round((price - discount) * 100);
+      addSubscriptionRow(courseId, courseTitle, teacherName, amountCents, 'PAID');
+    });
+
+    oneTimePayments.forEach((payment) => {
+      const courseId = payment.courseId;
+      const courseTitle = payment.course.title;
+      const teacher = payment.course.teacher;
+      const teacherName = teacher ? `${teacher.first_name || ''} ${teacher.last_name || ''}`.trim() : 'غير محدد';
+      addSubscriptionRow(courseId, courseTitle, teacherName, payment.amountCents, payment.status);
+    });
+
+    const courseAccounts = Array.from(courseMap.values()).map((item) => {
+      const teacherShareCents = Math.round(item.collectedAmountCents * teacherSharePercentage / 100);
+      const centerShareCents = item.collectedAmountCents - teacherShareCents;
+
+      return {
+        ...item,
+        teacherShareCents,
+        centerShareCents,
+      };
+    });
+
+    const totalCourses = courseAccounts.length;
+    const totalSubscriptions = subscriptions.length + oneTimeEnrollments.length + oneTimePayments.length;
+    const totalPaidSubscriptions = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'PAID').length + oneTimeEnrollments.length + oneTimePayments.filter((pay) => pay.status === 'PAID').length;
+    const totalPendingSubscriptions = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'PENDING').length + oneTimePayments.filter((pay) => pay.status === 'PENDING').length;
+    const totalOverdueSubscriptions = subscriptions.filter((sub) => this.getComputedSubscriptionStatus(sub) === 'OVERDUE').length;
+    const totalCollectedCents = courseAccounts.reduce((sum, item) => sum + item.collectedAmountCents, 0);
+    const totalTeacherShareCents = courseAccounts.reduce((sum, item) => sum + item.teacherShareCents, 0);
+    const totalCenterShareCents = courseAccounts.reduce((sum, item) => sum + item.centerShareCents, 0);
+    const totalOneTimePayments = oneTimeEnrollments.length + oneTimePayments.length;
+    const totalOneTimeCollectedCents = oneTimeEnrollments.reduce((sum, enrollment) => {
+      const amountCents = Math.round((enrollment.course.price - (enrollment.course.discount || 0)) * 100);
+      return sum + amountCents;
+    }, 0) + oneTimePayments.filter((pay) => pay.status === 'PAID').reduce((sum, pay) => sum + pay.amountCents, 0);
+
+    return {
+      month: targetMonth,
+      year: targetYear,
+      teacherSharePercentage,
+      totalCourses,
+      totalSubscriptions,
+      totalPaidSubscriptions,
+      totalPendingSubscriptions,
+      totalOverdueSubscriptions,
+      totalCollectedCents,
+      totalTeacherShareCents,
+      totalCenterShareCents,
+      totalOneTimePayments,
+      totalOneTimeCollectedCents,
+      courseAccounts,
     };
   }
 
@@ -811,8 +1308,8 @@ export class PaymentsService {
         console.log(
           `✅ Enrollment confirmed for student ${payment.userId} in course ${payment.courseId}`,
         );
-      } catch (error) {
-        console.error('❌ Error confirming enrollment:', error.message);
+      } catch (error: any) {
+        console.error('❌ Error confirming enrollment:', error.message || error);
       }
 
       // If course is monthly subscription, create or update monthly subscription for current month irrespective of enrollment confirmation status
@@ -822,18 +1319,22 @@ export class PaymentsService {
         });
         if (course && course.paymentType === 'MONTHLY') {
           const now = new Date();
-          const currentMonth = now.getMonth() + 1; // getMonth() is 0-based
-          const currentYear = now.getFullYear();
-          const dueDate = new Date(currentYear, currentMonth - 1, 1); // First day of current month
+          const paymentDate =
+            (obj.updated_at && !isNaN(new Date(obj.updated_at).getTime())) ? new Date(obj.updated_at) :
+            (obj.created_at && !isNaN(new Date(obj.created_at).getTime())) ? new Date(obj.created_at) :
+            payment.updatedAt || payment.createdAt || now;
+          const paymentMonth = paymentDate.getMonth() + 1; // getMonth() is 0-based
+          const paymentYear = paymentDate.getFullYear();
+          const dueDate = new Date(Date.UTC(paymentYear, paymentMonth - 1, 1));
 
-          // Check if subscription already exists for this month
+          // Check if subscription already exists for the actual payment month/year
           const existingSubscription = await this.prisma.monthlySubscription.findUnique({
             where: {
               unique_monthly_subscription: {
                 courseId: payment.courseId,
                 studentId: payment.userId,
-                month: currentMonth,
-                year: currentYear,
+                month: paymentMonth,
+                year: paymentYear,
               },
             },
           });
@@ -844,35 +1345,35 @@ export class PaymentsService {
               where: { id: existingSubscription.id },
               data: {
                 status: 'PAID',
-                paidAt: now,
+                paidAt: paymentDate,
                 transactionId: obj.id.toString(),
               },
             });
             console.log(
-              `✅ Monthly subscription updated to PAID for student ${payment.userId} in course ${payment.courseId} for ${currentMonth}/${currentYear}`,
+              `✅ Monthly subscription updated to PAID for student ${payment.userId} in course ${payment.courseId} for ${paymentMonth}/${paymentYear}`,
             );
           } else {
-            // Create new subscription
+            // Create new subscription using actual payment month/year
             await this.prisma.monthlySubscription.create({
               data: {
                 courseId: payment.courseId,
                 studentId: payment.userId,
-                month: currentMonth,
-                year: currentYear,
+                month: paymentMonth,
+                year: paymentYear,
                 amountCents: obj.amount_cents,
                 dueDate,
                 status: 'PAID',
-                paidAt: now,
+                paidAt: paymentDate,
                 transactionId: obj.id.toString(),
               },
             });
             console.log(
-              `✅ Monthly subscription created for student ${payment.userId} in course ${payment.courseId} for ${currentMonth}/${currentYear}`,
+              `✅ Monthly subscription created for student ${payment.userId} in course ${payment.courseId} for ${paymentMonth}/${paymentYear}`,
             );
           }
         }
-      } catch (error) {
-        console.error('❌ Error creating/updating monthly subscription:', error.message);
+      } catch (error: any) {
+        console.error('❌ Error creating/updating monthly subscription:', error.message || error);
       }
     } else {
       console.log(`❌ PAYMENT FAILED | Order ${obj.order.id}`);

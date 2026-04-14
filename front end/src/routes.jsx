@@ -215,7 +215,7 @@ export const roomRoutes = [
   {
     path: '/rooms',
     element: (
-      <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER', 'EMPLOYEE']}>
+      <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
         <RoomManagement />
       </ProtectedRoute>
     ),
@@ -223,7 +223,7 @@ export const roomRoutes = [
   {
     path: '/add-room',
     element: (
-      <ProtectedRoute allowedRoles={['ADMIN', 'TEACHER', 'EMPLOYEE']}>
+      <ProtectedRoute allowedRoles={['ADMIN', 'EMPLOYEE']}>
         <AddRoom />
       </ProtectedRoute>
     ),

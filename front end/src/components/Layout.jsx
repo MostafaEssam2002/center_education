@@ -33,8 +33,9 @@ const Layout = ({ children }) => {
     return roles[role] || role;
   };
 
-  const isTeacher = user?.role === 'TEACHER' || user?.role === 'ADMIN';
-  const isStudent = user?.role === 'STUDENT';
+  const role = user?.role?.toString().toUpperCase() || '';
+  const isTeacher = role === 'TEACHER' || role === 'ADMIN';
+  const isStudent = role === 'STUDENT';
 
   const NAVBAR_ITEMS = [
     { to: '/dashboard', label: 'لوحة التحكم', roles: ['ALL'] },
@@ -43,8 +44,8 @@ const Layout = ({ children }) => {
     { to: '/chat', label: 'المحادثات', roles: ['ALL'], isChat: true },
     { to: '/attendance', label: 'تسجيل الحضور', roles: ['EMPLOYEE', 'TEACHER'] },
     { to: '/schedule', label: 'الجدول العام', roles: ['ADMIN', 'TEACHER', 'EMPLOYEE'] },
-    { to: '/rooms', label: 'إدارة الغرف', roles: ['ADMIN', 'TEACHER', 'EMPLOYEE'] },
-    { to: '/enrollment-requests', label: 'طلبات الالتحاق', roles: ['TEACHER'] },
+    { to: '/rooms', label: 'إدارة الغرف', roles: ['ADMIN', 'EMPLOYEE'] },
+    { to: '/enrollment-requests', label: 'طلبات الالتحاق', roles: ['ADMIN', 'TEACHER'] },
     { to: '/my-enrollments', label: 'كورساتي', roles: ['STUDENT'] },
     { to: '/student-schedule', label: 'مواعيدي', roles: ['STUDENT'] },
     { to: '/my-quizzes', label: 'اختباراتي', roles: ['STUDENT'] },
@@ -53,7 +54,6 @@ const Layout = ({ children }) => {
   ];
 
   const getVisibleNavbarItems = () => {
-    const role = user?.role || '';
     return NAVBAR_ITEMS.filter(item =>
       item.roles.includes('ALL') || item.roles.includes(role)
     );

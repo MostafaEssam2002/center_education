@@ -1,64 +1,230 @@
-INSERT INTO `user` (`id`, `email`, `first_name`, `last_name`, `image_path`, `age`, `password`, `phone`, `address`, `role`, `createdAt`, `updatedAt`) VALUES
-(10, 'amerwqb@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$JoOyS.hZncnkNKTV5yjjCONkTDeU0l7WDli6YCGO2vwa7GYklW0Tq', NULL, NULL, 'TEACHER', '2025-12-26 12:02:57.143', '2025-12-26 12:02:57.143'),
-(11, 'amerwqbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$JDxlIZcMpGnSxg0aaxxnWOljmWtcCtS1m0rbiFZtCYWzDbfaA/8aK', NULL, NULL, 'STUDENT', '2025-12-26 12:06:49.887', '2025-12-26 12:06:49.887'),
-(12, 'mofbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$pbRNQIf0Q3hDIL8EdUTO7efqjlK3Qyuyvw5Zw9Y580j9dlpMXmm1G', NULL, NULL, 'STUDENT', '2025-12-26 12:07:04.798', '2025-12-26 12:07:04.798'),
-(13, 'mofرbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$DFzqP/gFT.cGjRVIm4vyqOxodR0kF5qVQs./K6S2PyOgjD4GITTXa', NULL, NULL, 'STUDENT', '2025-12-26 12:19:24.172', '2025-12-26 12:19:24.172'),
-(14, 'nader@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$xZwzNabR7TwbyaePaVBGkuU3oUbCAMyPmptdlSgennbD1tNOH5kFy', NULL, NULL, 'ADMIN', '2025-12-26 13:54:48.172', '2025-12-26 13:54:48.172'),
-(15, 'aa@gmail.com', 'ali', 'alaa', NULL, NULL, '$2b$10$/VhMSFBhj8LLv3PjO0ctHuSdHtiRxV8hjblNVwtomrqgQE0E5aS8O', NULL, NULL, 'STUDENT', '2025-12-26 14:52:15.529', '2025-12-26 14:52:15.529'),
-(16, 'ramez@gmail.com', 'ramez', 'galal', NULL, NULL, '$2b$10$KkxlADTndQ/RkQbEvbmjn.sc24jsYTGG9BV0y2vWvrPNoh.KvBHqa', NULL, NULL, 'STUDENT', '2025-12-26 21:24:54.904', '2025-12-26 21:24:54.904'),
-(17, 'amira@gmail.com', 'amira', 'ali', NULL, NULL, '$2b$10$amlAwnHN1ro4b/emajnLouF1iNV7fKxhjHwwFso8TTReSGnc6X6EO', NULL, NULL, 'TEACHER', '2025-12-27 14:19:04.750', '2025-12-27 14:19:04.750'),
-(18, 'sayed@gmail.com', 'sayed', 'gmail', NULL, 22, '$2b$10$K3r58U/BWdxy9izMOKx8TeDuhxK.0hqu60CQXt30wDqkdW2s4yj2i', '(+20)01118606952', 'menofia', 'EMPLOYEE', '2025-12-31 09:41:43.719', '2025-12-31 09:41:43.719'),
-(19, 'mostafaessam9511@gmail.com', 'mostafa', 'essam', NULL, 21, '$2b$10$LeS77Ei3Tuu2/qgrBkVn1O3WUrhEzQNSmTFi9lRm9SN9tz.cHms9a', '(+20)01118606952', 'egypt', 'STUDENT', '2026-01-04 11:06:49.428', '2026-01-04 11:06:49.428'),
-(20, 'amerwqab@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$d21H4SKI6acen4YOgzHlqe5sBpxRv4L0vx/hd.QWO4vjUSJcxyM2e', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:20:04.217', '2026-01-04 12:20:04.217'),
-(21, 'amerwqasb@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$IzOxviUstft9Tf5Y4GUcbu4zup/K4t8E.fTQN1rCDorZcFRX6jigq', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:21:03.781', '2026-01-04 12:21:03.781');
+-- ============================================================
+-- INSERT STATEMENTS - center_education Database
+-- ============================================================
 
-INSERT INTO `course`
-(`title`, `description`, `teacherId`, `image_path`, `createdAt`, `updatedAt`)
-VALUES
--- ================= Teacher 10 =================
-('Math 101', 'Basic Mathematics', 10, '/images/math.png', NOW(), NOW()),
-('Math 102', 'Intermediate Mathematics', 10, '/images/math.png', NOW(), NOW()),
-('Physics 101', 'Basic Physics', 10, '/images/physics.png', NOW(), NOW()),
-('Physics 102', 'Advanced Physics', 10, '/images/physics.png', NOW(), NOW()),
-('Chemistry 101', 'Intro to Chemistry', 10, '/images/chemistry.png', NOW(), NOW()),
-('Statistics 101', 'Statistics Basics', 10, '/images/stat.png', NOW(), NOW()),
-('Algebra', 'Linear Algebra Course', 10, '/images/algebra.png', NOW(), NOW()),
-('Calculus I', 'Limits & Derivatives', 10, '/images/calculus.png', NOW(), NOW()),
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
 
--- ================= Teacher 17 =================
-('JS Basics', 'JavaScript for Beginners', 17, '/images/js.png', NOW(), NOW()),
-('Advanced JS', 'Deep JavaScript Concepts', 17, '/images/js.png', NOW(), NOW()),
-('Node.js', 'Backend with Node.js', 17, '/images/node.png', NOW(), NOW()),
-('Express.js', 'REST APIs with Express', 17, '/images/express.png', NOW(), NOW()),
-('NestJS', 'Scalable Backend with NestJS', 17, '/images/nest.png', NOW(), NOW()),
-('MySQL', 'Relational Database Basics', 17, '/images/mysql.png', NOW(), NOW()),
-('Prisma ORM', 'Modern ORM with Prisma', 17, '/images/prisma.png', NOW(), NOW()),
-('GraphQL', 'API with GraphQL', 17, '/images/graphql.png', NOW(), NOW()),
+-- --------------------------------------------------------
+-- 1. user
+-- --------------------------------------------------------
+INSERT INTO `user` (`id`, `email`, `first_name`, `last_name`, `image_path`, `age`, `password`, `phone`, `address`, `role`, `createdAt`, `updatedAt`, `AdditionalAddress`, `Center_name`, `cityCode`, `countryCode`, `isVerified`, `regionId`) VALUES
+(10, 'amerwqb@gmail.com', 'salah', 'shaban', NULL, NULL, '$2b$10$JoOyS.hZncnkNKTV5yjjCONkTDeU0l7WDli6YCGO2vwa7GYklW0Tq', NULL, NULL, 'TEACHER', '2025-12-26 12:02:57.143', '2025-12-26 12:02:57.143', NULL, NULL, NULL, NULL, 1, NULL),
+(11, 'amerwqbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$JDxlIZcMpGnSxg0aaxxnWOljmWtcCtS1m0rbiFZtCYWzDbfaA/8aK', NULL, NULL, 'STUDENT', '2025-12-26 12:06:49.887', '2025-12-26 12:06:49.887', NULL, NULL, NULL, NULL, 1, NULL),
+(12, 'mofbq@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$pbRNQIf0Q3hDIL8EdUTO7efqjlK3Qyuyvw5Zw9Y580j9dlpMXmm1G', NULL, NULL, 'STUDENT', '2025-12-26 12:07:04.798', '2025-12-26 12:07:04.798', NULL, NULL, NULL, NULL, 1, NULL),
+(13, 'mofbqwa@gmail.com', NULL, NULL, NULL, NULL, '$2b$10$DFzqP/gFT.cGjRVIm4vyqOxodR0kF5qVQs./K6S2PyOgjD4GITTXa', NULL, NULL, 'STUDENT', '2025-12-26 12:19:24.172', '2025-12-26 12:19:24.172', NULL, NULL, NULL, NULL, 1, NULL),
+(14, 'nader@gmail.com', NULL, NULL, '/images/1775897853592-673676336.jpg', NULL, '$2b$10$xZwzNabR7TwbyaePaVBGkuU3oUbCAMyPmptdlSgennbD1tNOH5kFy', NULL, NULL, 'ADMIN', '2025-12-26 13:54:48.172', '2026-03-11 08:57:33.635', NULL, NULL, NULL, NULL, 1, NULL),
+(15, 'aa@gmail.com', 'ali', 'alaa', NULL, NULL, '$2b$10$/VhMSFBhj8LLv3PjO0ctHuSdHtiRxV8hjblNVwtomrqgQE0E5aS8O', NULL, NULL, 'STUDENT', '2025-12-26 14:52:15.529', '2025-12-26 14:52:15.529', NULL, NULL, NULL, NULL, 1, NULL),
+(16, 'ramez@gmail.com', 'ramez', 'galal', NULL, NULL, '$2b$10$KkxlADTndQ/RkQbEvbmjn.sc24jsYTGG9BV0y2vWvrPNoh.KvBHqa', NULL, NULL, 'STUDENT', '2025-12-26 21:24:54.904', '2025-12-26 21:24:54.904', NULL, NULL, NULL, NULL, 1, NULL),
+(17, 'amira@gmail.com', 'amira', 'ali', '/images/1775909867464-345633585.png', NULL, '$2b$10$amlAwnHN1ro4b/emajnLouF1iNV7fKxhjHwwFso8TTReSGnc6X6EO', NULL, NULL, 'TEACHER', '2025-12-27 14:19:04.750', '2026-03-11 12:17:47.505', NULL, NULL, NULL, NULL, 1, NULL),
+(18, 'sayed@gmail.com', 'sayed', 'gmail', '/images/1775826167252-181763586.jpg', 22, '$2b$10$K3r58U/BWdxy9izMOKx8TeDuhxK.0hqu60CQXt30wDqkdW2s4yj2i', '(+20)01118606952', 'menofia', 'EMPLOYEE', '2025-12-31 09:41:43.719', '2026-03-10 13:02:47.287', NULL, NULL, NULL, NULL, 1, NULL),
+(19, 'mostafaessam9511@gmail.com', 'mostafa', 'essam', NULL, 21, '$2b$10$LeS77Ei3Tuu2/qgrBkVn1O3WUrhEzQNSmTFi9lRm9SN9tz.cHms9a', '(+20)01118606952', 'egypt', 'STUDENT', '2026-01-04 11:06:49.428', '2026-01-04 11:06:49.428', NULL, NULL, NULL, NULL, 1, NULL),
+(20, 'amerwqab@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$d21H4SKI6acen4YOgzHlqe5sBpxRv4L0vx/hd.QWO4vjUSJcxyM2e', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:20:04.217', '2026-01-04 12:20:04.217', NULL, NULL, NULL, NULL, 1, NULL),
+(21, 'amerwqasb@gmail.com', 'amer', 'ali', 'null', 21, '$2b$10$IzOxviUstft9Tf5Y4GUcbu4zup/K4t8E.fTQN1rCDorZcFRX6jigq', '(+20)01118606952', 'menofia', 'USER', '2026-01-04 12:21:03.781', '2026-01-04 12:21:03.781', NULL, NULL, NULL, NULL, 1, NULL),
+(22, 'mws83887@gmail.com', 'amr', 'khaled', '/images/1775331005955-713738980.png', 22, '$2b$10$Eij2M3MhbCirayK2KvHkv.uRg5TN5r2Qgpgv4jfWFOJYU9PqPsg72', '(+20)01118606952', 'الجيزه', 'STUDENT', '2026-03-04 19:30:06.408', '2026-03-04 19:30:32.851', NULL, NULL, NULL, NULL, 1, NULL);
 
--- ================= Mixed =================
-('HTML & CSS', 'Frontend Basics', 10, '/images/html.png', NOW(), NOW()),
-('React Basics', 'Frontend with React', 17, '/images/react.png', NOW(), NOW()),
-('TypeScript', 'Typed JavaScript', 17, '/images/ts.png', NOW(), NOW()),
-('Git & GitHub', 'Version Control', 10, '/images/git.png', NOW(), NOW()),
-('Problem Solving', 'Algorithms Basics', 10, '/images/ps.png', NOW(), NOW());
+-- --------------------------------------------------------
+-- 2. room
+-- --------------------------------------------------------
+INSERT INTO `room` (`id`, `name`, `type`, `capacity`, `location`, `isActive`, `createdAt`, `updatedAt`) VALUES
+(1, 'Room A', 'OFFLINE', 30, 'Building A - Floor 1', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(2, 'Room B', 'OFFLINE', 25, 'Building A - Floor 2', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(3, 'Room C', 'OFFLINE', 40, 'Building B - Floor 1', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(4, 'Lab 1', 'OFFLINE', 20, 'Building C - Lab Area', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(5, 'Lab 2', 'OFFLINE', 15, 'Building C - Lab Area', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(6, 'Hall 1', 'OFFLINE', 60, 'Main Building - Ground Floor', 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(7, 'Zoom Room 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(8, 'Zoom Room 2', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(9, 'Google Meet 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(10, 'Teams Room 1', 'ONLINE', NULL, NULL, 1, '2026-01-10 09:13:41.000', '2026-01-10 09:13:41.000'),
+(27, 'room vip', 'OFFLINE', 500, 'city starts', 0, '2026-01-10 09:04:34.030', '2026-01-10 09:05:31.595'),
+(28, 'asd', 'OFFLINE', 222, 'sadsadsa', 0, '2026-01-10 09:06:29.701', '2026-01-10 09:06:38.319'),
+(29, 'test', 'OFFLINE', 1, 'palm stip', 1, '2026-01-10 17:38:16.460', '2026-01-10 17:38:16.460'),
+(30, 'room 5f', 'OFFLINE', 50, 'الدور الرابع', 1, '2026-03-11 12:26:54.612', '2026-03-11 12:26:54.612');
 
+-- --------------------------------------------------------
+-- 3. course
+-- --------------------------------------------------------
+INSERT INTO `course` (`id`, `title`, `description`, `teacherId`, `image_path`, `createdAt`, `updatedAt`, `discount`, `price`, `monthlyPrice`, `paymentType`) VALUES
+(1, 'ATH 101', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 12:48:21.249', '2025-12-28 12:48:21.249', NULL, 100, NULL, 'ONE_TIME'),
+(2, 'math 6', 'Basic Mathematics', 17, '/images/1767035064828-490128286.jpg', '2025-12-28 21:19:25.930', '2025-12-28 21:19:25.930', NULL, 100, NULL, 'ONE_TIME'),
+(3, 'js', 'java script', 17, '/images/1767079738969-570493753.png', '2025-12-29 08:29:16.289', '2025-12-30 07:28:59.958', 0, 0, 100, 'MONTHLY'),
+(4, 'Math 101', 'Basic Mathematics', 10, '/images/math.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(5, 'Math 102', 'Intermediate Mathematics', 10, '/images/math102.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(6, 'Physics 101', 'Basic Physics', 10, '/images/physics.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(7, 'Physics 102', 'Advanced Physics', 10, '/images/physics.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(8, 'Chemistry 101', 'Intro to Chemistry', 10, '/images/chemistry.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(9, 'Statistics 101', 'Statistics Basics', 10, '/images/stat.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(10, 'Algebra', 'Linear Algebra Course', 10, '/images/algebra.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(11, 'Calculus I', 'Limits & Derivatives', 10, '/images/calculus.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(12, 'JS Basics', 'JavaScript for Beginners', 17, '/images/js.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(13, 'Advanced JS', 'Deep JavaScript Concepts', 17, '/images/js.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(14, 'Node.js', 'Backend with Node.js', 17, '/images/node.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(15, 'Express.js', 'REST APIs with Express', 17, '/images/express.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(16, 'NestJS', 'Scalable Backend with NestJS', 17, '/images/nest.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(17, 'MySQL', 'Relational Database Basics', 17, '/images/mysql.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(18, 'Prisma ORM', 'Modern ORM with Prisma', 17, '/images/prisma.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(19, 'GraphQL', 'API with GraphQL', 17, '/images/graphql.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(20, 'HTML & CSS', 'Frontend Basics', 10, '/images/html.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(21, 'React Basics', 'Frontend with React', 17, '/images/react.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(22, 'TypeScript', 'Typed JavaScript', 17, '/images/ts.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(23, 'Git & GitHub', 'Version Control', 10, '/images/git.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(24, 'Problem Solving', 'Algorithms Basics', 10, '/images/ps.png', '2026-01-10 10:03:20.000', '2026-01-10 10:03:20.000', NULL, 100, NULL, 'ONE_TIME'),
+(25, 'الطبخ', 'تعلم الطبخ فش ستع ', 17, '/images/1775222010374-902005665.png', '2026-03-03 13:13:32.237', '2026-03-03 13:13:32.237', 0, 0, 100, 'MONTHLY');
+
+-- --------------------------------------------------------
+-- 4. chapter
+-- --------------------------------------------------------
 INSERT INTO `chapter` (`id`, `title`, `content`, `videoPath`, `pdfPath`, `order`, `courseId`, `createdAt`, `updatedAt`) VALUES
-(4, 'chapter1', 'chapter1', '/videos/1767023058120-754837650.mp4', '/pdfs/1767023058139-358092834.pdf', 1, 9, '2025-12-29 15:44:18.151', '2025-12-29 15:44:18.151'),
-(5, 'CHAPTER 2 ', 'import {\n  CanActivate,\n  ExecutionContext,\n  Injectable,\n  ForbiddenException,\n} from \'@nestjs/common\';\nimport { PrismaService } from \'src/prisma/prisma.service\';\nimport { Role } from \'@pris', '/videos/1767023137631-51829886.mp4', '/pdfs/1767023137643-930340734.pdf', 2, 9, '2025-12-29 15:45:37.657', '2025-12-29 15:45:37.657'),
-(6, 'ch4', 'v454v54v54v', '/videos/1767029520976-761807342.mp4', '/pdfs/1767029521004-979311338.pdf', 3, 9, '2025-12-29 17:32:01.042', '2025-12-29 17:32:01.042'),
-(7, 'chapter 3 ', 'typescript', '/videos/1767036461910-100556933.mp4', NULL, 4, 9, '2025-12-29 19:27:41.998', '2025-12-29 19:27:41.998');
+(4, 'chapter1', 'chapter1', '/videos/1767023058120-754837650.mp4', '/pdfs/1767023058139-358092834.pdf', 1, 3, '2025-12-29 15:44:18.151', '2025-12-29 15:44:18.151'),
+(5, 'CHAPTER 2 ', 'import {\n  CanActivate,\n  ExecutionContext,\n  Injectable,\n  ForbiddenException,\n} from \'@nestjs/common\';\nimport { PrismaService } from \'src/prisma/prisma.service\';\nimport { Role } from \'@pris', '/videos/1767023137631-51829886.mp4', '/pdfs/1767023137643-930340734.pdf', 2, 3, '2025-12-29 15:45:37.657', '2025-12-29 15:45:37.657'),
+(6, 'ch4', 'v454v54v54v', '/videos/1767029520976-761807342.mp4', '/pdfs/1767029521004-979311338.pdf', 3, 3, '2025-12-29 17:32:01.042', '2025-12-29 17:32:01.042'),
+(7, 'chapter 3 ', 'typescript', '/videos/1767036461910-100556933.mp4', NULL, 4, 3, '2025-12-29 19:27:41.998', '2025-12-29 19:27:41.998'),
+(8, 'chapter 4', 'تعلم المتغيرات و الشروط', '/videos/1775331397615-127654696/index.m3u8', '/pdfs/1775331422061-883467287.pdf', 5, 3, '2026-03-04 19:37:02.148', '2026-03-04 19:37:02.148'),
+(9, 'chapter 6 ', 'type script', '/videos/1775479492809-724117148/index.m3u8', '/pdfs/1775479558058-73681727.pdf', 6, 3, '2026-03-06 12:45:58.077', '2026-03-06 12:45:58.077');
 
-INSERT INTO `quiz` (`id`, `title`, `description`, `type`, `courseId`, `chapterId`, `startTime`, `endTime`, `durationMin`, `totalMarks`, `keepAnswers`, `isPublished`, `createdAt`, `updatedAt`, `createdBy`) VALUES
-(5, 'q1', 'q1', 'CHAPTER', 9, 4, '2026-01-03 19:22:00.000', '2026-01-03 20:22:00.000', 30, 10, 0, 1, '2026-01-03 19:22:25.000', '2026-01-03 19:25:44.949', 17),
-(6, 'q2', 'q2', 'CHAPTER', 9, 5, '2026-01-03 16:12:00.000', '2026-01-04 11:05:00.000', 1, 4, 0, 1, '2026-01-03 20:12:57.241', '2026-01-04 11:01:20.970', 17);
+-- --------------------------------------------------------
+-- 5. courseschedule
+-- --------------------------------------------------------
+INSERT INTO `courseschedule` (`id`, `courseId`, `roomId`, `day`, `startTime`, `endTime`) VALUES
+(82, 1, 1, 'SAT', '08:00', '09:30'),
+(83, 2, 2, 'SAT', '09:30', '11:00'),
+(84, 3, 3, 'SAT', '11:00', '12:30'),
+(86, 9, 7, 'SAT', '18:00', '19:30'),
+(87, 10, 8, 'SAT', '19:30', '21:00'),
+(88, 5, 1, 'SUN', '08:00', '09:30'),
+(89, 6, 4, 'SUN', '09:30', '11:00'),
+(90, 7, 5, 'SUN', '11:00', '12:30'),
+(91, 8, 6, 'SUN', '12:30', '14:00'),
+(92, 11, 9, 'SUN', '18:00', '19:30'),
+(93, 12, 10, 'SUN', '19:30', '21:00'),
+(94, 13, 2, 'MON', '08:00', '09:30'),
+(95, 14, 3, 'MON', '09:30', '11:00'),
+(96, 15, 4, 'MON', '11:00', '12:30'),
+(97, 16, 6, 'MON', '12:30', '14:00'),
+(98, 17, 7, 'MON', '18:00', '19:30'),
+(99, 18, 1, 'TUE', '09:00', '10:30'),
+(100, 19, 2, 'TUE', '10:30', '12:00'),
+(101, 20, 3, 'TUE', '12:00', '13:30'),
+(102, 9, 8, 'TUE', '18:00', '19:30'),
+(103, 10, 4, 'WED', '08:00', '09:30'),
+(104, 11, 5, 'WED', '09:30', '11:00'),
+(105, 12, 6, 'WED', '11:00', '12:30'),
+(106, 13, 7, 'WED', '18:00', '19:30'),
+(107, 14, 1, 'THU', '09:00', '10:30'),
+(108, 15, 2, 'THU', '10:30', '12:00'),
+(109, 16, 3, 'THU', '12:00', '13:30'),
+(110, 17, 9, 'THU', '18:00', '19:30'),
+(111, 19, 3, 'SAT', '08:00', '09:00'),
+(112, 20, 2, 'SAT', '08:00', '09:00'),
+(114, 6, 9, 'SAT', '08:00', '08:30'),
+(115, 6, 9, 'SAT', '08:30', '09:00'),
+(117, 6, 4, 'SAT', '08:30', '09:30'),
+(118, 5, 5, 'SAT', '08:00', '09:30'),
+(119, 4, 1, 'SAT', '10:30', '12:00'),
+(120, 2, 29, 'WED', '08:00', '09:30'),
+(121, 2, 2, 'WED', '08:00', '10:00');
 
+-- --------------------------------------------------------
+-- 6. course_sessions
+-- --------------------------------------------------------
+INSERT INTO `course_sessions` (`id`, `courseId`, `date`, `startTime`, `endTime`, `roomId`, `createdAt`) VALUES
+(1, 3, '2026-03-10 00:00:00.000', '11:04', '11:06', 29, '2026-03-10 09:04:44.990'),
+(2, 2, '2026-03-10 00:00:00.000', '15:10', '15:13', 3, '2026-03-10 13:10:55.004'),
+(3, 3, '2026-03-10 00:00:00.000', '15:11', '15:12', 2, '2026-03-10 13:11:35.962');
+
+-- --------------------------------------------------------
+-- 7. enrollment
+-- --------------------------------------------------------
+INSERT INTO `enrollment` (`id`, `studentId`, `courseId`, `createdAt`) VALUES
+(1, 16, 3, '2026-01-10 07:39:30.649'),
+(2, 16, 25, '2026-03-03 14:59:48.833'),
+(3, 15, 25, '2026-03-03 16:06:25.401'),
+(4, 11, 25, '2026-03-03 17:02:07.345'),
+(5, 13, 25, '2026-03-03 17:15:55.118'),
+(6, 19, 25, '2026-03-03 17:26:12.255'),
+(7, 16, 2, '2026-03-04 11:09:12.958'),
+(8, 15, 3, '2026-03-04 11:30:28.726'),
+(9, 13, 3, '2026-03-04 11:36:19.916'),
+(10, 22, 3, '2026-03-04 19:33:33.932');
+
+-- --------------------------------------------------------
+-- 8. enrollmentrequest
+-- --------------------------------------------------------
+INSERT INTO `enrollmentrequest` (`id`, `studentId`, `courseId`, `status`, `createdAt`) VALUES
+(10, 16, 19, 'WAIT_FOR_PAY', '2026-03-06 12:53:36.968'),
+(11, 22, 2, 'SENT', '2026-03-11 09:03:09.690'),
+(12, 22, 1, 'SENT', '2026-03-11 09:03:12.799'),
+(13, 22, 4, 'WAIT_FOR_PAY', '2026-03-11 09:03:15.434');
+
+-- --------------------------------------------------------
+-- 9. monthlysubscription
+-- --------------------------------------------------------
+INSERT INTO `monthlysubscription` (`id`, `courseId`, `studentId`, `month`, `year`, `amountCents`, `status`, `dueDate`, `paidAt`, `transactionId`, `createdAt`, `updatedAt`) VALUES
+(1, 25, 16, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-03 15:57:47.195', NULL, '2026-03-03 15:13:00.374', '2026-03-03 15:57:47.218'),
+(2, 25, 15, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-03 16:15:54.237', NULL, '2026-03-03 16:14:26.971', '2026-03-03 16:15:54.898'),
+(3, 25, 11, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 13:09:55.489', NULL, '2026-03-03 17:07:08.940', '2026-03-10 13:09:55.498'),
+(4, 25, 13, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 13:09:49.012', NULL, '2026-03-03 17:18:29.843', '2026-03-10 13:09:49.023'),
+(5, 25, 19, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 13:09:45.590', NULL, '2026-03-04 10:56:11.450', '2026-03-10 13:09:45.598'),
+(6, 3, 16, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 08:57:48.685', NULL, '2026-03-04 11:25:11.781', '2026-03-10 08:57:48.696'),
+(7, 3, 15, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 08:57:50.771', NULL, '2026-03-04 11:32:25.047', '2026-03-10 08:57:50.777'),
+(8, 3, 13, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 08:57:51.296', NULL, '2026-03-04 11:39:59.356', '2026-03-10 08:57:51.304'),
+(9, 3, 22, 4, 2026, 10000, 'PAID', '2026-03-01 00:00:00.000', '2026-03-10 08:57:52.093', NULL, '2026-03-06 11:59:55.756', '2026-03-10 08:57:52.099');
+
+-- --------------------------------------------------------
+-- 10. chapterprogress
+-- --------------------------------------------------------
+INSERT INTO `chapterprogress` (`id`, `studentId`, `chapterId`, `progress`, `createdAt`, `updatedAt`) VALUES
+(1, 16, 7, 32, '2026-03-02 19:24:51.774', '2026-03-02 19:25:02.203'),
+(2, 22, 8, 13, '2026-03-04 19:37:32.072', '2026-03-04 19:37:37.834');
+
+-- --------------------------------------------------------
+-- 11. attendance
+-- --------------------------------------------------------
+INSERT INTO `attendance` (`id`, `sessionId`, `studentId`, `status`, `createdAt`) VALUES
+(1, 1, 16, 'LATE', '2026-03-10 09:49:56.139'),
+(2, 1, 15, 'LATE', '2026-03-10 09:49:56.139'),
+(3, 1, 13, 'PRESENT', '2026-03-10 09:49:56.139'),
+(4, 1, 22, 'LATE', '2026-03-10 09:49:56.139'),
+(5, 2, 16, 'PRESENT', '2026-03-10 13:11:11.200');
+
+-- --------------------------------------------------------
+-- 12. quiz
+-- --------------------------------------------------------
+INSERT INTO `quiz` (`id`, `title`, `description`, `type`, `courseId`, `chapterId`, `startTime`, `endTime`, `durationMin`, `totalMarks`, `keepAnswers`, `isPublished`, `createdBy`, `createdAt`, `updatedAt`) VALUES
+(5, 'q1', 'q1', 'CHAPTER', 3, 4, '2026-01-03 19:22:00.000', '2026-01-03 20:22:00.000', 30, 10, 0, 1, 17, '2026-01-03 19:22:25.000', '2026-01-03 19:25:44.949'),
+(6, 'q2', 'q2', 'CHAPTER', 3, 5, '2026-01-03 16:12:00.000', '2026-01-04 11:05:00.000', 1, 4, 0, 1, 17, '2026-01-03 20:12:57.241', '2026-01-04 11:01:20.970'),
+(7, 'اختبار الفصل الرابع ', 'اختبار الفصل الرابع ', 'CHAPTER', 3, 8, '2026-03-04 19:40:00.000', '2026-03-06 19:40:00.000', 5, 10, 1, 1, 17, '2026-03-04 19:40:46.724', '2026-03-04 19:43:28.460'),
+(8, 'chapter 6 quiz', NULL, 'CHAPTER', 3, 9, '2026-03-06 12:47:00.000', '2026-03-07 12:47:00.000', 30, 5, 1, 1, 17, '2026-03-06 12:47:49.863', '2026-03-06 12:49:42.486'),
+(9, 'final test', 'sadsadasdasdasd', 'CHAPTER', 3, 7, '2026-03-11 09:34:00.000', '2026-03-18 09:34:00.000', 30, 3, 0, 1, 17, '2026-03-11 09:34:43.479', '2026-03-11 09:35:17.818'),
+(10, 'bvcxxcv', 'vcxcvcx', 'CHAPTER', 3, 9, '2026-03-11 09:41:00.000', '2026-03-12 00:45:00.000', 30, 10, 0, 1, 17, '2026-03-11 09:42:03.082', '2026-03-11 09:42:19.684'),
+(11, 'dwdwd', 'wdwdwdwd', 'CHAPTER', 3, 7, '2026-03-11 09:45:00.000', '2026-03-11 09:51:00.000', 30, 10, 0, 1, 17, '2026-03-11 09:45:28.143', '2026-03-11 09:45:50.890');
+
+-- --------------------------------------------------------
+-- 13. quizquestion
+-- --------------------------------------------------------
 INSERT INTO `quizquestion` (`id`, `quizId`, `question`, `marks`, `createdAt`) VALUES
 (5, 5, 'what is your name ?', 1, '2026-01-03 19:22:56.067'),
 (6, 5, 'what is your age ?', 1, '2026-01-03 19:23:16.499'),
 (7, 5, 'what is your address ?', 1, '2026-01-03 19:23:52.204'),
 (8, 6, 'hhhhh', 1, '2026-01-03 20:13:10.944'),
-(10, 6, 'how are ypu ', 3, '2026-01-04 11:01:12.841');
+(10, 6, 'how are ypu ', 3, '2026-01-04 11:01:12.841'),
+(11, 7, 'طريقه تعريف ثابت ', 1, '2026-03-04 19:41:33.604'),
+(12, 7, 'طريقه تعريف متغير ', 1, '2026-03-04 19:42:23.411'),
+(13, 7, 'ما هي اللغه المستخدمه', 8, '2026-03-04 19:43:24.628'),
+(14, 8, 'decleare variable', 1, '2026-03-06 12:48:30.226'),
+(15, 8, 'declear constant', 2, '2026-03-06 12:49:07.849'),
+(16, 8, 'llop', 2, '2026-03-06 12:49:34.947'),
+(17, 9, 'sdaS', 1, '2026-03-11 09:34:52.818'),
+(18, 9, 'sdsadas', 1, '2026-03-11 09:35:06.992'),
+(19, 9, 'sad', 1, '2026-03-11 09:35:15.363'),
+(20, 10, 'fgbnm,kjhgf', 10, '2026-03-11 09:42:16.624'),
+(21, 11, 'dasdsadsad', 10, '2026-03-11 09:45:44.349');
 
+-- --------------------------------------------------------
+-- 14. quizoption
+-- --------------------------------------------------------
 INSERT INTO `quizoption` (`id`, `questionId`, `text`, `isCorrect`) VALUES
 (10, 5, 'mostafa', 1),
 (11, 5, 'essam', 0),
@@ -71,14 +237,53 @@ INSERT INTO `quizoption` (`id`, `questionId`, `text`, `isCorrect`) VALUES
 (18, 8, '1', 1),
 (19, 8, '1', 0),
 (22, 10, '2', 0),
-(23, 10, '3', 1);
+(23, 10, '3', 1),
+(24, 11, 'const ', 1),
+(25, 11, 'let', 0),
+(26, 11, 'var', 0),
+(27, 11, 'echo', 0),
+(28, 12, 'const', 0),
+(29, 12, 'let', 1),
+(30, 12, 'while', 0),
+(31, 12, 'if', 0),
+(32, 13, 'js', 0),
+(33, 13, 'php', 0),
+(34, 13, 'nest', 0),
+(35, 13, 'node js', 1),
+(36, 14, 'const x', 0),
+(37, 14, 'var x', 1),
+(38, 14, 'x=10', 0),
+(39, 15, 'const x = 0', 1),
+(40, 15, 'let x = 2', 0),
+(41, 15, 'var x = 10', 0),
+(42, 16, 'while', 1),
+(43, 16, 'for ', 0),
+(44, 16, 'foreach', 0),
+(45, 17, 'as', 1),
+(46, 17, 'sasas', 0),
+(47, 18, 'sad', 1),
+(48, 18, 'das', 0),
+(49, 19, 'asd', 1),
+(50, 19, 'sad', 0),
+(51, 20, 'asdsad', 1),
+(52, 20, 'sadsadsa', 0),
+(53, 21, 'sdsadasdsa', 1),
+(54, 21, 'sda', 0),
+(55, 21, 'sad', 0);
 
+-- --------------------------------------------------------
+-- 15. quizattempt
+-- --------------------------------------------------------
 INSERT INTO `quizattempt` (`id`, `quizId`, `studentId`, `score`, `status`, `startedAt`, `submittedAt`) VALUES
 (9, 5, 15, 1, 'SUBMITTED', '2026-01-03 19:26:14.996', '2026-01-03 19:26:23.176'),
 (11, 5, 16, 2, 'SUBMITTED', '2026-01-03 19:54:06.948', '2026-01-03 19:54:16.546'),
 (13, 6, 16, 0, 'SUBMITTED', '2026-01-04 11:02:39.936', '2026-01-04 11:03:39.092'),
-(14, 6, 15, 1, 'SUBMITTED', '2026-01-04 11:04:59.541', '2026-01-04 11:05:13.074');
+(14, 6, 15, 1, 'SUBMITTED', '2026-01-04 11:04:59.541', '2026-01-04 11:05:13.074'),
+(15, 7, 22, 2, 'SUBMITTED', '2026-03-04 19:43:47.257', '2026-03-04 19:44:05.383');
 
+-- --------------------------------------------------------
+-- 16. quizattemptanswer
+-- --------------------------------------------------------
 INSERT INTO `quizattemptanswer` (`id`, `attemptId`, `questionId`, `optionId`, `isCorrect`) VALUES
 (5, 9, 5, 10, 1),
 (6, 9, 6, 12, 0),
@@ -87,26 +292,48 @@ INSERT INTO `quizattemptanswer` (`id`, `attemptId`, `questionId`, `optionId`, `i
 (9, 11, 6, 13, 1),
 (10, 11, 7, 17, 0),
 (11, 14, 8, 18, 1),
-(12, 14, 10, 22, 0);
+(12, 14, 10, 22, 0),
+(13, 15, 11, 24, 1),
+(14, 15, 12, 29, 1),
+(15, 15, 13, 34, 0);
 
-INSERT INTO room (name, type, capacity, location, isActive, createdAt, updatedAt)
-VALUES
--- Offline Rooms
-('Room A', 'OFFLINE', 30, 'Building A - Floor 1', 1, NOW(), NOW()),
-('Room B', 'OFFLINE', 25, 'Building A - Floor 2', 1, NOW(), NOW()),
-('Room C', 'OFFLINE', 40, 'Building B - Floor 1', 1, NOW(), NOW()),
-('Lab 1',  'OFFLINE', 20, 'Building C - Lab Area', 1, NOW(), NOW()),
-('Lab 2',  'OFFLINE', 15, 'Building C - Lab Area', 1, NOW(), NOW()),
-('Hall 1', 'OFFLINE', 60, 'Main Building - Ground Floor', 1, NOW(), NOW()),
+-- --------------------------------------------------------
+-- 17. assignment
+-- --------------------------------------------------------
+INSERT INTO `assignment` (`id`, `chapterId`, `title`, `description`, `dueDate`, `maxGrade`, `allowLate`, `createdBy`, `createdAt`, `updatedAt`) VALUES
+(1, 8, 'واجب chapter 4 ', 'اعمل loop لطباعه الارقام من 1 الي 100 ', '2026-03-05 19:38:00.000', 100, 0, 17, '2026-03-04 19:39:02.051', '2026-03-04 19:39:02.051'),
+(2, 9, 'type script assignment ', 'create function to calculate area of rectangle', '2026-03-11 12:46:00.000', 100, 0, 17, '2026-03-06 12:47:02.667', '2026-03-06 12:47:02.667'),
+(3, 4, 'asdsad', 'asdsadasd', '2026-03-11 09:52:00.000', 100, 0, 17, '2026-03-11 09:46:40.562', '2026-03-11 09:46:40.562'),
+(4, 8, 'dsadas', 'dsadsadsad', '2026-03-11 09:51:00.000', 100, 0, 17, '2026-03-11 09:47:03.245', '2026-03-11 09:47:03.245');
 
--- Online Rooms
-('Zoom Room 1',   'ONLINE', NULL, NULL, 1, NOW(), NOW()),
-('Zoom Room 2',   'ONLINE', NULL, NULL, 1, NOW(), NOW()),
-('Google Meet 1', 'ONLINE', NULL, NULL, 1, NOW(), NOW()),
-('Teams Room 1',  'ONLINE', NULL, NULL, 1, NOW(), NOW());
+-- --------------------------------------------------------
+-- 18. assignmentsubmission
+-- --------------------------------------------------------
+INSERT INTO `assignmentsubmission` (`id`, `assignmentId`, `studentId`, `filePath`, `submittedAt`, `status`, `grade`, `feedback`) VALUES
+(1, 1, 22, '/pdfs/1775331571809-25594683.pdf', '2026-03-04 19:39:31.853', 'REVIEWED', 100, 'good job');
 
+-- --------------------------------------------------------
+-- 19. message
+-- --------------------------------------------------------
+INSERT INTO `message` (`id`, `content`, `type`, `senderId`, `receiverId`, `courseId`, `isRead`, `createdAt`, `imageUrl`) VALUES
+(1, 'اهلا بحضرتك', 'TO_TEACHER', 22, 17, 3, 1, '2026-03-04 19:45:34.319', NULL),
+(2, 'سعيد بانضمامي الي الكورس', 'TO_TEACHER', 22, 17, 3, 1, '2026-03-04 19:45:46.260', NULL),
+(3, 'اهلا بيك', 'TO_TEACHER', 17, 22, 3, 1, '2026-03-04 19:46:03.885', NULL),
+(4, 'اتمني لك التوفيق', 'TO_TEACHER', 17, 22, 3, 1, '2026-03-04 19:46:16.075', NULL),
+(5, 'تم تغيير ميعاد المحاضره الي الساعه 1 ظهرا', 'COURSE_BROADCAST', 17, NULL, 3, 0, '2026-03-06 12:54:42.841', NULL),
+(6, 'ازيك يا عمور', 'TO_EMPLOYEE', 14, 22, NULL, 1, '2026-03-11 08:25:47.616', NULL),
+(7, 'ازيك يا عامر', 'TO_EMPLOYEE', 14, 21, NULL, 0, '2026-03-11 08:26:53.228', NULL),
+(8, 'اهلا بيك يا غالي', 'TO_EMPLOYEE', 22, 14, NULL, 1, '2026-03-11 09:02:47.996', NULL),
+(9, 'السلام عليكم', 'TO_EMPLOYEE', 14, 18, NULL, 0, '2026-03-11 12:26:03.975', NULL),
+(10, 'كيف الحال', 'TO_EMPLOYEE', 14, 18, NULL, 0, '2026-03-11 12:26:14.753', NULL);
 
-INSERT INTO `courseschedule` (`id`, `courseId`, `roomId`, `day`, `startTime`, `endTime`) VALUES
-(1, 6, 17, 'SAT', '08:00', '09:00'),
-(2, 9, 18, 'SAT', '11:00', '12:00'),
-(3, 6, 17, 'SUN', '10:00', '11:00');
+-- --------------------------------------------------------
+-- 20. broadcastrecipient
+-- --------------------------------------------------------
+INSERT INTO `broadcastrecipient` (`id`, `messageId`, `studentId`, `isRead`, `readAt`, `createdAt`) VALUES
+(1, 5, 15, 0, NULL, '2026-03-06 12:54:42.848'),
+(2, 5, 16, 1, '2026-03-06 12:54:55.149', '2026-03-06 12:54:42.848'),
+(3, 5, 13, 0, NULL, '2026-03-06 12:54:42.848'),
+(4, 5, 22, 1, '2026-03-11 09:02:58.220', '2026-03-06 12:54:42.848');
+
+COMMIT;

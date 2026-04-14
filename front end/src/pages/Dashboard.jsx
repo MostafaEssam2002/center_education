@@ -268,6 +268,13 @@ const Dashboard = () => {
                 <p>عرض جرد شهري كامل للإدمن</p>
               </Link>
             )}
+
+            {user?.role === 'ADMIN' && (
+              <Link to="/admin-accounts" className="card" style={{ textDecoration: 'none', color: 'inherit', padding: '30px', textAlign: 'center' }}>
+                <h3 style={{ color: '#667eea', marginBottom: '10px' }}>🧾 حسابات المركز</h3>
+                <p>عرض الإيرادات وصافي المركز بعد خصم المعلم</p>
+              </Link>
+            )}
           </div>
         )}
       </div>

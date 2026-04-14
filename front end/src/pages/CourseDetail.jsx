@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { courseAPI, chapterAPI, enrollmentAPI } from '../services/api';
+import { courseAPI, chapterAPI, enrollmentAPI, paymentAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useToast } from '../context/ToastContext';
 
@@ -16,6 +16,9 @@ const CourseDetail = () => {
     const [error, setError] = useState('');
     const [enrollmentStatus, setEnrollmentStatus] = useState(null);
     const [enrolling, setEnrolling] = useState(false);
+    const [subscriptionLocked, setSubscriptionLocked] = useState(false);
+    const [subscriptionMessage, setSubscriptionMessage] = useState('');
+    const [currentMonthStart, setCurrentMonthStart] = useState(null);
 
     useEffect(() => {
         loadCourseData();
@@ -38,16 +41,40 @@ const CourseDetail = () => {
             }
 
             // Check enrollment status for students
+            let isEnrolled = false;
             if (user?.role === 'STUDENT') {
                 try {
                     const enrollmentsResponse = await enrollmentAPI.getCoursesByStudent(user.id);
-                    const isEnrolled = enrollmentsResponse.data.some(
+                    isEnrolled = enrollmentsResponse.data.some(
                         enrollment => enrollment.courseId === parseInt(id)
                     );
                     setEnrollmentStatus(isEnrolled ? 'enrolled' : 'not_enrolled');
                 } catch (err) {
                     console.error('Error checking enrollment:', err);
                     setEnrollmentStatus('not_enrolled');
+                }
+            }
+
+            // If student is enrolled in a monthly course, check current month payment status.
+            if (user?.role === 'STUDENT' && isEnrolled && courseResponse.data.paymentType === 'MONTHLY') {
+                try {
+                    const subscriptionsResponse = await paymentAPI.getMyMonthlySubscriptions();
+                    const currentMonth = new Date().getMonth() + 1;
+                    const currentYear = new Date().getFullYear();
+                    const currentSub = subscriptionsResponse.data.find(
+                        sub => sub.course?.id === parseInt(id) && sub.month === currentMonth && sub.year === currentYear,
+                    );
+
+                    const isPaid = currentSub?.status === 'PAID';
+                    if (!isPaid) {
+                        setSubscriptionLocked(true);
+                        setSubscriptionMessage(
+                            `يجب دفع اشتراك الشهر ${currentMonth}/${currentYear} للكورس قبل الوصول للمحتوى الحالي أو أي محتوى لاحق.`,
+                        );
+                    }
+                    setCurrentMonthStart(new Date(currentYear, currentMonth - 1, 1));
+                } catch (err) {
+                    console.error('Error checking monthly subscription:', err);
                 }
             }
         } catch (err) {
@@ -103,6 +130,13 @@ const CourseDetail = () => {
             </div>
         );
     }
+
+    const visibleChapters = subscriptionLocked && currentMonthStart
+        ? chapters.filter(ch => new Date(ch.createdAt) < currentMonthStart)
+        : chapters;
+    const hiddenChaptersCount = subscriptionLocked && currentMonthStart
+        ? chapters.length - visibleChapters.length
+        : 0;
 
     if (error || !course) {
         return (
@@ -221,6 +255,20 @@ const CourseDetail = () => {
                     </div>
                 )}
 
+                {subscriptionLocked && (
+                    <div style={{ marginBottom: '20px' }}>
+                        <div className="message warning" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                            <div>{subscriptionMessage}</div>
+                            <button
+                                className="btn btn-primary"
+                                onClick={() => navigate('/my-monthly-payments')}
+                            >
+                                دفع اشتراك الشهر الآن
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {/* Management Actions for Teachers/Admins */}
                 {canManage && (
                     <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', flexWrap: 'wrap' }}>
@@ -241,11 +289,11 @@ const CourseDetail = () => {
 
                 <div>
                     <h3 style={{ color: 'var(--primary-light)', marginBottom: '15px' }}>الفصول</h3>
-                    {chapters.length === 0 ? (
-                        <div className="empty-state">لا توجد فصول في هذا الكورس</div>
+                    {visibleChapters.length === 0 ? (
+                        <div className="empty-state">لا توجد فصول متاحة حتى تدفع اشتراك الشهر الحالي</div>
                     ) : (
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: '15px' }}>
-                            {chapters.map((chapter, index) => (
+                            {visibleChapters.map((chapter, index) => (
                                 <div
                                     key={chapter.id}
                                     style={{

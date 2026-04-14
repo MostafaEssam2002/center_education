@@ -385,14 +385,15 @@ model payment {
   id                  Int               @id @default(autoincrement())
   userId              Int
   courseId            Int
-  enrollmentRequestId Int               @unique(map: "Payment_enrollmentRequestId_key")
+  enrollmentRequestId Int?              @unique(map: "Payment_enrollmentRequestId_key")
   amountCents         Int
   status              payment_status    @default(PENDING)
   paymobOrderId       Int?
   transactionId       Int?
   createdAt           DateTime          @default(now())
+  updatedAt           DateTime          @updatedAt
   course              Course            @relation(fields: [courseId], references: [id], map: "Payment_courseId_fkey")
-  enrollmentrequest   EnrollmentRequest @relation(fields: [enrollmentRequestId], references: [id], onDelete: Cascade, map: "Payment_enrollmentRequestId_fkey")
+  enrollmentrequest   EnrollmentRequest? @relation(fields: [enrollmentRequestId], references: [id], onDelete: Cascade, map: "Payment_enrollmentRequestId_fkey")
   user                User              @relation(fields: [userId], references: [id], map: "Payment_userId_fkey")
 
   @@index([courseId], map: "Payment_courseId_idx")
