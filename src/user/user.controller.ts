@@ -44,8 +44,13 @@ export class UserController {
   @ApiBody({ type: UpdateUserDto })
   @ApiResponse({ status: 200, description: 'User updated successfully' })
   @ApiResponse({ status: 400, description: 'Bad Request' })
-  update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
-    return this.userService.update(+id, updateUserDto);
+  async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
+    const updated = await this.userService.update(+id, updateUserDto);
+    return {
+      data: updated,
+      message: 'updated successfully',
+      status: 1,
+    };
   }
 
   @Delete(':id')
