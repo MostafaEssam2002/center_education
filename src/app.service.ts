@@ -201,6 +201,7 @@ export class AppService {
             },
           },
         },
+        requests: true,
         Quiz: {
           select: {
             id: true,
@@ -236,24 +237,111 @@ export class AppService {
             },
           },
         },
+        CourseSession: {
+          include: {
+            attendance: {
+              include: {
+                student: {
+                  select: {
+                    id: true,
+                    first_name: true,
+                    last_name: true,
+                    email: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
 
+    const courseIds = courses.map((c) => c.id);
+
+    // Fetch progress data separately
+    const progressData = await this.prisma.chapterProgress.findMany({
+      where: {
+        chapter: {
+          courseId: { in: courseIds },
+        },
+      },
+      select: {
+        progress: true,
+        chapter: { select: { courseId: true } },
+      },
+    });
+
+    const progressByCoarse = new Map<number, number[]>();
+    progressData.forEach((p) => {
+      const courseId = p.chapter.courseId;
+      if (!progressByCoarse.has(courseId)) {
+        progressByCoarse.set(courseId, []);
+      }
+      progressByCoarse.get(courseId)!.push(p.progress);
+    });
+
     return {
-      courses: courses.map((course) => ({
-        id: course.id,
-        title: course.title,
-        enrollments: course.enrollments,
-        quizzes: {
-          details: course.Quiz,
-        },
-        assignments: {
-          details: course.chapters.flatMap((ch) => ch.assignments),
-        },
-      })),
+      courses: courses.map((course) => {
+        const totalStudents = (course as any).enrollments.length;
+        const assignmentCount = (course as any).chapters.reduce(
+          (sum, ch) => sum + (ch.assignments?.length || 0),
+          0,
+        );
+        const quizCount = (course as any).Quiz.length;
+
+        // Calculate average progress from chapter progress
+        const progressRecords = progressByCoarse.get(course.id) || [];
+        const averageProgress =
+          progressRecords.length > 0
+            ? Math.round(
+                progressRecords.reduce((sum, p) => sum + (p || 0), 0) /
+                  progressRecords.length,
+              )
+            : 0;
+
+        const attendancePercentage = 0;
+
+        return {
+          courseId: course.id,
+          courseTitle: course.title,
+          studentCount: totalStudents,
+          requestCount: (course as any).requests.length,
+          chapterCount: (course as any).chapters.length,
+          assignmentCount,
+          quizCount,
+          averageProgress,
+          attendance: {
+            percentage: attendancePercentage,
+          },
+          enrollments: (course as any).enrollments.map((enrollment) => {
+            // Calculate attendance for this student
+            const studentAttendance = (course as any).CourseSession.flatMap((session) =>
+              session.attendance.filter((att) => att.studentId === enrollment.userId)
+            );
+            const presentCount = studentAttendance.filter((att) => att.status === 'PRESENT').length;
+            const totalSessions = (course as any).CourseSession.length;
+            const attendancePercentage = totalSessions > 0 ? (presentCount / totalSessions) * 100 : 0;
+
+            return {
+              ...enrollment,
+              attendance: studentAttendance,
+              attendancePercentage: Math.round(attendancePercentage),
+            };
+          }),
+          quizzes: {
+            details: (course as any).Quiz,
+          },
+          sessions: (course as any).CourseSession,
+          assignments: {
+            details: (course as any).chapters.flatMap((ch) => ch.assignments),
+          },
+        };
+      }),
       summary: {
         totalCourses: courses.length,
-        totalStudents: courses.reduce((sum, c) => sum + c.enrollments.length, 0),
+        totalStudents: courses.reduce((sum, c) => sum + (c as any).enrollments.length, 0),
+        totalRequests: courses.reduce((sum, c) => sum + (c as any).requests.length, 0),
+        averageProgress: 0,
       },
     };
   }

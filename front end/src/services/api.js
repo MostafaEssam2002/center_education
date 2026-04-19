@@ -86,7 +86,7 @@ export const appAPI = {
 };
 
 export const publicAppAPI = {
-  getStatistics: () => publicApi.get('/statistics'),
+  getStatistics: () => publicApi.get('/platform-statistics'),
 };
 
 // Course API

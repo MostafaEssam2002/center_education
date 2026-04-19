@@ -40,6 +40,7 @@ import Profile from './pages/Profile';
 import LandingPage from './pages/LandingPage';
 import AddCourse from './pages/AddCourse';
 import CenterPerformance from './pages/CenterPerformance';
+import TeacherStatistics from './pages/TeacherStatistics';
 
 import { ToastProvider } from './context/ToastContext';
 
@@ -202,6 +203,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <StudentCourseStatistics />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/teacher-statistics"
+                element={
+                  <ProtectedRoute allowedRoles={['TEACHER']}>
+                    <TeacherStatistics />
                   </ProtectedRoute>
                 }
               />

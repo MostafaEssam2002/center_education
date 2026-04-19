@@ -207,13 +207,13 @@ const Dashboard = () => {
                       <div>
                         <div style={{ fontWeight: 700, color: '#e2e8f0', marginBottom: '8px' }}>{course.courseTitle}</div>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '10px' }}>
-                          <div style={{ color: '#cbd5e1' }}>الطلاب: <strong style={{ color: '#fff' }}>{course.studentCount}</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>طلبات: <strong style={{ color: '#fff' }}>{course.requestCount}</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>فصول: <strong style={{ color: '#fff' }}>{course.chapterCount}</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>واجبات: <strong style={{ color: '#fff' }}>{course.assignmentCount}</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>اختبارات: <strong style={{ color: '#fff' }}>{course.quizCount}</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>تقدم: <strong style={{ color: '#fff' }}>{course.averageProgress}%</strong></div>
-                          <div style={{ color: '#cbd5e1' }}>حضور: <strong style={{ color: '#fff' }}>{course.attendance.percentage}%</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>الطلاب: <strong style={{ color: '#fff' }}>{course.studentCount ?? 0}</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>طلبات: <strong style={{ color: '#fff' }}>{course.requestCount ?? 0}</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>فصول: <strong style={{ color: '#fff' }}>{course.chapterCount ?? 0}</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>واجبات: <strong style={{ color: '#fff' }}>{course.assignmentCount ?? 0}</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>اختبارات: <strong style={{ color: '#fff' }}>{course.quizCount ?? 0}</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>تقدم: <strong style={{ color: '#fff' }}>{course.averageProgress ?? 0}%</strong></div>
+                          <div style={{ color: '#cbd5e1' }}>حضور: <strong style={{ color: '#fff' }}>{course.attendance?.percentage ?? 0}%</strong></div>
                         </div>
                       </div>
                       <Link to={`/courses/${course.courseId}`} className="btn btn-small btn-secondary">عرض الكورس</Link>

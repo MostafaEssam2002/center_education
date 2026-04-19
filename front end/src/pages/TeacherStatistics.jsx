@@ -41,9 +41,10 @@ const TeacherStatistics = () => {
     setError('');
     try {
       const response = await appAPI.getTeacherStatistics();
-      setStatistics(response.data);
-      if (response.data?.courses?.length > 0) {
-        setSelectedCourse(response.data.courses[0]);
+      const normalized = normalizeStatistics(response.data);
+      setStatistics(normalized);
+      if (normalized?.courses?.length > 0) {
+        setSelectedCourse(normalized.courses[0]);
       }
     } catch (err) {
       console.error('Failed to load teacher statistics:', err);
@@ -53,6 +54,21 @@ const TeacherStatistics = () => {
       setPageLoading(false);
     }
   };
+
+  const normalizeCourse = (course, index) => ({
+    id: course.id ?? course.courseId ?? course.course_id ?? index,
+    title: course.title ?? course.courseTitle ?? course.course_title ?? `Course ${index + 1}`,
+    enrollments: course.enrollments || [],
+    quizzes: course.quizzes || { details: course.Quiz || [] },
+    assignments: course.assignments || { details: course.assignments?.details || [] },
+    sessions: course.sessions || [],
+    ...course,
+  });
+
+  const normalizeStatistics = (data) => ({
+    ...data,
+    courses: (data?.courses || []).map(normalizeCourse),
+  });
 
   const handleCourseSelect = (course) => {
     setSelectedCourse(course);
@@ -75,11 +91,11 @@ const TeacherStatistics = () => {
         const avgScore = quizScores.length > 0 ? quizScores.reduce((a, b) => a + b) / quizScores.length : 0;
 
         return {
-          name: `${enrollment.student?.first_name || ''} ${enrollment.student?.last_name || ''}`.trim(),
+          name: `${enrollment.user?.first_name || ''} ${enrollment.user?.last_name || ''}`.trim(),
           score: Math.round(avgScore * 10) / 10,
           quizCount: studentQuizzes.length,
           progress: 0,
-          email: enrollment.student?.email,
+          email: enrollment.user?.email,
         };
       })
       .sort((a, b) => b.score - a.score);
@@ -154,13 +170,14 @@ const TeacherStatistics = () => {
       .map((enrollment) => {
         const attendance = enrollment.attendance || [];
         const presentDays = attendance.filter((a) => a.status === 'PRESENT').length;
-        const attendancePercentage = attendance.length > 0 ? (presentDays / attendance.length) * 100 : 0;
+        const totalSessions = selectedCourse.sessions?.length || 0;
+        const attendancePercentage = enrollment.attendancePercentage || 0;
 
         return {
-          name: `${enrollment.student?.first_name} ${enrollment.student?.last_name}`,
+          name: `${enrollment.user?.first_name} ${enrollment.user?.last_name}`,
           present: presentDays,
-          absent: attendance.filter((a) => a.status === 'ABSENT').length,
-          percentage: Math.round(attendancePercentage),
+          absent: totalSessions - presentDays,
+          percentage: attendancePercentage,
         };
       })
       .sort((a, b) => b.percentage - a.percentage);
@@ -178,20 +195,27 @@ const TeacherStatistics = () => {
 
     const courses = statistics.courses || [];
     const totalStudents = courses.reduce((sum, c) => sum + (c.enrollments?.length || 0), 0);
-    const allAttempts = courses
-      .flatMap((c) => c.quizzes?.details || [])
-      .flatMap((q) => (q.attempts || []).filter((a) => a.status === 'SUBMITTED' || a.status === 'TIMED_OUT'));
+    const allAttempts = courses.flatMap((c) =>
+      (c.quizzes?.details || []).flatMap((q) =>
+        (q.attempts || [])
+          .filter((a) => a.status === 'SUBMITTED' || a.status === 'TIMED_OUT')
+          .map((attempt) => ({
+            ...attempt,
+            totalMarks: q.totalMarks || 1,
+          })),
+      ),
+    );
     const avgScore =
       allAttempts.length > 0
         ? Math.round(
-            allAttempts.reduce((sum, a) => sum + (a.score / (a.quiz?.totalMarks || 1)) * 100, 0) / allAttempts.length * 10
+            allAttempts.reduce((sum, a) => sum + (a.score / (a.totalMarks || 1)) * 100, 0) / allAttempts.length * 10,
           ) / 10
         : 0;
 
     return {
       totalCourses: courses.length,
       totalStudents,
-      averageScore,
+      averageScore: avgScore,
       totalQuizzes: courses.reduce((sum, c) => sum + (c.quizzes?.details?.length || 0), 0),
     };
   };
@@ -501,10 +525,10 @@ const TeacherStatistics = () => {
         <div className="card">
           <h3>اختر المقرر الدراسي</h3>
           <div className="course-selector">
-            {courses.map((course) => (
+            {courses.map((course, index) => (
               <button
-                key={course.id}
-                className={`course-btn ${selectedCourse?.id === course.id ? 'active' : ''}`}
+                key={course.id ?? course.courseId ?? index}
+                className={`course-btn ${selectedCourse?.id === (course.id ?? course.courseId) ? 'active' : ''}`}
                 onClick={() => handleCourseSelect(course)}
               >
                 {course.title}
