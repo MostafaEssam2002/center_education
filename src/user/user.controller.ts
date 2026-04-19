@@ -46,6 +46,16 @@ export class UserController {
   @ApiResponse({ status: 400, description: 'Bad Request' })
   async update(@Param('id') id: string, @Body() updateUserDto: UpdateUserDto) {
     const updated = await this.userService.update(+id, updateUserDto);
+    try {
+      if (updateUserDto && (updateUserDto as any).lang) {
+        if (updated && typeof updated === 'object') {
+          (updated as any).lang = (updateUserDto as any).lang;
+        }
+      }
+    } catch (err) {
+      // ignore silently
+    }
+
     return {
       data: updated,
       message: 'updated successfully',

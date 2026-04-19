@@ -83,4 +83,9 @@ export class CreateUserDto {
     @IsOptional()
     @IsNumber()
     regionId?: number;
+
+    @ApiPropertyOptional({ description: 'Response language preference' })
+    @IsOptional()
+    @IsString()
+    lang?: string;
 }

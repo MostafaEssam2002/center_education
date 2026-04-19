@@ -105,7 +105,7 @@ export class UserService {
     }
 
     // Map DTO fields to Database fields
-    const { country, city, region, ...updateData } = updateUserDto;
+    const { country, city, region, ...updateData } = updateUserDto as any;
     const dbData: any = { ...updateData };
 
     if (country) dbData.countryCode = country;
