@@ -104,22 +104,34 @@ export class AuthController {
   @ApiResponse({ status: 200, description: 'Logged in successfully.' })
   @ApiResponse({ status: 401, description: 'Invalid credentials.' })
   async login(@Body() loginDto: LoginDto, @Res({ passthrough: true }) res: Response) {
-    const user = await this.authService.validateUser(loginDto.email, loginDto.password);
-    if (!user) {
+    try {
+      const user = await this.authService.validateUser(loginDto.email, loginDto.password);
+      if (!user) {
+        return {
+          status: 0,
+          message: "invalid credentials",
+        };
+      }
+      const result = await this.authService.login(user as any);
+      const token = result?.data?.access_token;
+      if (token) {
+        res.cookie('authToken', token, {
+          httpOnly: true,
+          sameSite: 'lax',
+        });
+      }
+      return result;
+    } catch (e) {
+      // هنا بنمنع 400 ونخليه 200
       return {
         status: 0,
-        message: "invalid credentials",
+        message:
+          e?.response?.message ||
+          e?.message ||
+          "Something went wrong",
+        data: null,
       };
     }
-    const result = await this.authService.login(user as any);
-    const token = result?.data?.access_token;
-    if (token) {
-      res.cookie('authToken', token, {
-        httpOnly: true,
-        sameSite: 'lax',
-      });
-    }
-    return result;
   }
 
   @Get("users")
