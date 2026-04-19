@@ -66,3 +66,7 @@ src/upload-file/ffmpeg.exe
 /public/pdfs/*
 !/public/pdfs/.gitkeep
 /public/ffmpeg.exe
+
+# Sensitive files - API tokens and credentials
+.paymob_token.json
+*.token.json
