@@ -9,7 +9,7 @@ export class CourseService {
 
   // ================= CREATE COURSE =================
   async create(createCourseDto: CreateCourseDto, teacherId: number) {
-    return this.prisma.course.create({
+    const created = await this.prisma.course.create({
       data: {
         title: createCourseDto.title,
         description: createCourseDto.description,
@@ -24,6 +24,12 @@ export class CourseService {
         teacher: true,
       },
     });
+
+    return {
+      data: created,
+      message: 'created successfully',
+      status: 1,
+    };
   }
 
   // ================= GET ALL COURSES =================
@@ -85,7 +91,11 @@ export class CourseService {
       throw new NotFoundException(`Course with id ${id} not found`);
     }
 
-    return course;
+    return{
+      data: course,
+      message: 'retrieved successfully',
+      status: 1,
+    };
   }
 
   // ================= SEARCH BY TITLE =================
@@ -113,7 +123,7 @@ export class CourseService {
       throw new NotFoundException(`Course with id ${id} not found`);
     }
 
-    return this.prisma.course.update({
+    const updated = await this.prisma.course.update({
       where: { id },
       data: {
         title: dto.title,
@@ -123,6 +133,12 @@ export class CourseService {
         discount: dto.discount
       },
     });
+
+    return {
+      data:  updated,
+      message: 'updated successfully',
+      status: 1,
+    };
   }
 
   // ================= DELETE COURSE =================
@@ -135,8 +151,13 @@ export class CourseService {
       throw new NotFoundException(`Course with id ${id} not found`);
     }
 
-    return this.prisma.course.delete({
+    const deleted = await this.prisma.course.delete({
       where: { id },
     });
+    return {
+      data: "",
+      message: 'deleted successfully',
+      status: 1,
+    };
   }
 }

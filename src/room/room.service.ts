@@ -66,10 +66,15 @@ export class RoomService {
     };
   }
 
-  findOne(id: number) {
-    return this.prisma.room.findUnique({
+  async findOne(id: number) {
+    const room = await this.prisma.room.findUnique({
       where: { id },
     });
+    return {
+      data:  room,
+      message: 'retrieved successfully',
+      status: 1,
+    };
   }
 
   async update(id: number, dto: UpdateRoomDto) {
@@ -79,10 +84,16 @@ export class RoomService {
 
     this.validateRoom(dto);
 
-    return this.prisma.room.update({
+    const updated = await this.prisma.room.update({
       where: { id },
       data: dto,
     });
+
+    return {
+      data:  updated,
+      message: 'updated successfully',
+      status: 1,
+    };
   }
 
   async remove(id: number) {
@@ -90,10 +101,15 @@ export class RoomService {
     if (!room) throw new NotFoundException('Room not found');
 
     // Soft delete
-    return this.prisma.room.update({
+    const deleted = await this.prisma.room.update({
       where: { id },
       data: { isActive: false },
     });
+    return {
+      data: "",
+      message: 'Room deleted successfully',
+      status: 1,
+    };
   }
 
 
