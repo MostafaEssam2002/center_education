@@ -72,9 +72,25 @@ export class AuthService {
     };
   }
   async findOne(id: number) {
-    return this.prisma.user.findUnique({
-      where: { id },
-    });
+    // _________/\______________
+    
+    // return this.prisma.user.findUnique({
+    //   where: { id },
+    // });
+
+    const user = await this.prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return {
+        status: 0,
+        message: 'User not found',
+        data: null,
+      };
+    }
+    return {
+      status: 1,
+      message: 'retrieved successfully',
+      data: user,
+    };
   }
 
 }
