@@ -14,10 +14,16 @@ export class UserService {
     if (existingUser) {
       throw new BadRequestException('Email already exists');
     }
-    if (createUserDto.role === "ADMIN") {
-      throw new BadRequestException('Cannot register user with ADMIN role');
-    }
+    // if (createUserDto.role === "ADMIN") {
+    //   throw new BadRequestException('Cannot register user with ADMIN role');
+    // }
+    // Allow registration with any valid role (including ADMIN)
     const hashedPassword = await bcrypt.hash(createUserDto.password, 10);
+
+    // Ensure default language is Arabic when not provided
+    if (!createUserDto.lang) {
+      createUserDto.lang = 'ar';
+    }
 
     // Map DTO fields to Database fields
     const { country, city, region, ...userData } = createUserDto;
